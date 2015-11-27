@@ -1,9 +1,15 @@
 Building RUPS
 -------------
 
-Running a maven build without profile will just build the jar.
+Install a recent JDK, [Maven](http://maven.apache.org/), and type:
 
-Running the build with profiles:
+```
+mvn install
+```
+
+Running a maven build without a profile will just build the jar.
+
+Running the build with profiles (`-P profile`):
 
 profile name | build actions
 ------------ | -------------
