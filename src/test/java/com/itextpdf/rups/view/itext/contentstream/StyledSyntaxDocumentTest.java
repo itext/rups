@@ -633,4 +633,20 @@ public class StyledSyntaxDocumentTest {
         String expectedResult = Files.readString(Paths.get(SRC_DIR, expectedOutputFile), StandardCharsets.ISO_8859_1);
         Assertions.assertEquals(expectedResult, output);
     }
+
+    @ParameterizedTest
+    @CsvSource({
+            "baseline.cmp, baselineIndentedNumbered.cmp",
+    })
+    void testNumbering(String inputFile, String expectedOutputFile) throws Exception {
+        byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, inputFile));
+        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        doc.processContentStream(origBytes);
+
+        String output = doc.getText(0, doc.getLength());
+        String expectedResult = Files.readString(Paths.get(SRC_DIR, expectedOutputFile), StandardCharsets.ISO_8859_1);
+        Assertions.assertEquals(expectedResult, output);
+    }
+
+
 }
