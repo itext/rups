@@ -115,7 +115,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testReplaceUtf8InDocument() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "utf8.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -132,7 +132,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testDeleteAndInsertUtf8InDocument() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "utf8.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -167,7 +167,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testInlineImageDocContainsPlaceholderWhitespace() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "charprocWithInlineImg.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -190,7 +190,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testBinaryStringDoesNotPermitNonHexReplacement() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "stringWithBin.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -218,7 +218,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testBinaryStringPermitsNullReplace() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "stringWithBin.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -230,7 +230,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testBinaryStringPermitsNullInsert() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "stringWithBin.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -242,7 +242,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testBinaryStringDoesNotPermitNonHexInsertion() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "stringWithBin.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -256,7 +256,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testRemovalEndCannotTraverseBinaryString() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "stringWithBin.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -268,7 +268,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testRemovalStartCannotTraverseBinaryString() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "stringWithBin.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -280,7 +280,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testRemovalCanReplaceBinaryStringEntirely() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "stringWithBin.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -296,7 +296,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testMatchingOperandsMode() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "baseline.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.setMatchingOperands(true);
         Assertions.assertTrue(doc.isMatchingOperands());
         doc.processContentStream(origBytes);
@@ -331,7 +331,7 @@ public class StyledSyntaxDocumentTest {
 
     @Test
     public void testBogusEIDoesNotInhibitSyntaxDoc() throws Exception {
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         PdfObject[] bogusOps = new PdfObject[] {
                 new PdfString("This makes no sense"), new PdfLiteral("EI")
         };
@@ -353,7 +353,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testBinaryStringEditPaddingTolerance() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "stringWithBin.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -371,7 +371,7 @@ public class StyledSyntaxDocumentTest {
     public void testHexeditSprawlTolerance() throws Exception {
         // this shouldn't arise in normal document editing due to the filter, but let's see how
         // our defenses hold up
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
 
         PdfObject[] splitString = new PdfObject[] {
                 new PdfString("This\000is"),
@@ -400,7 +400,7 @@ public class StyledSyntaxDocumentTest {
     public void testHexeditBoundaryTolerance() throws Exception {
         // this shouldn't arise in normal document editing due to the filter, but let's see how
         // our defenses hold up
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
 
         PdfObject[] splitString = new PdfObject[] {
                 new PdfString("This\000is\000w31rd"),
@@ -423,7 +423,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testBinaryStringPermitsHexReplacement() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "stringWithBin.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -441,7 +441,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testBinaryStringPermitsHexInsertion() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "stringWithBin.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -459,7 +459,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testBinaryStringPermitsPartialHexInsertion() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "stringWithBin.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -477,7 +477,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testBinaryStringPermitsHexInsertionAtEnd() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "stringWithBin.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -495,7 +495,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testInlineImageDoesNotPermitInsertion() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "charprocWithInlineImg.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -507,7 +507,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testInlineImageDoesNotPermitInnerRemoval() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "charprocWithInlineImg.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -519,7 +519,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testInlineImageDoesNotPermitInnerReplacement() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "charprocWithInlineImg.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -537,7 +537,7 @@ public class StyledSyntaxDocumentTest {
 
     private void checkReserialize(String inputFile) throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, inputFile));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -549,7 +549,7 @@ public class StyledSyntaxDocumentTest {
     private void reserializeWithCompareTarget(String src, String cmp) throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, src));
         byte[] expectedResult = Files.readAllBytes(Paths.get(SRC_DIR, cmp));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -562,7 +562,7 @@ public class StyledSyntaxDocumentTest {
     private void checkDecodedDoc(String fname, String expectedSubstring) throws Exception {
 
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, fname));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -571,7 +571,7 @@ public class StyledSyntaxDocumentTest {
 
     private void stringRemovalCheck(String marker, int len, String expectedSub) throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "stringWithBin.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String theText = doc.getText(0, doc.getLength());
@@ -583,7 +583,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testEncodingTooltip() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "utf16be.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         int start = doc.getText(0, doc.getLength()).indexOf("こんにちは");
@@ -594,7 +594,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testHexTooltip() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "stringWithBin.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
 
@@ -607,7 +607,7 @@ public class StyledSyntaxDocumentTest {
     @Test
     public void testNoTooltip() throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, "stringWithBin.cmp"));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         int start = doc.getText(0, doc.getLength()).indexOf("Tj");
@@ -626,7 +626,7 @@ public class StyledSyntaxDocumentTest {
     })
     void testIndentation(String inputFile, String expectedOutputFile) throws Exception {
         byte[] origBytes = Files.readAllBytes(Paths.get(SRC_DIR, inputFile));
-        StyledSyntaxDocument doc = new StyledSyntaxDocument();
+        StyledSyntaxDocument doc = new StyledSyntaxDocument(false);
         doc.processContentStream(origBytes);
 
         String output = doc.getText(0, doc.getLength());

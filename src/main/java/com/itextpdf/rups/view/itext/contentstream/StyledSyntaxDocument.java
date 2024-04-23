@@ -74,6 +74,7 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
     private static final int INLINE_IMAGE_EXPECTED_TOKEN_COUNT = 2;
 
     private final transient IndentManager indentManager;
+    private final transient LineManager lineManager;
 
     /**
      * Highlight operands according to their operator.
@@ -85,6 +86,12 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
      */
     public StyledSyntaxDocument() {
         indentManager = new IndentManager();
+        lineManager = new LineManager();
+    }
+
+    public StyledSyntaxDocument(boolean numberLines) {
+        indentManager = new IndentManager();
+        lineManager = new LineManager(numberLines);
     }
 
     /**
@@ -148,6 +155,8 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
         final ArrayList<PdfObject> tokens = new ArrayList<>();
         final PdfCanvasParser ps = ContentStreamHandlingUtils.createCanvasParserFor(streamContent);
         indentManager.reset();
+        lineManager.reset();
+        
         try {
             while (!ps.parse(tokens).isEmpty()) {
                 final PdfObject operator = tokens.get(tokens.size() - 1);
@@ -204,7 +213,7 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
     }
 
     /**
-     * Append graphics operators to the document, indenting when appropriate.
+     * Append graphics operators to the document, indenting and numbering when appropriate.
      * A graphics operator is specified as a list of {@link PdfObject}s,
      * where the last element of the list is the operator literal,
      * and the preceding elements represent the operands.
@@ -222,6 +231,7 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
             appendInlineImage((PdfStream) tokens.get(0));
             return;
         }
+        appendLineNumber();
         appendDisplayOnlyIndent(indentManager.getIndentLevel());
         final AttributeSet attributes = getStyleAttributes(operator);
         for (int i = 0; i < tokens.size() - 1; i++) {
@@ -390,6 +400,12 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
 
     private void appendDisplayOnlyNewline() throws BadLocationException {
         insertString(getLength(), "\n", ContentStreamStyleConstants.DISPLAY_ONLY_ATTRS);
+    }
+
+    private void appendLineNumber() throws BadLocationException {
+        
+        lineManager.increaseLineNumber();
+        insertString(getLength(), lineManager.getLineNumberString(), null);
     }
 
     private void insertAndRenderInlineImage(final BufferedImage img, byte[] rawBytes, int indentLevel)
