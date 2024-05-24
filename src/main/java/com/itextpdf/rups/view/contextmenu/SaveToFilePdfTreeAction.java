@@ -49,6 +49,7 @@ import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.itext.PdfTree;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
+import com.itextpdf.rups.view.itext.treenodes.asn1.AbstractAsn1TreeNode;
 
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -119,6 +120,9 @@ public final class SaveToFilePdfTreeAction extends AbstractRupsAction {
             if (node instanceof PdfObjectTreeNode) {
                 return getBytes((PdfObjectTreeNode) node, raw);
             }
+            if (node instanceof AbstractAsn1TreeNode) {
+                return getBytes((AbstractAsn1TreeNode) node);
+            }
         }
         return new byte[0];
     }
@@ -144,5 +148,9 @@ public final class SaveToFilePdfTreeAction extends AbstractRupsAction {
             return string.getValueBytes();
         }
         return string.toUnicodeString().getBytes(StandardCharsets.UTF_8);
+    }
+
+    private static byte[] getBytes(AbstractAsn1TreeNode node) throws IOException {
+        return node.getAsn1Primitive().getEncoded();
     }
 }

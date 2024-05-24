@@ -40,73 +40,69 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.model;
+package com.itextpdf.rups.view.itext.treenodes.asn1;
 
-import com.itextpdf.rups.view.Language;
+import java.text.ParseException;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+/**
+ * Tree node for showing GeneralizedTime ASN.1 objects.
+ */
+public final class Asn1GeneralizedTimeTreeNode extends AbstractAsn1TreeNode {
+    /**
+     * Icon to use for GeneralizedTime ASN.1 objects.
+     */
+    private static final String ICON = "time.png";
 
-public final class LoggerHelper {
-    private LoggerHelper() {
-        // static class
+    /**
+     * Creates a new tree node for a GeneralizedTime ASN.1 object.
+     *
+     * @param time GeneralizedTime ASN.1 object.
+     */
+    public Asn1GeneralizedTimeTreeNode(ASN1GeneralizedTime time) {
+        super(ICON, time);
+        reload();
     }
 
-    public static void warn(String message, Exception e, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.warn(message);
-        logger.debug(message, e);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getAsn1Type() {
+        return "GeneralizedTime";
     }
 
-    public static void warn(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.warn(message);
-        logger.debug(message);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getAsn1DisplayValue() {
+        return getAsn1Primitive().getTimeString();
     }
 
-    public static void warn(String message, Exception e, Class<?> c) {
-        warn(message, e, c.getName());
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ASN1GeneralizedTime getAsn1Primitive() {
+        return (ASN1GeneralizedTime) super.getAsn1Primitive();
     }
 
-    public static void warn(String message, Class<?> c) {
-        warn(message, c.getName());
-    }
-
-    public static void warnf(String format, Class<?> c, Object... args) {
-        warn(String.format(format, args), c.getName());
-    }
-
-    public static void warnf(Language format, Class<?> c, Object... args) {
-        warnf(format.getString(), c, args);
-    }
-
-    public static void error(String message, Exception e, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.error(message);
-        logger.debug(message, e);
-    }
-
-    public static void error(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.error(message);
-        logger.debug(message);
-    }
-
-    public static void error(String message, Exception e, Class<?> c) {
-        error(message, e, c.getName());
-    }
-
-    public static void error(String message, Class<?> c) {
-        error(message, c.getName());
-    }
-
-    public static void info(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.info(message);
-        logger.debug(message);
-    }
-
-    public static void info(String message, Class<?> c) {
-        info(message, c.getName());
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void reload() {
+        super.reload();
+        try {
+            // If data is valid, will add a more readable ISO version as well
+            final OffsetDateTime dt = getAsn1Primitive().getDate().toInstant().atOffset(ZoneOffset.UTC);
+            setValueExplanation(DateTimeFormatter.ISO_DATE_TIME.format(dt));
+        } catch (RuntimeException | ParseException e) {
+            setValueExplanation(null);
+        }
     }
 }

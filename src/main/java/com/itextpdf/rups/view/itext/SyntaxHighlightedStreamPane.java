@@ -82,6 +82,7 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import javax.swing.tree.TreeNode;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
@@ -214,10 +215,32 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
     }
 
     public void saveToTarget() {
+        /*
+         * FIXME: With indirect objects with multiple references, this will
+         *        change the tree only in one of them.
+         * FIXME: This doesn't change Length...
+         */
         manager.discardAllEdits();
         manager.setLimit(0);
         if (controller != null && ((PdfDictionary) target.getPdfObject()).containsKey(PdfName.Filter)) {
             controller.deleteTreeNodeDictChild(target, PdfName.Filter);
+        }
+        /*
+         * In the current state, stream node could contain ASN1. data, which
+         * is parsed and added as tree nodes. After editing, it won't be valid,
+         * so we must remove them.
+         */
+        if (controller != null) {
+            int i = 0;
+            while (i < target.getChildCount()) {
+                final TreeNode child = target.getChildAt(i);
+                if (child instanceof PdfObjectTreeNode) {
+                    ++i;
+                } else {
+                    controller.deleteTreeChild(target, i);
+                    // Will assume it being just a shift...
+                }
+            }
         }
         final int sizeEst = text.getText().length();
         final ByteArrayOutputStream baos = new ByteArrayOutputStream(sizeEst);

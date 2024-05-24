@@ -259,6 +259,25 @@ public class PdfObjectTreeNode extends IconTreeNode implements IPdfContextMenuTa
     }
 
     /**
+     * Checks if this node is a dictionary item with one of the specific keys.
+     *
+     * @param keys Possible keys of the node we're looking for.
+     *
+     * @return true if this node is a dictionary item one of the specific keys.
+     */
+    public boolean isDictionaryNode(Iterable<PdfName> keys) {
+        if (keys == null) {
+            return false;
+        }
+        for (final PdfName keyName : keys) {
+            if (isDictionaryNode(keyName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Gets the ChildNode with specific key if this node is a dictionary. Otherwise return {@code null}
      *
      * @param key key of the node to find
@@ -267,11 +286,11 @@ public class PdfObjectTreeNode extends IconTreeNode implements IPdfContextMenuTa
      */
     public PdfObjectTreeNode getDictionaryChildNode(PdfName key) {
         final Enumeration<TreeNode> children = breadthFirstEnumeration();
-        PdfObjectTreeNode child;
+        TreeNode child;
         while (children.hasMoreElements()) {
-            child = (PdfObjectTreeNode) children.nextElement();
-            if (child.isDictionaryNode(key)) {
-                return child;
+            child = children.nextElement();
+            if ((child instanceof PdfObjectTreeNode) && ((PdfObjectTreeNode) child).isDictionaryNode(key)) {
+                return (PdfObjectTreeNode) child;
             }
         }
         return null;
@@ -374,20 +393,25 @@ public class PdfObjectTreeNode extends IconTreeNode implements IPdfContextMenuTa
      * @return the treepath to an ancestor
      */
     public PdfObjectTreeNode getAncestor() {
-        try {
-            if (isRecursive()) {
-                PdfObjectTreeNode node = this;
-                while (true) {
-                    node = (PdfObjectTreeNode) node.getParent();
-                    if (node.isIndirectReference() && node.getNumber() == getNumber()) {
-                        return node;
-                    }
-                }
-            }
-        } catch (NullPointerException e) {
-            LoggerHelper.warn(Language.ERROR_PARENT_NULL.getString(), e, getClass());
+        if (!isRecursive()) {
+            return null;
         }
-        return null;
+
+        TreeNode node = this;
+        while (true) {
+            node = node.getParent();
+            if (node == null) {
+                LoggerHelper.warn(Language.ERROR_PARENT_NULL.getString(), getClass());
+                return null;
+            }
+            if (!(node instanceof PdfObjectTreeNode)) {
+                continue;
+            }
+            final PdfObjectTreeNode pdfNode = (PdfObjectTreeNode) node;
+            if (pdfNode.isIndirectReference() && pdfNode.getNumber() == getNumber()) {
+                return pdfNode;
+            }
+        }
     }
 
     /**

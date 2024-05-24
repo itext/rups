@@ -40,73 +40,40 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.model;
+package com.itextpdf.rups.view.itext.treenodes.asn1;
 
-import com.itextpdf.rups.view.Language;
+import org.bouncycastle.asn1.ASN1Boolean;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public final class LoggerHelper {
-    private LoggerHelper() {
-        // static class
+@Tag("UnitTest")
+final class Asn1BooleanTreeNodeTest {
+    @Test
+    void init_WithRfc() {
+        final Asn1BooleanTreeNode node = new Asn1BooleanTreeNode("revoked", true);
+        Asn1TestUtil.assertNodeMatches(0, "revoked: TRUE", node);
     }
 
-    public static void warn(String message, Exception e, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.warn(message);
-        logger.debug(message, e);
+    @Test
+    void toString_False() {
+        final ASN1Boolean obj = ASN1Boolean.getInstance(false);
+        final Asn1BooleanTreeNode node = new Asn1BooleanTreeNode(obj);
+        Asn1TestUtil.assertNodeMatches(0, "BOOLEAN: FALSE", node);
     }
 
-    public static void warn(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.warn(message);
-        logger.debug(message);
+    @Test
+    void toString_True() {
+        final ASN1Boolean obj = ASN1Boolean.getInstance(true);
+        final Asn1BooleanTreeNode node = new Asn1BooleanTreeNode(obj);
+        Asn1TestUtil.assertNodeMatches(0, "BOOLEAN: TRUE", node);
     }
 
-    public static void warn(String message, Exception e, Class<?> c) {
-        warn(message, e, c.getName());
-    }
-
-    public static void warn(String message, Class<?> c) {
-        warn(message, c.getName());
-    }
-
-    public static void warnf(String format, Class<?> c, Object... args) {
-        warn(String.format(format, args), c.getName());
-    }
-
-    public static void warnf(Language format, Class<?> c, Object... args) {
-        warnf(format.getString(), c, args);
-    }
-
-    public static void error(String message, Exception e, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.error(message);
-        logger.debug(message, e);
-    }
-
-    public static void error(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.error(message);
-        logger.debug(message);
-    }
-
-    public static void error(String message, Exception e, Class<?> c) {
-        error(message, e, c.getName());
-    }
-
-    public static void error(String message, Class<?> c) {
-        error(message, c.getName());
-    }
-
-    public static void info(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.info(message);
-        logger.debug(message);
-    }
-
-    public static void info(String message, Class<?> c) {
-        info(message, c.getName());
+    @Test
+    void toString_Descriptive() {
+        final ASN1Boolean obj = ASN1Boolean.getInstance(true);
+        final Asn1BooleanTreeNode node = new Asn1BooleanTreeNode(obj);
+        node.setRfcFieldName("ca");
+        node.setValueExplanation("Is a CA cert");
+        Asn1TestUtil.assertNodeMatches(0, "ca: TRUE (Is a CA cert)", node);
     }
 }

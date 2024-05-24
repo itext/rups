@@ -40,73 +40,50 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.model;
+package com.itextpdf.rups.view.itext.treenodes.asn1;
 
-import com.itextpdf.rups.view.Language;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+/**
+ * Tree node for showing OBJECT IDENTIFIER ASN.1 objects.
+ */
+public final class Asn1ObjectIdentifierTreeNode extends AbstractAsn1TreeNode {
+    /**
+     * Icon to use for OBJECT IDENTIFIER ASN.1 objects.
+     */
+    private static final String ICON = "oid.png";
 
-public final class LoggerHelper {
-    private LoggerHelper() {
-        // static class
+    /**
+     * Creates a new tree node for a OBJECT IDENTIFIER ASN.1 object.
+     *
+     * @param oid OBJECT IDENTIFIER ASN.1 object.
+     */
+    public Asn1ObjectIdentifierTreeNode(ASN1ObjectIdentifier oid) {
+        super(ICON, oid);
+        reload();
     }
 
-    public static void warn(String message, Exception e, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.warn(message);
-        logger.debug(message, e);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getAsn1Type() {
+        return "OBJECT IDENTIFIER";
     }
 
-    public static void warn(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.warn(message);
-        logger.debug(message);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getAsn1DisplayValue() {
+        return getAsn1Primitive().getId();
     }
 
-    public static void warn(String message, Exception e, Class<?> c) {
-        warn(message, e, c.getName());
-    }
-
-    public static void warn(String message, Class<?> c) {
-        warn(message, c.getName());
-    }
-
-    public static void warnf(String format, Class<?> c, Object... args) {
-        warn(String.format(format, args), c.getName());
-    }
-
-    public static void warnf(Language format, Class<?> c, Object... args) {
-        warnf(format.getString(), c, args);
-    }
-
-    public static void error(String message, Exception e, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.error(message);
-        logger.debug(message, e);
-    }
-
-    public static void error(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.error(message);
-        logger.debug(message);
-    }
-
-    public static void error(String message, Exception e, Class<?> c) {
-        error(message, e, c.getName());
-    }
-
-    public static void error(String message, Class<?> c) {
-        error(message, c.getName());
-    }
-
-    public static void info(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.info(message);
-        logger.debug(message);
-    }
-
-    public static void info(String message, Class<?> c) {
-        info(message, c.getName());
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ASN1ObjectIdentifier getAsn1Primitive() {
+        return (ASN1ObjectIdentifier) super.getAsn1Primitive();
     }
 }

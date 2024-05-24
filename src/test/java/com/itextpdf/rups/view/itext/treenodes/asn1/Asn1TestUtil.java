@@ -40,73 +40,17 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.model;
+package com.itextpdf.rups.view.itext.treenodes.asn1;
 
-import com.itextpdf.rups.view.Language;
+import org.junit.jupiter.api.Assertions;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public final class LoggerHelper {
-    private LoggerHelper() {
+public final class Asn1TestUtil {
+    private Asn1TestUtil() {
         // static class
     }
 
-    public static void warn(String message, Exception e, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.warn(message);
-        logger.debug(message, e);
-    }
-
-    public static void warn(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.warn(message);
-        logger.debug(message);
-    }
-
-    public static void warn(String message, Exception e, Class<?> c) {
-        warn(message, e, c.getName());
-    }
-
-    public static void warn(String message, Class<?> c) {
-        warn(message, c.getName());
-    }
-
-    public static void warnf(String format, Class<?> c, Object... args) {
-        warn(String.format(format, args), c.getName());
-    }
-
-    public static void warnf(Language format, Class<?> c, Object... args) {
-        warnf(format.getString(), c, args);
-    }
-
-    public static void error(String message, Exception e, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.error(message);
-        logger.debug(message, e);
-    }
-
-    public static void error(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.error(message);
-        logger.debug(message);
-    }
-
-    public static void error(String message, Exception e, Class<?> c) {
-        error(message, e, c.getName());
-    }
-
-    public static void error(String message, Class<?> c) {
-        error(message, c.getName());
-    }
-
-    public static void info(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.info(message);
-        logger.debug(message);
-    }
-
-    public static void info(String message, Class<?> c) {
-        info(message, c.getName());
+    public static void assertNodeMatches(int expectedChildCount, String expectedString, AbstractAsn1TreeNode node) {
+        Assertions.assertEquals(expectedString, node.toString());
+        Assertions.assertEquals(expectedChildCount, node.getChildCount());
     }
 }

@@ -40,73 +40,27 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.model;
+package com.itextpdf.rups.view.itext.treenodes.asn1;
 
-import com.itextpdf.rups.view.Language;
+import org.bouncycastle.asn1.ASN1Enumerated;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public final class LoggerHelper {
-    private LoggerHelper() {
-        // static class
+@Tag("UnitTest")
+final class Asn1EnumeratedTreeNodeTest {
+    @Test
+    void toString_Regular() {
+        final ASN1Enumerated obj = new ASN1Enumerated(1);
+        final Asn1EnumeratedTreeNode node = new Asn1EnumeratedTreeNode(obj);
+        Asn1TestUtil.assertNodeMatches(0, "ENUMERATED: 1", node);
     }
 
-    public static void warn(String message, Exception e, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.warn(message);
-        logger.debug(message, e);
-    }
-
-    public static void warn(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.warn(message);
-        logger.debug(message);
-    }
-
-    public static void warn(String message, Exception e, Class<?> c) {
-        warn(message, e, c.getName());
-    }
-
-    public static void warn(String message, Class<?> c) {
-        warn(message, c.getName());
-    }
-
-    public static void warnf(String format, Class<?> c, Object... args) {
-        warn(String.format(format, args), c.getName());
-    }
-
-    public static void warnf(Language format, Class<?> c, Object... args) {
-        warnf(format.getString(), c, args);
-    }
-
-    public static void error(String message, Exception e, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.error(message);
-        logger.debug(message, e);
-    }
-
-    public static void error(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.error(message);
-        logger.debug(message);
-    }
-
-    public static void error(String message, Exception e, Class<?> c) {
-        error(message, e, c.getName());
-    }
-
-    public static void error(String message, Class<?> c) {
-        error(message, c.getName());
-    }
-
-    public static void info(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.info(message);
-        logger.debug(message);
-    }
-
-    public static void info(String message, Class<?> c) {
-        info(message, c.getName());
+    @Test
+    void toString_Descriptive() {
+        final ASN1Enumerated obj = new ASN1Enumerated(2);
+        final Asn1EnumeratedTreeNode node = new Asn1EnumeratedTreeNode(obj);
+        node.setRfcFieldName("version");
+        node.setValueExplanation("v3");
+        Asn1TestUtil.assertNodeMatches(0, "version: 2 (v3)", node);
     }
 }

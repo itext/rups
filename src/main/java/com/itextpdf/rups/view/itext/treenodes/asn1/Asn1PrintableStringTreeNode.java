@@ -40,73 +40,41 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.model;
+package com.itextpdf.rups.view.itext.treenodes.asn1;
 
-import com.itextpdf.rups.view.Language;
+import org.bouncycastle.asn1.ASN1PrintableString;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+/**
+ * Tree node for showing PrintableString ASN.1 objects.
+ */
+public final class Asn1PrintableStringTreeNode extends AbstractAsn1TreeNode {
+    /**
+     * Icon to use for PrintableString ASN.1 objects.
+     */
+    private static final String ICON = "string.png";
 
-public final class LoggerHelper {
-    private LoggerHelper() {
-        // static class
+    /**
+     * Creates a new tree node for a PrintableString ASN.1 object.
+     *
+     * @param string PrintableString ASN.1 object.
+     */
+    public Asn1PrintableStringTreeNode(ASN1PrintableString string) {
+        super(ICON, string);
     }
 
-    public static void warn(String message, Exception e, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.warn(message);
-        logger.debug(message, e);
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getAsn1Type() {
+        return "PrintableString";
     }
 
-    public static void warn(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.warn(message);
-        logger.debug(message);
-    }
-
-    public static void warn(String message, Exception e, Class<?> c) {
-        warn(message, e, c.getName());
-    }
-
-    public static void warn(String message, Class<?> c) {
-        warn(message, c.getName());
-    }
-
-    public static void warnf(String format, Class<?> c, Object... args) {
-        warn(String.format(format, args), c.getName());
-    }
-
-    public static void warnf(Language format, Class<?> c, Object... args) {
-        warnf(format.getString(), c, args);
-    }
-
-    public static void error(String message, Exception e, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.error(message);
-        logger.debug(message, e);
-    }
-
-    public static void error(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.error(message);
-        logger.debug(message);
-    }
-
-    public static void error(String message, Exception e, Class<?> c) {
-        error(message, e, c.getName());
-    }
-
-    public static void error(String message, Class<?> c) {
-        error(message, c.getName());
-    }
-
-    public static void info(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.info(message);
-        logger.debug(message);
-    }
-
-    public static void info(String message, Class<?> c) {
-        info(message, c.getName());
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ASN1PrintableString getAsn1Primitive() {
+        return (ASN1PrintableString) super.getAsn1Primitive();
     }
 }

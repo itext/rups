@@ -40,73 +40,40 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.model;
+package com.itextpdf.rups.view.itext.treenodes.asn1;
 
-import com.itextpdf.rups.view.Language;
+import org.bouncycastle.asn1.ASN1UTCTime;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public final class LoggerHelper {
-    private LoggerHelper() {
-        // static class
+@Tag("UnitTest")
+final class Asn1UtcTimeTreeNodeTest {
+    @Test
+    void toString_Regular() {
+        final ASN1UTCTime obj = new ASN1UTCTime("240501133722Z");
+        final Asn1UtcTimeTreeNode node = new Asn1UtcTimeTreeNode(obj);
+        Asn1TestUtil.assertNodeMatches(0, "UTCTime: 240501133722Z (2024-05-01T13:37:22Z)", node);
     }
 
-    public static void warn(String message, Exception e, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.warn(message);
-        logger.debug(message, e);
+    @Test
+    void toString_Invalid() {
+        final ASN1UTCTime obj = ASN1UTCTime.getInstance(new byte[] {
+                0x17,   // Tag: UTCTime
+                0x0D,   // Value length: 13
+                // Value: 20240501XXXXXXZ
+                0x32, 0x34, 0x30, 0x35, 0x30, 0x31,
+                0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x5A,
+        });
+        final Asn1UtcTimeTreeNode node = new Asn1UtcTimeTreeNode(obj);
+        Asn1TestUtil.assertNodeMatches(0, "UTCTime: 240501XXXXXXZ", node);
     }
 
-    public static void warn(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.warn(message);
-        logger.debug(message);
-    }
-
-    public static void warn(String message, Exception e, Class<?> c) {
-        warn(message, e, c.getName());
-    }
-
-    public static void warn(String message, Class<?> c) {
-        warn(message, c.getName());
-    }
-
-    public static void warnf(String format, Class<?> c, Object... args) {
-        warn(String.format(format, args), c.getName());
-    }
-
-    public static void warnf(Language format, Class<?> c, Object... args) {
-        warnf(format.getString(), c, args);
-    }
-
-    public static void error(String message, Exception e, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.error(message);
-        logger.debug(message, e);
-    }
-
-    public static void error(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.error(message);
-        logger.debug(message);
-    }
-
-    public static void error(String message, Exception e, Class<?> c) {
-        error(message, e, c.getName());
-    }
-
-    public static void error(String message, Class<?> c) {
-        error(message, c.getName());
-    }
-
-    public static void info(String message, String className) {
-        final Logger logger = LoggerFactory.getLogger(className);
-        logger.info(message);
-        logger.debug(message);
-    }
-
-    public static void info(String message, Class<?> c) {
-        info(message, c.getName());
+    @Test
+    void toString_Descriptive() {
+        final ASN1UTCTime obj = new ASN1UTCTime("240501133722Z");
+        final Asn1UtcTimeTreeNode node = new Asn1UtcTimeTreeNode(obj);
+        node.setRfcFieldName("notAfter");
+        node.setValueExplanation("expired");
+        Asn1TestUtil.assertNodeMatches(0, "notAfter: 240501133722Z (expired)", node);
     }
 }
