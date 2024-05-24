@@ -49,17 +49,18 @@ import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.view.Language;
+import com.itextpdf.rups.view.contextmenu.IPdfContextMenuTarget;
 import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.icons.IconTreeNode;
 
-import javax.swing.tree.TreeNode;
 import java.util.Enumeration;
+import javax.swing.tree.TreeNode;
 
 /**
  * Every node in our tree corresponds with a PDF object.
  * This class is the superclass of all tree nodes used.
  */
-public class PdfObjectTreeNode extends IconTreeNode {
+public class PdfObjectTreeNode extends IconTreeNode implements IPdfContextMenuTarget {
 
     private static final String ARRAY_ICON = "array.png";
     private static final String BOOLEAN_ICON = "boolean.png";
@@ -151,6 +152,7 @@ public class PdfObjectTreeNode extends IconTreeNode {
      * Creates an instance of a tree node for a PDF object.
      *
      * @param object the PDF object represented by this tree node.
+     *
      * @return a PdfObjectTreeNode
      */
     public static PdfObjectTreeNode getInstance(PdfObject object) {
@@ -170,6 +172,7 @@ public class PdfObjectTreeNode extends IconTreeNode {
      *
      * @param object the PDF object represented by this tree node.
      * @param number the xref number of the indirect object
+     *
      * @return a PdfObjectTreeNode
      */
     public static PdfObjectTreeNode getInstance(PdfObject object, int number) {
@@ -183,6 +186,7 @@ public class PdfObjectTreeNode extends IconTreeNode {
      *
      * @param dict the dictionary that is the parent of this tree node.
      * @param key  the dictionary key corresponding with the PDF object in this tree node.
+     *
      * @return a PdfObjectTreeNode
      */
     public static PdfObjectTreeNode getInstance(PdfDictionary dict, PdfName key) {
@@ -247,6 +251,7 @@ public class PdfObjectTreeNode extends IconTreeNode {
      * Checks if this node is a dictionary item with a specific key.
      *
      * @param key the key of the node we're looking for
+     *
      * @return true if this node is a dictionary item with a specific key
      */
     public boolean isDictionaryNode(PdfName key) {
@@ -257,6 +262,7 @@ public class PdfObjectTreeNode extends IconTreeNode {
      * Gets the ChildNode with specific key if this node is a dictionary. Otherwise return {@code null}
      *
      * @param key key of the node to find
+     *
      * @return find node or {@code null}
      */
     public PdfObjectTreeNode getDictionaryChildNode(PdfName key) {
@@ -311,6 +317,7 @@ public class PdfObjectTreeNode extends IconTreeNode {
      * Creates the caption for a PDF object.
      *
      * @param object the object for which a caption has to be created.
+     *
      * @return a caption for a PDF object
      */
     public static String getCaption(PdfObject object) {
@@ -349,6 +356,7 @@ public class PdfObjectTreeNode extends IconTreeNode {
      *
      * @param dict a dictionary
      * @param key  a key in the dictionary
+     *
      * @return a caption for the object corresponding with the key in the dictionary.
      */
     public static String getDictionaryEntryCaption(PdfDictionary dict, PdfName key) {
@@ -390,12 +398,34 @@ public class PdfObjectTreeNode extends IconTreeNode {
      */
     public PdfName getPdfDictionaryType() {
         PdfObject obj = getPdfObject();
-        if(obj.isDictionary()) {
+        if (obj.isDictionary()) {
             PdfObject name = ((PdfDictionary) obj).get(PdfName.Type, false);
             if (name instanceof PdfName) {
                 return (PdfName) name;
             }
         }
         return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean supportsInspectObject() {
+        /*
+         * "Inspect Object" is useful only for streams at the moment.
+         */
+        return object.isStream();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean supportsSave() {
+        /*
+         * Currently saving is supported only for strings and streams.
+         */
+        return object.isStream() || object.isString();
     }
 }

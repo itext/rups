@@ -42,54 +42,23 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
-import com.itextpdf.rups.view.Language;
-
-import javax.swing.Action;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import java.awt.Component;
-
 /**
- * Convenience class for the popup menu for the PdfTree panel.
- *
- * @author Michael Demey
+ * Interface for tree nodes, which can spawn {@link com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu}.
  */
-public final class PdfTreeContextMenu extends JPopupMenu {
-    private final InspectObjectAction inspectObjectAction;
-    private final SaveToFilePdfTreeAction saveRawBytesToFileAction;
-    private final SaveToFilePdfTreeAction saveToFileAction;
+public interface IPdfContextMenuTarget {
+    /**
+     * Returns true, if the tree node supports the "Inspect Object" operation.
+     *
+     * @return true, if the tree node supports the "Inspect Object" operation.
+     */
+    boolean supportsInspectObject();
 
-    public PdfTreeContextMenu(Component component) {
-        inspectObjectAction = new InspectObjectAction(
-                Language.INSPECT_OBJECT.getString(),
-                component
-        );
-        saveRawBytesToFileAction = new SaveToFilePdfTreeAction(
-                Language.SAVE_RAW_BYTES_TO_FILE.getString(),
-                component,
-                true
-        );
-        saveToFileAction = new SaveToFilePdfTreeAction(
-                Language.SAVE_TO_FILE.getString(),
-                component,
-                false
-        );
-
-        add(getJMenuItem(inspectObjectAction));
-        add(getJMenuItem(saveRawBytesToFileAction));
-        add(getJMenuItem(saveToFileAction));
-    }
-
-    public void setEnabledForNode(IPdfContextMenuTarget node) {
-        inspectObjectAction.setEnabled(node.supportsInspectObject());
-        saveRawBytesToFileAction.setEnabled(node.supportsSave());
-        saveToFileAction.setEnabled(node.supportsSave());
-    }
-
-    private static JMenuItem getJMenuItem(AbstractRupsAction rupsAction) {
-        final JMenuItem jMenuItem = new JMenuItem();
-        jMenuItem.setText((String) rupsAction.getValue(Action.NAME));
-        jMenuItem.setAction(rupsAction);
-        return jMenuItem;
-    }
+    /**
+     * Returns true, if the tree node supports the "Save Raw Bytes to File" and
+     * "Save to File" operations.
+     *
+     * @return true, if the tree node supports the "Save Raw Bytes to File" and
+     * "Save to File" operations.
+     */
+    boolean supportsSave();
 }

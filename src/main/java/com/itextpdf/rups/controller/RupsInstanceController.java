@@ -62,6 +62,8 @@ import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.Snackbar;
 import com.itextpdf.rups.view.contextmenu.ConsoleContextMenu;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
+import com.itextpdf.rups.view.contextmenu.IPdfContextMenuTarget;
+import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
@@ -77,9 +79,11 @@ import java.util.Observable;
 import java.util.Observer;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
@@ -348,9 +352,20 @@ public class RupsInstanceController extends Observable
 
     @Override
     public void valueChanged(TreeSelectionEvent evt) {
-        final Object selectedNode = readerController.getPdfTree().getLastSelectedPathComponent();
+        final JTree tree = readerController.getPdfTree();
+        final Object selectedNode = tree.getLastSelectedPathComponent();
+
+        /*
+         * Tree contains nodes for different types of objects, which require
+         * different popup menu handling.
+         */
+        final JPopupMenu menu = tree.getComponentPopupMenu();
+        if ((menu instanceof PdfTreeContextMenu) && (selectedNode instanceof IPdfContextMenuTarget)) {
+            ((PdfTreeContextMenu) menu).setEnabledForNode((IPdfContextMenuTarget) selectedNode);
+        }
+
         if (selectedNode instanceof PdfTrailerTreeNode) {
-            readerController.getPdfTree().clearSelection();
+            tree.clearSelection();
             return;
         }
         if (selectedNode instanceof PdfObjectTreeNode) {
