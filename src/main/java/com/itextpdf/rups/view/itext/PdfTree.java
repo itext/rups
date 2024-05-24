@@ -51,6 +51,7 @@ import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
 import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 import java.util.Observable;
@@ -116,7 +117,7 @@ public class PdfTree extends JTree implements Observer {
      *
      * @param node the node that has to be selected
      */
-    public void selectNode(PdfObjectTreeNode node) {
+    public void selectNode(DefaultMutableTreeNode node) {
         if (node != null) {
             final TreePath path = new TreePath(node.getPath());
             setSelectionPath(path);
