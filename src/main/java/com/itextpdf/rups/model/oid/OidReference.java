@@ -40,31 +40,60 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext.treenodes.asn1;
+package com.itextpdf.rups.model.oid;
 
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import com.itextpdf.rups.model.LoggerHelper;
+import com.itextpdf.rups.model.oid.builder.OidMainTreeBuilder;
+import com.itextpdf.rups.view.Language;
 
-@Tag("UnitTest")
-final class Asn1ObjectIdentifierTreeNodeTest {
-    @Test
-    void toString_Regular() {
-        final ASN1ObjectIdentifier obj = new ASN1ObjectIdentifier("1.3.101.112");
-        final Asn1ObjectIdentifierTreeNode node = new Asn1ObjectIdentifierTreeNode(obj);
-        Asn1TestUtil.assertNodeMatches(
-                0,
-                "OBJECT IDENTIFIER: 1.3.101.112 (/iso/identified-organization/thawte/id-Ed25519)",
-                node
-        );
+import java.util.StringTokenizer;
+
+/**
+ * <p>Static class for converting OBJECT IDENTIFIER number strings into
+ * descriptive display strings.</p>
+ *
+ * <p>Ex. "1.2.840.113549.1.7.2" -> "/iso/member-body/us/rsadsi/pkcs/pkcs-7/signedData"</p>
+ */
+public final class OidReference {
+    private OidReference() {
+        // This is a "static" class
     }
 
-    @Test
-    void toString_Descriptive() {
-        final ASN1ObjectIdentifier obj = new ASN1ObjectIdentifier("1.3.101.112");
-        final Asn1ObjectIdentifierTreeNode node = new Asn1ObjectIdentifierTreeNode(obj);
-        node.setRfcFieldName("algorithm");
-        node.setValueExplanation("ed25519");
-        Asn1TestUtil.assertNodeMatches(0, "algorithm: 1.3.101.112 (ed25519)", node);
+    /**
+     * Returns the display string for the provided OBJECT IDENTIFIER.
+     *
+     * @param oid OBJECT IDENTIFIER to get the display string for.
+     *
+     * @return The display string.
+     */
+    public static String getDisplayString(String oid) {
+        final StringBuilder result = new StringBuilder();
+        OidTreeNode node = LazyHolder.ROOT;
+        final StringTokenizer tokenizer = new StringTokenizer(oid, ".");
+        while (tokenizer.hasMoreTokens()) {
+            final String id = tokenizer.nextToken();
+            result.append('/');
+            node = node.get(id);
+            if (node == null) {
+                LoggerHelper.warnf(Language.WARNING_OID_NAME_NOT_FOUND, OidReference.class, oid);
+                result.append(id);
+                break;
+            }
+            result.append(node.getName());
+        }
+        // Doing the other non-recognized parts separately, so that we report
+        // it only once
+        while (tokenizer.hasMoreTokens()) {
+            result.append('/');
+            result.append(tokenizer.nextToken());
+        }
+        return result.toString();
+    }
+
+    private static final class LazyHolder {
+        /**
+         * "OID -> Display String" mapping tree root.
+         */
+        public static final OidTreeNode ROOT = OidMainTreeBuilder.build();
     }
 }

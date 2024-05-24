@@ -40,31 +40,35 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext.treenodes.asn1;
+package com.itextpdf.rups.model.oid.builder;
 
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import com.itextpdf.rups.model.oid.OidTreeNode;
 
-@Tag("UnitTest")
-final class Asn1ObjectIdentifierTreeNodeTest {
-    @Test
-    void toString_Regular() {
-        final ASN1ObjectIdentifier obj = new ASN1ObjectIdentifier("1.3.101.112");
-        final Asn1ObjectIdentifierTreeNode node = new Asn1ObjectIdentifierTreeNode(obj);
-        Asn1TestUtil.assertNodeMatches(
-                0,
-                "OBJECT IDENTIFIER: 1.3.101.112 (/iso/identified-organization/thawte/id-Ed25519)",
-                node
-        );
+import java.util.Map;
+import static com.itextpdf.rups.model.oid.OidTreeNode.entry;
+
+/**
+ * Static class for building an "OID -> Display Name" mapping tree from the
+ * very root.
+ */
+public final class OidMainTreeBuilder {
+    private OidMainTreeBuilder() {
+        // static class
     }
 
-    @Test
-    void toString_Descriptive() {
-        final ASN1ObjectIdentifier obj = new ASN1ObjectIdentifier("1.3.101.112");
-        final Asn1ObjectIdentifierTreeNode node = new Asn1ObjectIdentifierTreeNode(obj);
-        node.setRfcFieldName("algorithm");
-        node.setValueExplanation("ed25519");
-        Asn1TestUtil.assertNodeMatches(0, "algorithm: 1.3.101.112 (ed25519)", node);
+    /**
+     * Tree: *
+     */
+    public static OidTreeNode build() {
+        return new OidTreeNode(null, Map.ofEntries(
+                entry("0", "itu-t"),
+                entry("1", "iso", Map.ofEntries(
+                        entry("0", "standard"),
+                        entry("1", "registration-authority"),
+                        entry("2", OidIsoMemberBodyTreeBuilder.build()),
+                        entry("3", OidIsoIdentifiedOrganizationTreeBuilder.build())
+                )),
+                entry("2", OidJointIsoItuTTreeBuilder.build())
+        ));
     }
 }

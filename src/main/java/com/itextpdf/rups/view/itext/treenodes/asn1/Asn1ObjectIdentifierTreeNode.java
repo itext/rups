@@ -42,6 +42,8 @@
  */
 package com.itextpdf.rups.view.itext.treenodes.asn1;
 
+import com.itextpdf.rups.model.oid.OidReference;
+
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 
 /**
@@ -85,5 +87,14 @@ public final class Asn1ObjectIdentifierTreeNode extends AbstractAsn1TreeNode {
     @Override
     public ASN1ObjectIdentifier getAsn1Primitive() {
         return (ASN1ObjectIdentifier) super.getAsn1Primitive();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void reload() {
+        super.reload();
+        setValueExplanation(OidReference.getDisplayString(getAsn1Primitive().getId()));
     }
 }

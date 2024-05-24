@@ -162,7 +162,7 @@ final class Asn1TreeNodeFactoryTest {
         );
         Assertions.assertNotNull(node);
         Assertions.assertInstanceOf(Asn1ObjectIdentifierTreeNode.class, node);
-        Asn1TestUtil.assertNodeMatches(0, "OBJECT IDENTIFIER: 1.2", node);
+        Asn1TestUtil.assertNodeMatches(0, "OBJECT IDENTIFIER: 1.2 (/iso/member-body)", node);
     }
 
     @Test
