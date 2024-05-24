@@ -44,18 +44,22 @@ package com.itextpdf.rups.view.contextmenu;
 
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfStream;
+import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.itext.PdfTree;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
@@ -63,7 +67,7 @@ import java.io.IOException;
  *
  * @author Michael Demey
  */
-public class SaveToFilePdfTreeAction extends AbstractRupsAction {
+public final class SaveToFilePdfTreeAction extends AbstractRupsAction {
 
     private final boolean saveRawBytes;
 
@@ -88,18 +92,15 @@ public class SaveToFilePdfTreeAction extends AbstractRupsAction {
                 if (choice == JFileChooser.APPROVE_OPTION) {
                     path = fileChooser.getSelectedFile().getPath();
 
-                    // get the stream
+                    // Get path to the node
                     final PdfTree tree = (PdfTree) invoker;
                     final TreeSelectionModel selectionModel = tree.getSelectionModel();
                     final TreePath[] paths = selectionModel.getSelectionPaths();
-                    final PdfObjectTreeNode lastPath = (PdfObjectTreeNode) paths[0].getLastPathComponent();
-                    final PdfObject object = lastPath.getPdfObject();
-                    final PdfStream stream = (PdfStream) object;
 
                     // get the bytes and write away
                     try {
-                        final byte[] array = stream.getBytes(!saveRawBytes);
-                        try (FileOutputStream fos = new FileOutputStream(path)) {
+                        final byte[] array = getBytes(paths, saveRawBytes);
+                        try (OutputStream fos = Files.newOutputStream(Path.of(path))) {
                             fos.write(array);
                         }
                     } catch (IOException e) { // TODO : Catch this exception properly
@@ -110,5 +111,38 @@ public class SaveToFilePdfTreeAction extends AbstractRupsAction {
         };
 
         SwingUtilities.invokeLater(saveRunnable);
+    }
+
+    private static byte[] getBytes(TreePath[] paths, boolean raw) throws IOException {
+        if (paths.length > 0) {
+            final Object node = paths[0].getLastPathComponent();
+            if (node instanceof PdfObjectTreeNode) {
+                return getBytes((PdfObjectTreeNode) node, raw);
+            }
+        }
+        return new byte[0];
+    }
+
+    private static byte[] getBytes(PdfObjectTreeNode node, boolean raw) {
+        final PdfObject object = node.getPdfObject();
+        switch (object.getType()) {
+            case PdfObject.STREAM:
+                return getBytes((PdfStream) object, raw);
+            case PdfObject.STRING:
+                return getBytes((PdfString) object, raw);
+            default:
+                return new byte[0];
+        }
+    }
+
+    private static byte[] getBytes(PdfStream stream, boolean raw) {
+        return stream.getBytes(!raw);
+    }
+
+    private static byte[] getBytes(PdfString string, boolean raw) {
+        if (raw) {
+            return string.getValueBytes();
+        }
+        return string.toUnicodeString().getBytes(StandardCharsets.UTF_8);
     }
 }
