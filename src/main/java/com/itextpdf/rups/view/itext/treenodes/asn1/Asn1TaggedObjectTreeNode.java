@@ -46,6 +46,7 @@ import org.bouncycastle.asn1.ASN1ApplicationSpecific;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERTags;
+import org.bouncycastle.asn1.DERTaggedObject;
 
 /**
  * Tree node for showing ASN.1 objects with context-specific tags.
@@ -155,6 +156,35 @@ public final class Asn1TaggedObjectTreeNode extends AbstractAsn1TreeNode {
     }
 
     /**
+     * Replaces {@code oldObj} in the base object sequence with {@code newObj}.
+     * Automatically reloads the tree.
+     *
+     * @param oldObj Base object to replace.
+     * @param newObj Base object replacement.
+     *
+     * @return {@code true}, if replacement happened, {@code false} otherwise.
+     */
+    public boolean replace(ASN1TaggedObject oldObj, ASN1TaggedObject newObj) {
+        final ASN1TaggedObject newRootObj = replaceInternal(getAsn1Primitive(), oldObj, newObj);
+        if (newRootObj == null) {
+            return false;
+        }
+        replace(newRootObj);
+        return true;
+    }
+
+    /**
+     * Replaces the underlying ASN.1 tagged object with {@code newObj}.
+     * Automatically reloads the tree.
+     *
+     * @param newObj Replacement ASN.1 tagged object.
+     */
+    public void replace(ASN1TaggedObject newObj) {
+        setUserObject(newObj);
+        reload();
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -175,5 +205,43 @@ public final class Asn1TaggedObjectTreeNode extends AbstractAsn1TreeNode {
         while (baseObjectNode.getChildCount() > 0) {
             add(baseObjectNode.getChildAt(0));
         }
+    }
+
+    /**
+     * Returns a new {@code root} object, where {@code oldObj} was replaced
+     * with {@code newObj}. If {@code oldObj} was not present in the
+     * {@code root} object base object chain, returns null.
+     *
+     * @param root   Object for which the replacement will be built.
+     * @param oldObj Base object to replace.
+     * @param newObj Base object replacement.
+     *
+     * @return A new {@code root} object, where {@code oldObj} was replaced
+     * with {@code newObj}. If {@code oldObj} was not present in the
+     * {@code root} object base object chain, returns null.
+     */
+    private static ASN1TaggedObject replaceInternal(
+            ASN1TaggedObject root,
+            ASN1TaggedObject oldObj,
+            ASN1TaggedObject newObj
+    ) {
+        /*
+         * Object reference comparison here is intended, as we expect oldObj
+         * to be taken directly from root, so there is no need to waste
+         * performance with equals.
+         */
+        if (root == oldObj) {
+            return newObj;
+        }
+        final ASN1Primitive baseObj = root.getBaseObject().toASN1Primitive();
+        if (!(baseObj instanceof ASN1TaggedObject)) {
+            return null;
+        }
+        return new DERTaggedObject(
+                root.isExplicit(),
+                root.getTagClass(),
+                root.getTagNo(),
+                replaceInternal((ASN1TaggedObject) baseObj, oldObj, newObj)
+        );
     }
 }

@@ -55,6 +55,8 @@ import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfPagesTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.asn1.AbstractAsn1TreeNode;
 import com.itextpdf.rups.view.itext.treenodes.asn1.Asn1TreeNodeFactory;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.CertificateCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.AbstractCorrector;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -348,6 +350,7 @@ public class TreeNodeFactory {
         final PdfString nodeObject = (PdfString) node.getPdfObject();
         final AbstractAsn1TreeNode asn1 = Asn1TreeNodeFactory.fromPrimitive(nodeObject.getValueBytes());
         if (asn1 != null) {
+            CertificateCorrector.INSTANCE.correct(asn1);
             node.add(asn1);
         } else {
             LoggerHelper.warnf(
@@ -434,9 +437,9 @@ public class TreeNodeFactory {
      * was added.
      */
     private static boolean expandDssDataNode(PdfObjectTreeNode node) {
-        return expandDssArrayNode(node, List.of(PdfName.Cert, PdfName.Certs))
-                || expandDssArrayNode(node, List.of(PdfName.CRL, PdfName.CRLs))
-                || expandDssArrayNode(node, List.of(PdfName.OCSP, PdfName.OCSPs))
+        return expandDssArrayNode(node, List.of(PdfName.Cert, PdfName.Certs), CertificateCorrector.INSTANCE)
+                || expandDssArrayNode(node, List.of(PdfName.CRL, PdfName.CRLs), null)
+                || expandDssArrayNode(node, List.of(PdfName.OCSP, PdfName.OCSPs), null)
                 || expandDssTsNode(node);
     }
 
@@ -446,13 +449,15 @@ public class TreeNodeFactory {
      *
      * @param node the parent node.
      * @param keys Keys, under which the array should be.
+     * @param corrector Corrector to use for the node.
      *
      * @return true if this is the correct node, regardless of whether a child
      * was added.
      */
     private static boolean expandDssArrayNode(
             PdfObjectTreeNode node,
-            Iterable<PdfName> keys
+            Iterable<PdfName> keys,
+            AbstractCorrector corrector
     ) {
         // This should be a stream
         if (!node.isStream()) {
@@ -477,6 +482,9 @@ public class TreeNodeFactory {
         final PdfStream nodeObject = (PdfStream) node.getPdfObject();
         final AbstractAsn1TreeNode asn1 = Asn1TreeNodeFactory.fromPrimitive(nodeObject.getBytes());
         if (asn1 != null) {
+            if (corrector != null) {
+                corrector.correct(asn1);
+            }
             node.add(asn1);
         } else {
             LoggerHelper.warnf(

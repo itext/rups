@@ -227,7 +227,7 @@ final class TreeNodeFactoryTest {
          *
          * As a result there SHOULD be an ASN.1 subtree.
          */
-        doVriTest(PdfName.Cert, new byte[] {0x30, 0x00}, "SEQUENCE");
+        doVriTest(PdfName.Cert, new byte[] {0x30, 0x00}, "certificate");
     }
 
     @Test
@@ -351,7 +351,7 @@ final class TreeNodeFactoryTest {
          *
          * As a result there SHOULD be an ASN.1 subtree.
          */
-        doDssTest(PdfName.Certs, new byte[] {0x30, 0x00}, "SEQUENCE");
+        doDssTest(PdfName.Certs, new byte[] {0x30, 0x00}, "certificate");
     }
 
     @Test
@@ -418,7 +418,7 @@ final class TreeNodeFactoryTest {
          *
          * Checking both keys at the same time.
          */
-        doSVCertTest(PdfName.Sig, SV, SVCert, new PdfString(new byte[] {0x30, 0x00}), "SEQUENCE");
+        doSVCertTest(PdfName.Sig, SV, SVCert, new PdfString(new byte[] {0x30, 0x00}), "certificate");
     }
 
     @Test
@@ -499,7 +499,7 @@ final class TreeNodeFactoryTest {
          *
          * Checking both keys at the same time.
          */
-        doSVCertTest(PdfName.Sig, SV, null, new PdfString(new byte[] {0x30, 0x00}), "SEQUENCE");
+        doSVCertTest(PdfName.Sig, SV, null, new PdfString(new byte[] {0x30, 0x00}), "certificate");
     }
 
     @Test
@@ -518,7 +518,7 @@ final class TreeNodeFactoryTest {
          *
          * Checking both keys at the same time.
          */
-        doSVCertTest(PdfName.Sig, null, null, new PdfString(new byte[] {0x30, 0x00}), "SEQUENCE");
+        doSVCertTest(PdfName.Sig, null, null, new PdfString(new byte[] {0x30, 0x00}), "certificate");
     }
 
     @Test
