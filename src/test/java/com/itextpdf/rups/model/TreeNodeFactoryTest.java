@@ -82,7 +82,7 @@ final class TreeNodeFactoryTest {
          *
          * As a result there SHOULD be an ASN.1 subtree.
          */
-        doSigTest(PdfName.Sig, PdfName.Sig, new PdfString(new byte[] {0x30, 0x00}), "SEQUENCE");
+        doSigTest(PdfName.Sig, PdfName.Sig, new PdfString(new byte[] {0x30, 0x00}), "contentInfo");
     }
 
     @Test
@@ -115,7 +115,7 @@ final class TreeNodeFactoryTest {
          *
          * As a result there SHOULD be an ASN.1 subtree.
          */
-        doSigTest(PdfName.Sig, PdfName.DocTimeStamp, new PdfString(new byte[] {0x30, 0x00}), "SEQUENCE");
+        doSigTest(PdfName.Sig, PdfName.DocTimeStamp, new PdfString(new byte[] {0x30, 0x00}), "contentInfo");
     }
 
     @Test
@@ -164,7 +164,7 @@ final class TreeNodeFactoryTest {
          *
          * As a result there SHOULD be an ASN.1 subtree.
          */
-        doSigTest(PdfName.Sig, null, new PdfString(new byte[] {0x30, 0x00}), "SEQUENCE");
+        doSigTest(PdfName.Sig, null, new PdfString(new byte[] {0x30, 0x00}), "contentInfo");
     }
 
     @Test
@@ -289,7 +289,7 @@ final class TreeNodeFactoryTest {
          *
          * As a result there SHOULD be an ASN.1 subtree.
          */
-        doTsTest(new byte[] {0x30, 0x00}, "SEQUENCE");
+        doTsTest(new byte[] {0x30, 0x00}, "contentInfo");
     }
 
     @Test

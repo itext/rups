@@ -45,6 +45,17 @@ package com.itextpdf.rups.view.itext.treenodes.asn1.correctors;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.algorithms.Mgf1Corrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.algorithms.RsassaPssCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.BasicOcspResponseCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.TimeStampTokenInfoCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.CmsAlgorithmProtectionCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.ContentTypeCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.MessageDigestCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.RandomNonceCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.RevocationInfoArchivalCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.SequenceNumberCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.SigningCertificateCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.SigningCertificateV2Corrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.SigningTimeCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.TimeStampTokenCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.ocsp.OcspAcceptableResponsesCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.ocsp.OcspArchiveCutoffCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.ocsp.OcspCrlCorrector;
@@ -76,6 +87,14 @@ public final class OidCorrectorMapper {
      */
     private static final Map<String, AbstractCorrector> CORRECTOR_MAP = Map.ofEntries(
             // Well this is ugly... Need code generation...
+            Map.entry(
+                    ContentInfoCorrector.OID,
+                    ContentInfoCorrector.INSTANCE
+            ),
+            Map.entry(
+                    SignedDataCorrector.OID,
+                    SignedDataCorrector.INSTANCE
+            ),
             // Cryptographic Algorithms
             Map.entry(
                     Mgf1Corrector.OID,
@@ -89,6 +108,10 @@ public final class OidCorrectorMapper {
             Map.entry(
                     BasicOcspResponseCorrector.OID,
                     BasicOcspResponseCorrector.INSTANCE
+            ),
+            Map.entry(
+                    TimeStampTokenInfoCorrector.OID,
+                    TimeStampTokenInfoCorrector.INSTANCE
             ),
             // X.509 Attributes
             Map.entry(
@@ -122,6 +145,46 @@ public final class OidCorrectorMapper {
             Map.entry(
                     OcspServiceLocatorCorrector.OID,
                     OcspServiceLocatorCorrector.INSTANCE
+            ),
+            Map.entry(
+                    CmsAlgorithmProtectionCorrector.OID,
+                    CmsAlgorithmProtectionCorrector.INSTANCE
+            ),
+            Map.entry(
+                    ContentTypeCorrector.OID,
+                    ContentTypeCorrector.INSTANCE
+            ),
+            Map.entry(
+                    MessageDigestCorrector.OID,
+                    MessageDigestCorrector.INSTANCE
+            ),
+            Map.entry(
+                    RandomNonceCorrector.OID,
+                    RandomNonceCorrector.INSTANCE
+            ),
+            Map.entry(
+                    RevocationInfoArchivalCorrector.OID,
+                    RevocationInfoArchivalCorrector.INSTANCE
+            ),
+            Map.entry(
+                    SequenceNumberCorrector.OID,
+                    SequenceNumberCorrector.INSTANCE
+            ),
+            Map.entry(
+                    SigningCertificateCorrector.OID,
+                    SigningCertificateCorrector.INSTANCE
+            ),
+            Map.entry(
+                    SigningCertificateV2Corrector.OID,
+                    SigningCertificateV2Corrector.INSTANCE
+            ),
+            Map.entry(
+                    SigningTimeCorrector.OID,
+                    SigningTimeCorrector.INSTANCE
+            ),
+            Map.entry(
+                    TimeStampTokenCorrector.OID,
+                    TimeStampTokenCorrector.INSTANCE
             ),
             // X.509 Extensions
             Map.entry(

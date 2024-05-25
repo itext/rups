@@ -56,6 +56,7 @@ import com.itextpdf.rups.view.itext.treenodes.PdfPagesTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.asn1.AbstractAsn1TreeNode;
 import com.itextpdf.rups.view.itext.treenodes.asn1.Asn1TreeNodeFactory;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.CertificateCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.ContentInfoCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.AbstractCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.CrlCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.OcspResponseCorrector;
@@ -267,6 +268,14 @@ public class TreeNodeFactory {
         final PdfString nodeObject = (PdfString) node.getPdfObject();
         final AbstractAsn1TreeNode asn1 = Asn1TreeNodeFactory.fromPrimitive(nodeObject.getValueBytes());
         if (asn1 != null) {
+            /*
+             * While this corrector only covers the CMS case, we can reasonably
+             * assume, that it is correct to use it. The only case in the
+             * standard, when this is not correct, is adbe.x509.rsa_sha1. But
+             * in that case the corrector will just do nothing, as it is just
+             * an octet string.
+             */
+            ContentInfoCorrector.INSTANCE.correct(asn1);
             node.add(asn1);
         } else {
             LoggerHelper.warnf(
@@ -525,6 +534,7 @@ public class TreeNodeFactory {
         final PdfStream nodeObject = (PdfStream) node.getPdfObject();
         final AbstractAsn1TreeNode asn1 = Asn1TreeNodeFactory.fromPrimitive(nodeObject.getBytes());
         if (asn1 != null) {
+            ContentInfoCorrector.INSTANCE.correct(asn1);
             node.add(asn1);
         } else {
             LoggerHelper.warnf(
