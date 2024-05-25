@@ -258,7 +258,7 @@ final class TreeNodeFactoryTest {
          *
          * As a result there SHOULD be an ASN.1 subtree.
          */
-        doVriTest(PdfName.OCSP, new byte[] {0x30, 0x00}, "SEQUENCE");
+        doVriTest(PdfName.OCSP, new byte[] {0x30, 0x00}, "ocspResponse");
     }
 
     @Test
@@ -382,7 +382,7 @@ final class TreeNodeFactoryTest {
          *
          * As a result there SHOULD be an ASN.1 subtree.
          */
-        doDssTest(PdfName.OCSPs, new byte[] {0x30, 0x00}, "SEQUENCE");
+        doDssTest(PdfName.OCSPs, new byte[] {0x30, 0x00}, "ocspResponse");
     }
 
     @Test

@@ -58,6 +58,7 @@ import com.itextpdf.rups.view.itext.treenodes.asn1.Asn1TreeNodeFactory;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.CertificateCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.AbstractCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.CrlCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.OcspResponseCorrector;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -440,7 +441,7 @@ public class TreeNodeFactory {
     private static boolean expandDssDataNode(PdfObjectTreeNode node) {
         return expandDssArrayNode(node, List.of(PdfName.Cert, PdfName.Certs), CertificateCorrector.INSTANCE)
                 || expandDssArrayNode(node, List.of(PdfName.CRL, PdfName.CRLs), CrlCorrector.INSTANCE)
-                || expandDssArrayNode(node, List.of(PdfName.OCSP, PdfName.OCSPs), null)
+                || expandDssArrayNode(node, List.of(PdfName.OCSP, PdfName.OCSPs), OcspResponseCorrector.INSTANCE)
                 || expandDssTsNode(node);
     }
 
@@ -483,9 +484,7 @@ public class TreeNodeFactory {
         final PdfStream nodeObject = (PdfStream) node.getPdfObject();
         final AbstractAsn1TreeNode asn1 = Asn1TreeNodeFactory.fromPrimitive(nodeObject.getBytes());
         if (asn1 != null) {
-            if (corrector != null) {
-                corrector.correct(asn1);
-            }
+            corrector.correct(asn1);
             node.add(asn1);
         } else {
             LoggerHelper.warnf(

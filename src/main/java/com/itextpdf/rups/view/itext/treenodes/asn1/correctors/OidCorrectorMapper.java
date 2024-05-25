@@ -44,6 +44,15 @@ package com.itextpdf.rups.view.itext.treenodes.asn1.correctors;
 
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.algorithms.Mgf1Corrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.algorithms.RsassaPssCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.BasicOcspResponseCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.ocsp.OcspAcceptableResponsesCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.ocsp.OcspArchiveCutoffCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.ocsp.OcspCrlCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.ocsp.OcspExtendedRevokeCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.ocsp.OcspNocheckCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.ocsp.OcspNonceCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.ocsp.OcspPreferredSignatureAlgorithmsCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.ocsp.OcspServiceLocatorCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.AuthorityInfoAccessCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.AuthorityKeyIdentifierCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.BasicConstraintsCorrector;
@@ -75,6 +84,44 @@ public final class OidCorrectorMapper {
             Map.entry(
                     RsassaPssCorrector.OID,
                     RsassaPssCorrector.INSTANCE
+            ),
+            // X.509 General
+            Map.entry(
+                    BasicOcspResponseCorrector.OID,
+                    BasicOcspResponseCorrector.INSTANCE
+            ),
+            // X.509 Attributes
+            Map.entry(
+                    OcspArchiveCutoffCorrector.OID,
+                    OcspArchiveCutoffCorrector.INSTANCE
+            ),
+            Map.entry(
+                    OcspCrlCorrector.OID,
+                    OcspCrlCorrector.INSTANCE
+            ),
+            Map.entry(
+                    OcspExtendedRevokeCorrector.OID,
+                    OcspExtendedRevokeCorrector.INSTANCE
+            ),
+            Map.entry(
+                    OcspNocheckCorrector.OID,
+                    OcspNocheckCorrector.INSTANCE
+            ),
+            Map.entry(
+                    OcspNonceCorrector.OID,
+                    OcspNonceCorrector.INSTANCE
+            ),
+            Map.entry(
+                    OcspPreferredSignatureAlgorithmsCorrector.OID,
+                    OcspPreferredSignatureAlgorithmsCorrector.INSTANCE
+            ),
+            Map.entry(
+                    OcspAcceptableResponsesCorrector.OID,
+                    OcspAcceptableResponsesCorrector.INSTANCE
+            ),
+            Map.entry(
+                    OcspServiceLocatorCorrector.OID,
+                    OcspServiceLocatorCorrector.INSTANCE
             ),
             // X.509 Extensions
             Map.entry(
