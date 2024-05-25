@@ -196,7 +196,7 @@ final class TreeNodeFactoryTest {
          *
          * As a result there SHOULD be an ASN.1 subtree.
          */
-        doVriTest(PdfName.CRL, new byte[] {0x30, 0x00}, "SEQUENCE");
+        doVriTest(PdfName.CRL, new byte[] {0x30, 0x00}, "crl");
     }
 
     @Test
@@ -320,7 +320,7 @@ final class TreeNodeFactoryTest {
          *
          * As a result there SHOULD be an ASN.1 subtree.
          */
-        doDssTest(PdfName.CRLs, new byte[] {0x30, 0x00}, "SEQUENCE");
+        doDssTest(PdfName.CRLs, new byte[] {0x30, 0x00}, "crl");
     }
 
     @Test

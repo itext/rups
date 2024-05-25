@@ -57,6 +57,7 @@ import com.itextpdf.rups.view.itext.treenodes.asn1.AbstractAsn1TreeNode;
 import com.itextpdf.rups.view.itext.treenodes.asn1.Asn1TreeNodeFactory;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.CertificateCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.AbstractCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.CrlCorrector;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -438,7 +439,7 @@ public class TreeNodeFactory {
      */
     private static boolean expandDssDataNode(PdfObjectTreeNode node) {
         return expandDssArrayNode(node, List.of(PdfName.Cert, PdfName.Certs), CertificateCorrector.INSTANCE)
-                || expandDssArrayNode(node, List.of(PdfName.CRL, PdfName.CRLs), null)
+                || expandDssArrayNode(node, List.of(PdfName.CRL, PdfName.CRLs), CrlCorrector.INSTANCE)
                 || expandDssArrayNode(node, List.of(PdfName.OCSP, PdfName.OCSPs), null)
                 || expandDssTsNode(node);
     }
