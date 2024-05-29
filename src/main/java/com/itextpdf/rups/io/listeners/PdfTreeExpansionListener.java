@@ -47,25 +47,29 @@ import com.itextpdf.rups.view.itext.PdfTree;
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 /**
  * Listener that checks if the expanded node has one child. If it has one child it should expand it.
  */
-public class PdfTreeExpansionListener implements TreeExpansionListener {
+public final class PdfTreeExpansionListener implements TreeExpansionListener {
 
+    @Override
     public void treeExpanded(TreeExpansionEvent event) {
-        PdfTree tree = (PdfTree) event.getSource();
-        DefaultMutableTreeNode node = ((DefaultMutableTreeNode) event.getPath().getLastPathComponent());
+        final TreePath originalPath = event.getPath();
+        final DefaultMutableTreeNode node = ((DefaultMutableTreeNode) originalPath.getLastPathComponent());
         if (node.getChildCount() == 1) {
-            TreeNode child = node.getChildAt(0);
-            tree.selectNode((DefaultMutableTreeNode) child);
-            tree.expandPath(new TreePath(((DefaultTreeModel) tree.getModel()).getPathToRoot(child)));
+            final TreeNode child = node.getChildAt(0);
+            final TreePath newPath = originalPath.pathByAddingChild(child);
+            final PdfTree tree = (PdfTree) event.getSource();
+            tree.setSelectionPath(newPath);
+            tree.expandPath(newPath);
         }
     }
 
+    @Override
     public void treeCollapsed(TreeExpansionEvent event) {
+        // noop
     }
 }
