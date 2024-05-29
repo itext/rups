@@ -51,6 +51,9 @@ import com.itextpdf.rups.view.itext.PdfTree;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.asn1.AbstractAsn1TreeNode;
 
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -59,9 +62,6 @@ import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.io.IOException;
 
 /**
  * Custom action to save raw bytes of a stream to a file from the PdfTree view.
@@ -79,7 +79,8 @@ public final class SaveToFilePdfTreeAction extends AbstractRupsAction {
 
     public void actionPerformed(ActionEvent event) {
         final Runnable saveRunnable = new Runnable() {
-            @Override public void run() {
+            @Override
+            public void run() {
                 // get saving location
                 final JFileChooser fileChooser = new JFileChooser();
 
@@ -99,11 +100,8 @@ public final class SaveToFilePdfTreeAction extends AbstractRupsAction {
                     final TreePath[] paths = selectionModel.getSelectionPaths();
 
                     // get the bytes and write away
-                    try {
-                        final byte[] array = getBytes(paths, saveRawBytes);
-                        try (OutputStream fos = Files.newOutputStream(Path.of(path))) {
-                            fos.write(array);
-                        }
+                    try (final OutputStream fos = Files.newOutputStream(Path.of(path))) {
+                        writeBytes(fos, paths, saveRawBytes);
                     } catch (IOException e) { // TODO : Catch this exception properly
                         LoggerHelper.error(Language.ERROR_WRITING_FILE.getString(), e, getClass());
                     }
@@ -114,43 +112,58 @@ public final class SaveToFilePdfTreeAction extends AbstractRupsAction {
         SwingUtilities.invokeLater(saveRunnable);
     }
 
-    private static byte[] getBytes(TreePath[] paths, boolean raw) throws IOException {
-        if (paths.length > 0) {
-            final Object node = paths[0].getLastPathComponent();
-            if (node instanceof PdfObjectTreeNode) {
-                return getBytes((PdfObjectTreeNode) node, raw);
-            }
-            if (node instanceof AbstractAsn1TreeNode) {
-                return getBytes((AbstractAsn1TreeNode) node);
-            }
+    private static void writeBytes(OutputStream os, TreePath[] paths, boolean raw)
+            throws IOException {
+        if (paths.length == 0) {
+            return;
         }
-        return new byte[0];
+        final Object node = paths[0].getLastPathComponent();
+        if (node instanceof PdfObjectTreeNode) {
+            writeBytes(os, (PdfObjectTreeNode) node, raw);
+        } else if (node instanceof AbstractAsn1TreeNode) {
+            writeBytes(os, (AbstractAsn1TreeNode) node, raw);
+        }
     }
 
-    private static byte[] getBytes(PdfObjectTreeNode node, boolean raw) {
+    private static void writeBytes(OutputStream os, PdfObjectTreeNode node, boolean raw)
+            throws IOException {
         final PdfObject object = node.getPdfObject();
         switch (object.getType()) {
             case PdfObject.STREAM:
-                return getBytes((PdfStream) object, raw);
+                writeBytes(os, (PdfStream) object, raw);
+                break;
             case PdfObject.STRING:
-                return getBytes((PdfString) object, raw);
+                writeBytes(os, (PdfString) object, raw);
+                break;
             default:
-                return new byte[0];
+                // noop
         }
     }
 
-    private static byte[] getBytes(PdfStream stream, boolean raw) {
-        return stream.getBytes(!raw);
+    private static void writeBytes(OutputStream os, PdfStream stream, boolean raw)
+            throws IOException {
+        os.write(stream.getBytes(!raw));
     }
 
-    private static byte[] getBytes(PdfString string, boolean raw) {
+    private static void writeBytes(OutputStream os, PdfString string, boolean raw)
+            throws IOException {
+        final byte[] data;
         if (raw) {
-            return string.getValueBytes();
+            data = string.getValueBytes();
+        } else {
+            data = string.toUnicodeString().getBytes(StandardCharsets.UTF_8);
         }
-        return string.toUnicodeString().getBytes(StandardCharsets.UTF_8);
+        os.write(data);
     }
 
-    private static byte[] getBytes(AbstractAsn1TreeNode node) throws IOException {
-        return node.getAsn1Primitive().getEncoded();
+    private static void writeBytes(OutputStream os, AbstractAsn1TreeNode node, boolean raw)
+            throws IOException {
+        if (raw) {
+            node.getAsn1Primitive().encodeTo(os);
+        } else {
+            node.toDisplayJson(os);
+            // Ensure blank line at the end for *nix tools sake
+            os.write(System.lineSeparator().getBytes(StandardCharsets.UTF_8));
+        }
     }
 }

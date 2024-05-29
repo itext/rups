@@ -42,12 +42,19 @@
  */
 package com.itextpdf.rups.view.itext.treenodes.asn1;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import org.bouncycastle.asn1.ASN1Boolean;
 import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERNull;
 import org.bouncycastle.asn1.DERPrintableString;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.asn1.DERTaggedObject;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -98,5 +105,52 @@ final class AbstractAsn1TreeNodeTest {
         final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(DERNull.INSTANCE);
         Assertions.assertFalse(node.supportsInspectObject());
         Assertions.assertTrue(node.supportsSave());
+    }
+
+    @Test
+    void toDisplayJson() throws IOException {
+        final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
+                new DERSequence(new ASN1Encodable[] {
+                        new DERSequence(new ASN1Encodable[] {
+                                new ASN1ObjectIdentifier("1.2"),
+                                new ASN1Integer(1),
+                        }),
+                        new DERTaggedObject(true, 1, ASN1Boolean.getInstance(false))
+                })
+        );
+        node.getChildAt(0).setRfcFieldName("first");
+        node.getChildAt(1).setRfcFieldName("second");
+        node.getChildAt(1).setValueExplanation("NOT-CRITICAL");
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        node.toDisplayJson(baos);
+        Assertions.assertEquals(
+                String.format("{%n" +
+                        "  \"type\": \"SEQUENCE\",%n" +
+                        "  \"children\": [%n" +
+                        "    {%n" +
+                        "      \"name\": \"first\",%n" +
+                        "      \"type\": \"SEQUENCE\",%n" +
+                        "      \"children\": [%n" +
+                        "        {%n" +
+                        "          \"type\": \"OBJECT IDENTIFIER\",%n" +
+                        "          \"value\": \"1.2\",%n" +
+                        "          \"explanation\": \"/iso/member-body\"%n" +
+                        "        },%n" +
+                        "        {%n" +
+                        "          \"type\": \"INTEGER\",%n" +
+                        "          \"value\": \"1\"%n" +
+                        "        }%n" +
+                        "      ]%n" +
+                        "    },%n" +
+                        "    {%n" +
+                        "      \"name\": \"second\",%n" +
+                        "      \"type\": \"[1] EXPLICIT BOOLEAN\",%n" +
+                        "      \"value\": \"FALSE\",%n" +
+                        "      \"explanation\": \"NOT-CRITICAL\"%n" +
+                        "    }%n" +
+                        "  ]%n" +
+                        "}"),
+                baos.toString(StandardCharsets.UTF_8)
+        );
     }
 }

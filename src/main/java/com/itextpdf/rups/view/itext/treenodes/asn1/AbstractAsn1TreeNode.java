@@ -42,9 +42,16 @@
  */
 package com.itextpdf.rups.view.itext.treenodes.asn1;
 
+import com.itextpdf.rups.view.JsonPrettyPrinter;
 import com.itextpdf.rups.view.contextmenu.IPdfContextMenuTarget;
 import com.itextpdf.rups.view.icons.IconTreeNode;
 
+import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.core.JsonFactory.Feature;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.core.StreamWriteFeature;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -250,9 +257,82 @@ public abstract class AbstractAsn1TreeNode
     }
 
     /**
+     * Writes the tree JSON representation to the output stream as a
+     * human-readable UTF-8 string.
+     *
+     * @param output Stream to write the string to.
+     *
+     * @throws IOException If there is either an underlying I/O problem or
+     *                     encoding issue at format layer.
+     */
+    public void toDisplayJson(OutputStream output) throws IOException {
+        final JsonFactory factory = JsonFactory.builder()
+                /*
+                 * We don't really need DoS protection in this case, so
+                 * disabling it to prevent having random exceptions
+                 * thrown.
+                 */
+                .disable(Feature.FAIL_ON_SYMBOL_HASH_OVERFLOW)
+                /*
+                 * Caller will be responsible for closing the stream. We only
+                 * append here.
+                 */
+                .disable(StreamWriteFeature.AUTO_CLOSE_TARGET)
+                .build();
+        try (final JsonGenerator jsonGenerator = factory.createGenerator(output)) {
+            jsonGenerator.setPrettyPrinter(new JsonPrettyPrinter());
+            toDisplayJsonInternal(jsonGenerator);
+        }
+    }
+
+    /**
+     * Writes the tree JSON representation via the JSON generator.
+     *
+     * @param json JSON generator to use for output.
+     *
+     * @throws IOException If there is either an underlying I/O problem or
+     *                     encoding issue at format layer.
+     */
+    private void toDisplayJsonInternal(JsonGenerator json) throws IOException {
+        json.writeStartObject();
+        writeStringFieldIfNotNull(json, "name", getRfcFieldName());
+        writeStringFieldIfNotNull(json, "type", getAsn1FullType());
+        writeStringFieldIfNotNull(json, "value", getAsn1DisplayValue());
+        writeStringFieldIfNotNull(json, "explanation", getValueExplanation());
+        if (getChildCount() > 0) {
+            json.writeFieldName("children");
+            json.writeStartArray();
+            for (final AbstractAsn1TreeNode child : this) {
+                child.toDisplayJsonInternal(json);
+            }
+            json.writeEndArray();
+        }
+        json.writeEndObject();
+    }
+
+    /**
+     * Convenience method for outputting a field entry ("member")
+     * that has a String value. If value is null, nothing is written.
+     *
+     * @param json  JsonGenerator object to call methods on.
+     * @param key   Name of the field to write.
+     * @param value String value of the field to write.
+     *
+     * @throws IOException if there is either an underlying I/O problem or encoding
+     *                     issue at format layer.
+     */
+    private static void writeStringFieldIfNotNull(JsonGenerator json, String key, String value)
+            throws IOException {
+        if (value != null) {
+            json.writeStringField(key, value);
+        }
+    }
+
+    /**
      * Returns the path in resources to the ASN.1 icon.
      *
      * @param iconBaseName ASN.1 icon file basename
+     *
      * @return The path in resources to the ASN.1 icon.
      */
     private static String getIconPath(String iconBaseName) {
