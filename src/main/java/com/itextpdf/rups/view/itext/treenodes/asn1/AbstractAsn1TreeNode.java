@@ -73,7 +73,7 @@ public abstract class AbstractAsn1TreeNode
      * @param object ASN.1 primitive, which the node represents.
      */
     protected AbstractAsn1TreeNode(String icon, ASN1Primitive object) {
-        super("asn1/" + icon, object);
+        super(getIconPath(icon), object);
     }
 
     /**
@@ -247,5 +247,18 @@ public abstract class AbstractAsn1TreeNode
     public void reload() {
         // If value changes, then value explanation should also change
         setValueExplanation(null);
+    }
+
+    /**
+     * Returns the path in resources to the ASN.1 icon.
+     *
+     * @param iconBaseName ASN.1 icon file basename
+     * @return The path in resources to the ASN.1 icon.
+     */
+    private static String getIconPath(String iconBaseName) {
+        if (iconBaseName == null) {
+            return null;
+        }
+        return "asn1/" + iconBaseName;
     }
 }
