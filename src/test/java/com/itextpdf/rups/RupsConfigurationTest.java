@@ -114,28 +114,8 @@ public class RupsConfigurationTest {
     }
 
     @Test
-    public void setLookAndFeel() {
-        String laf = "crossplatform";
-        RupsConfiguration.INSTANCE.setLookAndFeel(laf);
-        RupsConfiguration.INSTANCE.saveConfiguration();
-        String lookAndFeel = RupsConfiguration.INSTANCE.getLookAndFeel();
-        Assertions.assertTrue(lookAndFeel.contains("javax.swing.plaf"));
-    }
-
-    @Test
-    public void setSystemLookAndFeel() {
-        String laf = "system";
-        RupsConfiguration.INSTANCE.setLookAndFeel(laf);
-        RupsConfiguration.INSTANCE.saveConfiguration();
-        String lookAndFeel = RupsConfiguration.INSTANCE.getLookAndFeel();
-        Assertions.assertTrue(lookAndFeel.contains("javax.swing.plaf") ||
-                lookAndFeel.contains("java.swing.plaf") ||
-                lookAndFeel.equals("com.apple.laf.AquaLookAndFeel"));
-    }
-
-    @Test
-    public void clearUnsavedChangesTest() {
-        RupsConfiguration.INSTANCE.setLookAndFeel("system");
+    void clearUnsavedChangesTest() {
+        RupsConfiguration.INSTANCE.setLookAndFeel(RupsConfiguration.SUPPORTED_LOOK_AND_FEEL.get(0));
         Assertions.assertTrue(RupsConfiguration.INSTANCE.hasUnsavedChanges());
         RupsConfiguration.INSTANCE.cancelTemporaryChanges();
         Assertions.assertFalse(RupsConfiguration.INSTANCE.hasUnsavedChanges());

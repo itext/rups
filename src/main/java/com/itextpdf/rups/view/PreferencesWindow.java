@@ -43,15 +43,17 @@
 package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.RupsConfiguration;
+import com.itextpdf.rups.conf.LookAndFeelId;
 import com.itextpdf.rups.view.icons.FrameIconUtil;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ItemEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.Locale;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -69,7 +71,7 @@ import javax.swing.WindowConstants;
 /**
  * The window responsible for holding the UI to set the preferences.
  */
-public class PreferencesWindow {
+public final class PreferencesWindow {
 
     private JDialog jDialog;
 
@@ -85,6 +87,10 @@ public class PreferencesWindow {
     private JTextField pathField;
     private JLabel restartLabel;
     private JComboBox<String> localeBox;
+    /**
+     * Combo box for selecting Look & Feel.
+     */
+    private JComboBox<LookAndFeelId> lookAndFeelBox;
 
     public PreferencesWindow() {
         initializeJDialog();
@@ -116,12 +122,16 @@ public class PreferencesWindow {
     }
 
     private void initializeLayout() {
+        final Insets insets = new Insets(2, 2, 2, 2);
+
         this.gridBagLayout = new GridBagLayout();
 
         this.left = new GridBagConstraints();
+        this.left.insets = insets;
         this.left.anchor = GridBagConstraints.EAST;
 
         this.right = new GridBagConstraints();
+        this.right.insets = insets;
         this.right.weightx = 2.0;
         this.right.fill = GridBagConstraints.HORIZONTAL;
         this.right.gridwidth = GridBagConstraints.REMAINDER;
@@ -169,27 +179,48 @@ public class PreferencesWindow {
     }
 
     private void createVisualSettingsTab() {
+        /*
+         * Kind of a hack. Instead of using label visibility, we will set it
+         * to " ". This way it has a height, so the place for the label remains
+         * in the window and, because of that, component do not jump. Would
+         * assume there is a better way to do this...
+         */
+        this.restartLabel = new JLabel(" ");
+
+        this.lookAndFeelBox = new JComboBox<>();
+        for (final LookAndFeelId laf : RupsConfiguration.SUPPORTED_LOOK_AND_FEEL) {
+            this.lookAndFeelBox.addItem(laf);
+        }
+        this.lookAndFeelBox.setSelectedItem(RupsConfiguration.INSTANCE.getLookAndFeel());
+        this.lookAndFeelBox.addItemListener((ItemEvent e) -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                RupsConfiguration.INSTANCE.setLookAndFeel((LookAndFeelId) e.getItem());
+                this.restartLabel.setText(Language.PREFERENCES_NEED_RESTART.getString());
+            }
+        });
+
+        final JLabel lookAndFeelLabel = new JLabel(Language.LOOK_AND_FEEL.getString());
+        lookAndFeelLabel.setLabelFor(this.lookAndFeelBox);
+
         this.localeBox = new JComboBox<>();
         this.localeBox.addItem("nl-NL");
         this.localeBox.addItem("en-US");
         this.localeBox.setSelectedItem(RupsConfiguration.INSTANCE.getUserLocale().toLanguageTag());
-        final JLabel localeLabel = new JLabel(Language.LOCALE.getString());
-        localeLabel.setLabelFor(localeBox);
-
-        this.restartLabel = new JLabel(Language.PREFERENCES_NEED_RESTART.getString());
-        this.restartLabel.setVisible(false);
-        this.restartLabel.setLabelFor(localeBox);
-
         this.localeBox.addActionListener(e -> {
             Object selectedItem = localeBox.getSelectedItem();
             String selectedString = (String) selectedItem;
             RupsConfiguration.INSTANCE.setUserLocale(Locale.forLanguageTag(selectedString));
-            this.restartLabel.setVisible(true);
+            this.restartLabel.setText(Language.PREFERENCES_NEED_RESTART.getString());
         });
+
+        final JLabel localeLabel = new JLabel(Language.LOCALE.getString());
+        localeLabel.setLabelFor(localeBox);
 
         this.visualPanel = new JPanel();
         this.visualPanel.setLayout(this.gridBagLayout);
 
+        this.visualPanel.add(lookAndFeelLabel, this.left);
+        this.visualPanel.add(this.lookAndFeelBox, this.right);
         this.visualPanel.add(localeLabel, this.left);
         this.visualPanel.add(this.localeBox, this.right);
         this.visualPanel.add(this.restartLabel, this.right);
@@ -253,8 +284,9 @@ public class PreferencesWindow {
     private void resetView() {
         this.pathField.setText(RupsConfiguration.INSTANCE.getHomeFolder().getPath());
         this.openDuplicateFiles.setSelected(RupsConfiguration.INSTANCE.canOpenDuplicateFiles());
+        this.lookAndFeelBox.setSelectedItem(RupsConfiguration.INSTANCE.getLookAndFeel());
         this.localeBox.setSelectedItem(RupsConfiguration.INSTANCE.getUserLocale().toLanguageTag());
-        this.restartLabel.setVisible(false);
+        this.restartLabel.setText(" ");
     }
 
     public void show(Component component) {

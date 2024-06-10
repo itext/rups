@@ -91,7 +91,7 @@ public class Rups {
 
     static void setLookandFeel() {
         try {
-            UIManager.setLookAndFeel(RupsConfiguration.INSTANCE.getLookAndFeel());
+            UIManager.setLookAndFeel(RupsConfiguration.INSTANCE.getLookAndFeel().getClassName());
         } catch (
                 ClassNotFoundException | InstantiationException |
                         IllegalAccessException | UnsupportedLookAndFeelException e) {

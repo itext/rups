@@ -42,6 +42,7 @@
  */
 package com.itextpdf.rups;
 
+import com.itextpdf.rups.conf.LookAndFeelId;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.view.Language;
 
@@ -50,6 +51,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
@@ -72,6 +74,20 @@ import javax.swing.WindowConstants;
  */
 public enum RupsConfiguration {
     INSTANCE;
+
+    /**
+     * List of supported Look & Feel values.
+     */
+    public static final List<LookAndFeelId> SUPPORTED_LOOK_AND_FEEL = List.of(
+            new LookAndFeelId("system", UIManager.getSystemLookAndFeelClassName()),
+            new LookAndFeelId("crossplatform", UIManager.getCrossPlatformLookAndFeelClassName()),
+            new LookAndFeelId("flatlaflight", "com.formdev.flatlaf.FlatLightLaf"),
+            new LookAndFeelId("flatlafdark", "com.formdev.flatlaf.FlatDarkLaf"),
+            new LookAndFeelId("flatlafintellij", "com.formdev.flatlaf.FlatIntelliJLaf"),
+            new LookAndFeelId("flatlafdarcula", "com.formdev.flatlaf.FlatDarculaLaf"),
+            new LookAndFeelId("flatlafmacoslight", "com.formdev.flatlaf.themes.FlatMacLightLaf"),
+            new LookAndFeelId("flatlafmacosdark", "com.formdev.flatlaf.themes.FlatMacDarkLaf")
+    );
 
     private static final String DEFAULT_CONFIG_PATH = "/config/default.properties";
     private static final String DEFAULT_HOME_VALUE = "home";
@@ -180,27 +196,20 @@ public enum RupsConfiguration {
     /**
      * Gets the set Look and Feel for the application.
      *
-     * @return String
+     * @return The set Look and Feel for the application.
      */
-    public String getLookAndFeel() {
-        final String lookAndFeelName;
-        final String value = getValueFromSystemPreferences(LOOK_AND_FEEL_KEY);
-
-        switch (value) {
-            default:
-            case "system":
-                lookAndFeelName = UIManager.getSystemLookAndFeelClassName();
-                break;
-            case "crossplatform":
-                lookAndFeelName = UIManager.getCrossPlatformLookAndFeelClassName();
-                break;
+    public LookAndFeelId getLookAndFeel() {
+        final String lafKey = getValueFromSystemPreferences(LOOK_AND_FEEL_KEY);
+        for (final LookAndFeelId laf : SUPPORTED_LOOK_AND_FEEL) {
+            if (laf.getConfigurationKey().equals(lafKey)) {
+                return laf;
+            }
         }
-
-        return lookAndFeelName;
+        return SUPPORTED_LOOK_AND_FEEL.get(0);
     }
 
-    public void setLookAndFeel(String lookAndFeel) {
-        this.temporaryProperties.setProperty(LOOK_AND_FEEL_KEY, lookAndFeel);
+    public void setLookAndFeel(LookAndFeelId lookAndFeel) {
+        this.temporaryProperties.setProperty(LOOK_AND_FEEL_KEY, lookAndFeel.getConfigurationKey());
     }
 
     public void setOpenDuplicateFiles(boolean value) {
