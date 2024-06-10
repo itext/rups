@@ -60,6 +60,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.Timer;
+import javax.swing.UIManager;
 
 /**
  * Class for showing brief notifications in the app.
@@ -70,9 +71,6 @@ import javax.swing.Timer;
 public final class Snackbar {
     public static final int DURATION_SHORT = 4000;
     public static final int DURATION_LONG = 10000;
-
-    private static final Color COLOR_INVERSE_ON_SURFACE = new Color(0xF4EFF4);
-    private static final Color COLOR_INVERSE_SURFACE = new Color(0x313033);
 
     private static final int MARGIN = 16;
     private static final int X_PADDING = 16;
@@ -151,7 +149,7 @@ public final class Snackbar {
         final SnackbarPanel panel = new SnackbarPanel(ARC_SIZE, ARC_SIZE);
         panel.setLayout(new BoxLayout(panel, BoxLayout.LINE_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(0, X_PADDING, SHADOW_HEIGHT, X_PADDING));
-        panel.setBackground(COLOR_INVERSE_SURFACE);
+        panel.setBackground(UIManager.getColor("TextPane.selectionBackground"));
 
         final JLabel label = new JLabel(text);
         /*
@@ -160,7 +158,7 @@ public final class Snackbar {
          * explicitly with null to make it happy.
          */
         label.setLabelFor(null);
-        label.setForeground(COLOR_INVERSE_ON_SURFACE);
+        label.setForeground(UIManager.getColor("TextPane.selectionForeground"));
         label.setFont(new Font(label.getFont().getName(), Font.PLAIN, FONT_SIZE));
         panel.add(label);
 

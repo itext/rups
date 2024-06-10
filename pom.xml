@@ -61,6 +61,7 @@
     <maven-surefire-plugin.version>2.22.0</maven-surefire-plugin.version>
     <jacoco-maven-plugin.version>0.8.9</jacoco-maven-plugin.version>
     <maven-bundle-plugin.version>5.1.4</maven-bundle-plugin.version>
+    <flatlaf.version>3.4.1</flatlaf.version>
   </properties>
 
   <dependencies>
@@ -100,6 +101,11 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
       <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.formdev</groupId>
+      <artifactId>flatlaf</artifactId>
+      <version>${flatlaf.version}</version>
     </dependency>
     <dependency>
       <groupId>com.itextpdf</groupId>

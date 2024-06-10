@@ -163,6 +163,7 @@ public enum Language {
     LOADING,
     LOCALE,
     LOG_TREE_NODE_CREATED,
+    LOOK_AND_FEEL,
 
     MENU_BAR_ABOUT,
     MENU_BAR_CLOSE,
@@ -248,10 +249,20 @@ public enum Language {
     /**
      * Retrieves the String appropriate for the selected Locale.
      *
+     * @param name Name to return the string for.
+     *
+     * @return The correct String value.
+     */
+    public static String getString(String name) {
+        return ResourceBundle.getBundle(BUNDLE_LOCATION, RupsConfiguration.INSTANCE.getUserLocale()).getString(name);
+    }
+
+    /**
+     * Retrieves the String appropriate for the selected Locale.
+     *
      * @return the correct String value
      */
     public String getString() {
-        return ResourceBundle.getBundle(BUNDLE_LOCATION, RupsConfiguration.INSTANCE.getUserLocale()).getString(name());
+        return getString(name());
     }
-
 }
