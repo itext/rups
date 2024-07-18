@@ -47,7 +47,6 @@ import com.itextpdf.rups.view.itext.treenodes.asn1.Asn1TaggedObjectTreeNode;
 
 import java.math.BigInteger;
 import java.util.function.BiFunction;
-import org.bouncycastle.asn1.ASN1ApplicationSpecific;
 import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -171,7 +170,7 @@ public abstract class AbstractCorrector {
      * @return True, if object has a UNIVERSAL tag, otherwise false.
      */
     protected static boolean isUniversalType(ASN1Primitive obj) {
-        return !(obj instanceof ASN1TaggedObject || obj instanceof ASN1ApplicationSpecific);
+        return !(obj instanceof ASN1TaggedObject);
     }
 
     /**

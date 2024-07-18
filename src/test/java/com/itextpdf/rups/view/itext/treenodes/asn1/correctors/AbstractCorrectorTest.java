@@ -431,6 +431,10 @@ class AbstractCorrectorTest {
                 case BERTags.BOOLEAN:
                     data = new byte[] {i, 1, 0};
                     break;
+                case BERTags.OBJECT_IDENTIFIER:
+                case BERTags.RELATIVE_OID:
+                    data = new byte[] {i, 5, 0x28, (byte) 0xC2, 0x7B, 0x02, 0x01};
+                    break;
                 case BERTags.INTEGER:
                 case BERTags.ENUMERATED:
                 case BERTags.UTC_TIME:

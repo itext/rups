@@ -43,7 +43,6 @@
 package com.itextpdf.rups.view.itext.treenodes.asn1;
 
 import java.io.IOException;
-import org.bouncycastle.asn1.ASN1ApplicationSpecific;
 import org.bouncycastle.asn1.ASN1BMPString;
 import org.bouncycastle.asn1.ASN1BitString;
 import org.bouncycastle.asn1.ASN1Boolean;
@@ -87,9 +86,6 @@ public final class Asn1TreeNodeFactory {
         }
         if (object instanceof ASN1TaggedObject) {
             return new Asn1TaggedObjectTreeNode((ASN1TaggedObject) object);
-        }
-        if (object instanceof ASN1ApplicationSpecific) {
-            return new Asn1TaggedObjectTreeNode((ASN1ApplicationSpecific) object);
         }
         if (object instanceof ASN1Boolean) {
             return new Asn1BooleanTreeNode((ASN1Boolean) object);
