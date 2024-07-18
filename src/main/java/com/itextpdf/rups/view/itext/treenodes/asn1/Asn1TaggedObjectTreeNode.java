@@ -42,7 +42,6 @@
  */
 package com.itextpdf.rups.view.itext.treenodes.asn1;
 
-import org.bouncycastle.asn1.ASN1ApplicationSpecific;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.BERTags;
@@ -59,23 +58,6 @@ public final class Asn1TaggedObjectTreeNode extends AbstractAsn1TreeNode {
      * possible universal ASN.1 types.
      */
     private AbstractAsn1TreeNode baseObjectNode;
-
-    /**
-     * Creates a new tree node for an ASN.1 object with a non-UNIVERSAL tag.
-     *
-     * @param object ASN.1 object with a non-UNIVERSAL tag.
-     */
-    public Asn1TaggedObjectTreeNode(ASN1ApplicationSpecific object) {
-        /*
-         * For some reason, even though ASN1ApplicationSpecific is deprecated,
-         * ASN1Primitive.fromByteArray can still return it... I don't think
-         * there was any spec, when an APPLICATION tag was used, so it should
-         * not be a problem, if it pops-up somewhere and there is no special
-         * code for it. But we still want to display it in a tagged object
-         * node.
-         */
-        this(object.getTaggedObject());
-    }
 
     /**
      * Creates a new tree node for an ASN.1 object with a non-UNIVERSAL tag.
