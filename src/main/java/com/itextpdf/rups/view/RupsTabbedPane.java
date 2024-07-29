@@ -167,7 +167,7 @@ public class RupsTabbedPane {
     private void showReadOnlyWarning() {
         final IPdfFile currentFile = getCurrentFile();
         if (currentFile != null && !currentFile.isOpenedAsOwner()) {
-            Snackbar.make(Rups.getMainFrame(), Language.WARNING_OPENED_IN_READ_ONLY_MODE.getString()).show();
+            Rups.showBriefMessage(Language.WARNING_OPENED_IN_READ_ONLY_MODE.getString());
         }
     }
 }

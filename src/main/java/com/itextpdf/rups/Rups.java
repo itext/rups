@@ -49,6 +49,7 @@ import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.RupsDropTarget;
 import com.itextpdf.rups.view.RupsMenuBar;
 import com.itextpdf.rups.view.RupsTabbedPane;
+import com.itextpdf.rups.view.Snackbar;
 import com.itextpdf.rups.view.icons.FrameIconUtil;
 
 import java.awt.BorderLayout;
@@ -74,8 +75,16 @@ public final class Rups {
     }
 
     private static JFrame mainFrame = null;
-    public static JFrame getMainFrame() {
-        return mainFrame;
+
+    /**
+     * Shows a brief message in the main frame.
+     *
+     * @param message Message to show.
+     */
+    public static void showBriefMessage(String message) {
+        if (mainFrame != null) {
+            Snackbar.make(mainFrame, message).show();
+        }
     }
 
     /**
