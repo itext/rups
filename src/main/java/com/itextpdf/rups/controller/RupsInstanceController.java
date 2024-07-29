@@ -59,7 +59,6 @@ import com.itextpdf.rups.model.ProgressDialog;
 import com.itextpdf.rups.view.Console;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.PageSelectionListener;
-import com.itextpdf.rups.view.Snackbar;
 import com.itextpdf.rups.view.contextmenu.ConsoleContextMenu;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.contextmenu.IPdfContextMenuTarget;
@@ -214,7 +213,7 @@ public class RupsInstanceController extends Observable
             startObjectLoader();
             readerController.getParser().setDocument(pdfFile.getPdfDocument());
         } catch (IOException | PdfException | com.itextpdf.io.exceptions.IOException ioe) {
-            Snackbar.make(Rups.getMainFrame(), ioe.getMessage()).show();
+            Rups.showBriefMessage(ioe.getMessage());
         }
     }
 
