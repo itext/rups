@@ -44,7 +44,6 @@ package com.itextpdf.rups.controller;
 
 import com.itextpdf.rups.event.CloseDocumentEvent;
 import com.itextpdf.rups.event.OpenFileEvent;
-import com.itextpdf.rups.event.SaveToFileEvent;
 import com.itextpdf.rups.view.RupsTabbedPane;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -52,10 +51,10 @@ import org.junit.jupiter.api.Test;
 import java.awt.Dimension;
 import java.io.File;
 
-public class RupsControllerTest {
+class RupsControllerTest {
 
     @Test
-    public void closeTest() {
+    void closeTest() {
         MockRupsTabbedPane rupsTabbedPane = new MockRupsTabbedPane();
         RupsController rupsController = new RupsController(null, rupsTabbedPane);
 
@@ -66,18 +65,18 @@ public class RupsControllerTest {
     }
 
     @Test
-    public void saveTest() {
+    void saveTest() {
         MockRupsTabbedPane rupsTabbedPane = new MockRupsTabbedPane();
         RupsController rupsController = new RupsController(null, rupsTabbedPane);
 
-        rupsController.update(null, new SaveToFileEvent(new File("")));
+        rupsController.saveCurrentFile(new File(""));
         Assertions.assertTrue(rupsTabbedPane.saved);
         Assertions.assertFalse(rupsTabbedPane.opened);
         Assertions.assertFalse(rupsTabbedPane.closed);
     }
 
     @Test
-    public void openTest() {
+    void openTest() {
         MockRupsTabbedPane rupsTabbedPane = new MockRupsTabbedPane();
         RupsController rupsController = new RupsController(null, rupsTabbedPane);
 

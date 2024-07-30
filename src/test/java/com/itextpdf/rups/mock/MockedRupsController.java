@@ -93,4 +93,8 @@ public class MockedRupsController implements IRupsController {
     @Override
     public void reopenAsOwner() {
     }
+
+    @Override
+    public void saveCurrentFile(File newFile) {
+    }
 }
