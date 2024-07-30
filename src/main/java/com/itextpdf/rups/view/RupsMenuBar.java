@@ -49,7 +49,7 @@ import com.itextpdf.rups.event.ReopenCurrentFileAsOwnerEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.FileCloseAction;
 import com.itextpdf.rups.io.FileOpenAction;
-import com.itextpdf.rups.io.FileSaveAction;
+import com.itextpdf.rups.io.PdfFileSaveAction;
 import com.itextpdf.rups.io.OpenInViewerAction;
 import com.itextpdf.rups.io.filters.PdfFilter;
 import com.itextpdf.rups.model.IPdfFile;
@@ -81,7 +81,7 @@ public class RupsMenuBar extends JMenuBar implements Observer {
     /**
      * The action needed to save a file.
      */
-    protected FileSaveAction fileSaverAction;
+    protected PdfFileSaveAction fileSaverAction;
     /**
      * The HashMap with all the actions.
      */
@@ -102,7 +102,7 @@ public class RupsMenuBar extends JMenuBar implements Observer {
         fileOpenAction = new FileOpenAction(controller, PdfFilter.INSTANCE, controller.getMasterComponent());
         fileCloseAction = new FileCloseAction(controller);
         openInViewerAction = new OpenInViewerAction(controller);
-        fileSaverAction = new FileSaveAction(controller, PdfFilter.INSTANCE, controller.getMasterComponent());
+        fileSaverAction = new PdfFileSaveAction(controller, controller.getMasterComponent());
 
         final JMenu file = new JMenu(Language.MENU_BAR_FILE.getString());
         addItem(file, Language.MENU_BAR_OPEN.getString(), fileOpenAction,

@@ -40,25 +40,64 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.event;
+package com.itextpdf.rups.io;
 
-import java.io.File;
+import com.itextpdf.rups.RupsConfiguration;
+import com.itextpdf.rups.controller.IRupsController;
+import com.itextpdf.rups.io.filters.PdfFilter;
+import com.itextpdf.rups.view.Language;
 
-public class SaveToFileEvent extends RupsEvent {
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import javax.swing.AbstractAction;
+import javax.swing.JFileChooser;
 
-    private File file;
+/**
+ * Action for saving PDF files in RUPS.
+ *
+ * <p>
+ * The action shows the save file dialog, which starts at the opened file
+ * location with the same name. Will send a save event to the controller.
+ * </p>
+ */
+public final class PdfFileSaveAction extends AbstractAction {
+    /**
+     * The controller, that is expecting the result of the file chooser action.
+     */
+    private final IRupsController controller;
+    /**
+     * A parent Component for the file chooser dialog.
+     */
+    private final Component parent;
 
-    public SaveToFileEvent(File file) {
-        this.file = file;
+    /**
+     * Creates a new save PDF file chooser action.
+     *
+     * @param controller The controller waiting for you to select file.
+     * @param parent     A parent Component for chooser dialog.
+     */
+    public PdfFileSaveAction(IRupsController controller, Component parent) {
+        super(Language.MENU_BAR_SAVE_AS.getString());
+        this.controller = controller;
+        this.parent = parent;
     }
 
-    @Override
-    public int getType() {
-        return SAVE_TO_FILE_EVENT;
-    }
-
-    @Override
-    public Object getContent() {
-        return file;
+    /**
+     * {@inheritDoc}
+     */
+    public void actionPerformed(ActionEvent evt) {
+        final JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setSelectedFile(controller.getCurrentFile().getOriginalFile());
+        /*
+         * In case file chooser couldn't find the location of the file, use
+         * the home directory as a fallback.
+         */
+        if (fileChooser.getCurrentDirectory() == null) {
+            fileChooser.setCurrentDirectory(RupsConfiguration.INSTANCE.getHomeFolder());
+        }
+        fileChooser.setFileFilter(PdfFilter.INSTANCE);
+        if (fileChooser.showSaveDialog(parent) == JFileChooser.APPROVE_OPTION) {
+            controller.saveCurrentFile(fileChooser.getSelectedFile());
+        }
     }
 }

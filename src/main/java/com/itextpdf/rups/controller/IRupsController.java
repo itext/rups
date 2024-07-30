@@ -88,6 +88,13 @@ public interface IRupsController {
     void closeCurrentFile();
 
     /**
+     * Saves the currently opened file at the specified location.
+     *
+     * @param newFile Location to save the file to.
+     */
+    void saveCurrentFile(File newFile);
+
+    /**
      * Closes the current file and tries to open it as an owner again.
      */
     void reopenAsOwner();

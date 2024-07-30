@@ -108,9 +108,6 @@ public class RupsController extends Observable
                     break;
                 case RupsEvent.COMPARE_WITH_FILE_EVENT:
                     break;
-                case RupsEvent.SAVE_TO_FILE_EVENT:
-                    this.rupsTabbedPane.saveCurrentFile((File) event.getContent());
-                    break;
                 case RupsEvent.REOPEN_CURRENT_FILE_AS_OWNER:
                     this.reopenAsOwner();
                     break;
@@ -132,6 +129,14 @@ public class RupsController extends Observable
         if (lastOne) {
             this.update(this, new AllFilesClosedEvent());
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void saveCurrentFile(File newFile) {
+        this.rupsTabbedPane.saveCurrentFile(newFile);
     }
 
     @Override
