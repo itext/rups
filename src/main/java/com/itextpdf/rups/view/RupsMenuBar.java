@@ -45,7 +45,6 @@ package com.itextpdf.rups.view;
 import com.itextpdf.kernel.actions.data.ITextCoreProductData;
 import com.itextpdf.rups.controller.IRupsController;
 import com.itextpdf.rups.controller.RupsController;
-import com.itextpdf.rups.event.ReopenCurrentFileAsOwnerEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.FileCloseAction;
 import com.itextpdf.rups.io.FileOpenAction;
@@ -108,7 +107,7 @@ public class RupsMenuBar extends JMenuBar implements Observer {
         addItem(file, Language.MENU_BAR_OPEN.getString(), fileOpenAction,
                 KeyStroke.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK));
         addItem(file, Language.MENU_BAR_REOPEN_AS_OWNER.getString(),
-                e -> controller.update(null, new ReopenCurrentFileAsOwnerEvent()));
+                e -> controller.reopenAsOwner());
         addItem(file, Language.MENU_BAR_CLOSE.getString(), new FileCloseAction(controller),
                 KeyStroke.getKeyStroke('W', InputEvent.CTRL_DOWN_MASK));
         addItem(file, Language.MENU_BAR_SAVE_AS.getString(), fileSaverAction,
