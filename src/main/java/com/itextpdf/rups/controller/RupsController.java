@@ -108,9 +108,6 @@ public class RupsController extends Observable
                     break;
                 case RupsEvent.COMPARE_WITH_FILE_EVENT:
                     break;
-                case RupsEvent.REOPEN_CURRENT_FILE_AS_OWNER:
-                    this.reopenAsOwner();
-                    break;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
                 default:
                     setChanged();
@@ -139,6 +136,9 @@ public class RupsController extends Observable
         this.rupsTabbedPane.saveCurrentFile(newFile);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void reopenAsOwner() {
         final IPdfFile file = this.getCurrentFile();
