@@ -43,19 +43,20 @@
 package com.itextpdf.rups.view;
 
 import com.itextpdf.kernel.actions.data.ITextCoreProductData;
+import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.controller.IRupsController;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.FileCloseAction;
-import com.itextpdf.rups.io.FileOpenAction;
-import com.itextpdf.rups.io.PdfFileSaveAction;
 import com.itextpdf.rups.io.OpenInViewerAction;
-import com.itextpdf.rups.io.filters.PdfFilter;
+import com.itextpdf.rups.io.PdfFileOpenAction;
+import com.itextpdf.rups.io.PdfFileSaveAction;
 import com.itextpdf.rups.model.IPdfFile;
+import com.itextpdf.rups.model.MruListHandler;
 
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
-import java.util.HashMap;
+import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.Box;
@@ -64,73 +65,91 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
-public class RupsMenuBar extends JMenuBar implements Observer {
+public final class RupsMenuBar extends JMenuBar implements Observer {
+    private final IRupsController controller;
     /**
      * The action needed to open a file.
      */
-    protected FileOpenAction fileOpenAction;
-    /**
-     * The action needed to close a file/tab.
-     */
-    protected FileCloseAction fileCloseAction;
-    /**
-     * The action needed to open a file in the system viewer.
-     */
-    protected OpenInViewerAction openInViewerAction;
-    /**
-     * The action needed to save a file.
-     */
-    protected PdfFileSaveAction fileSaverAction;
-    /**
-     * The HashMap with all the actions.
-     */
-    protected HashMap<String, JMenuItem> items;
+    private final PdfFileOpenAction fileOpenAction;
     /**
      * The Preferences Window
      */
     private final PreferencesWindow preferencesWindow;
 
+    private final JMenuItem reopenAsOwnerMenuItem;
+    private final JMenuItem closeMenuItem;
+    private final JMenuItem saveAsMenuItem;
+    private final JMenuItem openInPdfViewerMenuItem;
+
     /**
      * Creates a JMenuBar.
      */
     public RupsMenuBar(RupsController controller) {
-        items = new HashMap<>();
+        this.controller = controller;
 
         preferencesWindow = new PreferencesWindow();
 
-        fileOpenAction = new FileOpenAction(controller, PdfFilter.INSTANCE, controller.getMasterComponent());
-        fileCloseAction = new FileCloseAction(controller);
-        openInViewerAction = new OpenInViewerAction(controller);
-        fileSaverAction = new PdfFileSaveAction(controller, controller.getMasterComponent());
+        fileOpenAction = new PdfFileOpenAction(controller::openNewFile, controller.getMasterComponent());
 
         final JMenu file = new JMenu(Language.MENU_BAR_FILE.getString());
-        addItem(file, Language.MENU_BAR_OPEN.getString(), fileOpenAction,
-                KeyStroke.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK));
-        addItem(file, Language.MENU_BAR_REOPEN_AS_OWNER.getString(),
-                e -> controller.reopenAsOwner());
-        addItem(file, Language.MENU_BAR_CLOSE.getString(), new FileCloseAction(controller),
-                KeyStroke.getKeyStroke('W', InputEvent.CTRL_DOWN_MASK));
-        addItem(file, Language.MENU_BAR_SAVE_AS.getString(), fileSaverAction,
-                KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK));
+        addItem(
+                file,
+                Language.MENU_BAR_OPEN,
+                fileOpenAction,
+                KeyStroke.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK)
+        );
+        file.add(createOpenRecentSubMenu());
+        reopenAsOwnerMenuItem = addItem(
+                file,
+                Language.MENU_BAR_REOPEN_AS_OWNER,
+                e -> controller.reopenAsOwner()
+        );
+        closeMenuItem = addItem(
+                file,
+                Language.MENU_BAR_CLOSE,
+                new FileCloseAction(controller),
+                KeyStroke.getKeyStroke('W', InputEvent.CTRL_DOWN_MASK)
+        );
+        saveAsMenuItem = addItem(
+                file,
+                Language.MENU_BAR_SAVE_AS,
+                new PdfFileSaveAction(controller, controller.getMasterComponent()),
+                KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK)
+        );
         file.addSeparator();
-        addItem(file, Language.MENU_BAR_OPEN_IN_PDF_VIEWER.getString(), openInViewerAction, KeyStroke.getKeyStroke('E', InputEvent.CTRL_DOWN_MASK));
+        openInPdfViewerMenuItem = addItem(
+                file,
+                Language.MENU_BAR_OPEN_IN_PDF_VIEWER,
+                new OpenInViewerAction(controller),
+                KeyStroke.getKeyStroke('E', InputEvent.CTRL_DOWN_MASK)
+        );
         add(file);
 
         final JMenu edit = new JMenu(Language.MENU_BAR_EDIT.getString());
-        addItem(edit, Language.PREFERENCES.getString(), e -> {
-                    preferencesWindow.show(controller.getMasterComponent());
-                }
+        addItem(
+                edit,
+                Language.PREFERENCES,
+                e -> preferencesWindow.show(controller.getMasterComponent())
         );
         add(edit);
 
         add(Box.createGlue());
 
         final JMenu help = new JMenu(Language.MENU_BAR_HELP.getString());
-        addItem(help, Language.MENU_BAR_ABOUT.getString(), new MessageAction(Language.MESSAGE_ABOUT.getString()));
-        addItem(help, Language.MENU_BAR_VERSION.getString(),
-                new MessageAction(ITextCoreProductData.getInstance().getVersion()));
+        addItem(
+                help,
+                Language.MENU_BAR_ABOUT,
+                new MessageAction(Language.MESSAGE_ABOUT.getString())
+        );
+        addItem(
+                help,
+                Language.MENU_BAR_VERSION,
+                new MessageAction(ITextCoreProductData.getInstance().getVersion())
+        );
         add(help);
         onDisplayedFileChanged(controller);
+
+        controller.addPdfFileOpenListener(f -> onDisplayedFileChanged(controller));
     }
 
     /**
@@ -138,18 +157,53 @@ public class RupsMenuBar extends JMenuBar implements Observer {
      */
     public void update(Observable observable, Object obj) {
         if (observable instanceof RupsController && obj instanceof RupsEvent) {
-            final RupsController controller = (RupsController) observable;
             final RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
                 case RupsEvent.ALL_FILES_CLOSED:
                 case RupsEvent.DISPLAYED_TAB_CHANGED:
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                case RupsEvent.OPEN_FILE_EVENT:
-                    onDisplayedFileChanged(controller);
+                    onDisplayedFileChanged((RupsController) observable);
                     break;
                 case RupsEvent.ROOT_NODE_CLICKED_EVENT:
                     fileOpenAction.actionPerformed(null);
             }
+        }
+    }
+
+    private void onDisplayedFileChanged(IRupsController controller) {
+        final IPdfFile currentFile = controller.getCurrentFile();
+        // "Reopen As Owner" makes sense only if the selected file was opened
+        // in a restricted mode
+        reopenAsOwnerMenuItem.setEnabled(currentFile != null && !currentFile.isOpenedAsOwner());
+        // "Close" should be enabled, when there is a "closeable" tab present
+        closeMenuItem.setEnabled(!controller.isDefaultTabShown());
+        // "Save As" should be enabled only if there is an "editable" file
+        // currently selected
+        saveAsMenuItem.setEnabled(currentFile != null && currentFile.isOpenedAsOwner());
+        // "Open In PDF Viewer" should be enabled for any opened file
+        openInPdfViewerMenuItem.setEnabled(currentFile != null);
+    }
+
+    private JMenu createOpenRecentSubMenu() {
+        final MruListHandler mruListHandler = RupsConfiguration.INSTANCE.getMruListHandler();
+        final JMenu menu = new JMenu(Language.MENU_BAR_OPEN_RECENT.getString());
+        populateOpenRecentSubMenu(menu, mruListHandler);
+        mruListHandler.addChangeListener(mru -> populateOpenRecentSubMenu(menu, mru));
+        return menu;
+    }
+
+    private void populateOpenRecentSubMenu(JMenu menu, MruListHandler mru) {
+        menu.removeAll();
+
+        // There is no reason to open an empty menu...
+        menu.setEnabled(!mru.isEmpty());
+        for (int i = mru.size() - 1; i >= 0; --i) {
+            final File mruElement = mru.peek(i);
+            addItem(menu, mruElement.getAbsolutePath(), e -> controller.openNewFile(mruElement));
+        }
+        if (!mru.isEmpty()) {
+            menu.addSeparator();
+            addItem(menu, Language.MENU_BAR_CLEAR_RECENTLY_OPENED, e -> mru.clear());
         }
     }
 
@@ -161,53 +215,25 @@ public class RupsMenuBar extends JMenuBar implements Observer {
      * @param caption the caption of the item
      * @param action  the action corresponding with the caption
      */
-    protected final void addItem(JMenu menu, String caption, ActionListener action) {
-        addItem(menu, caption, action, null);
+    private static JMenuItem addItem(JMenu menu, Language caption, ActionListener action) {
+        return addItem(menu, caption.getString(), action, null);
     }
 
-    protected final void addItem(JMenu menu, String caption, ActionListener action, KeyStroke keyStroke) {
+    private static JMenuItem addItem(JMenu menu, Language caption, ActionListener action, KeyStroke keyStroke) {
+        return addItem(menu, caption.getString(), action, keyStroke);
+    }
+
+    private static JMenuItem addItem(JMenu menu, String caption, ActionListener action) {
+        return addItem(menu, caption, action, null);
+    }
+
+    private static JMenuItem addItem(JMenu menu, String caption, ActionListener action, KeyStroke keyStroke) {
         final JMenuItem item = new JMenuItem(caption);
         item.addActionListener(action);
         if (keyStroke != null) {
             item.setAccelerator(keyStroke);
         }
         menu.add(item);
-        items.put(caption, item);
-    }
-
-    /**
-     * Enables/disables a specific menu item
-     *
-     * @param caption the caption of the item that needs to be enabled/disabled
-     * @param enabled true for enabling; false for disabling
-     */
-    protected void enableItem(String caption, boolean enabled) {
-        items.get(caption).setEnabled(enabled);
-    }
-
-    private void onDisplayedFileChanged(IRupsController controller) {
-        final IPdfFile currentFile = controller.getCurrentFile();
-        // "Reopen As Owner" makes sense only if the selected file was opened
-        // in a restricted mode
-        enableItem(
-                Language.MENU_BAR_REOPEN_AS_OWNER.getString(),
-                currentFile != null && !currentFile.isOpenedAsOwner()
-        );
-        // "Close" should be enabled, when there is a "closeable" tab present
-        enableItem(
-                Language.MENU_BAR_CLOSE.getString(),
-                !controller.isDefaultTabShown()
-        );
-        // "Save As" should be enabled only if there is an "editable" file
-        // currently selected
-        enableItem(
-                Language.MENU_BAR_SAVE_AS.getString(),
-                currentFile != null && currentFile.isOpenedAsOwner()
-        );
-        // "Open In PDF Viewer" should be enabled for any opened file
-        enableItem(
-                Language.MENU_BAR_OPEN_IN_PDF_VIEWER.getString(),
-                currentFile != null
-        );
+        return item;
     }
 }

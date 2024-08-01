@@ -44,6 +44,7 @@ package com.itextpdf.rups;
 
 import com.itextpdf.rups.conf.LookAndFeelId;
 import com.itextpdf.rups.model.LoggerHelper;
+import com.itextpdf.rups.model.MruListHandler;
 import com.itextpdf.rups.view.Language;
 
 import java.io.File;
@@ -100,13 +101,14 @@ public enum RupsConfiguration {
     private final Preferences systemPreferences;
     private final Properties defaultProperties;
     private final Properties temporaryProperties;
+    private final MruListHandler mruListHandler;
 
     RupsConfiguration() {
         this.defaultProperties = loadDefaultProperties();
         this.temporaryProperties = new Properties();
         this.systemPreferences = Preferences.userNodeForPackage(RupsConfiguration.class);
-
         initializeSystemDefaults(this.defaultProperties, this.systemPreferences);
+        this.mruListHandler = new MruListHandler(this.systemPreferences.node("mru"));
     }
 
     /**
@@ -298,6 +300,15 @@ public enum RupsConfiguration {
         properties.forEach((key, value) -> {
             this.systemPreferences.put((String) key, (String) value);
         });
+    }
+
+    /**
+     * Returns the MRU list handler for recently opened files.
+     *
+     * @return The MRU list handler for recently opened files.
+     */
+    public MruListHandler getMruListHandler() {
+        return mruListHandler;
     }
 
     private Properties loadDefaultProperties() {

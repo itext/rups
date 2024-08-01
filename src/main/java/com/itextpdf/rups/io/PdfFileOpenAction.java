@@ -40,26 +40,69 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.event;
+package com.itextpdf.rups.io;
 
+import com.itextpdf.rups.RupsConfiguration;
+import com.itextpdf.rups.io.filters.PdfFilter;
+import com.itextpdf.rups.view.Language;
 
+import java.awt.event.ActionEvent;
 import java.io.File;
+import java.util.function.Consumer;
+import javax.swing.AbstractAction;
+import javax.swing.JFileChooser;
+import java.awt.Component;
 
-public class OpenFileEvent extends RupsEvent {
+/**
+ * Action for opening PDF files in RUPS.
+ *
+ * <p>
+ * The action shows the open file dialog, which starts at location of the most
+ * recently opened file. Will send an open event to the controller.
+ * </p>
+ */
+public final class PdfFileOpenAction extends AbstractAction {
+    /**
+     * The listener, that is expecting the result of the file chooser action.
+     */
+    private final Consumer<File> listener;
+    /**
+     * A parent Component for the file chooser dialog.
+     */
+    private final Component parent;
 
-    private File file;
-
-    public OpenFileEvent(File file) {
-        this.file = file;
+    /**
+     * Creates a new open PDF file chooser action.
+     *
+     * @param listener The listener waiting for you to select file.
+     * @param parent   A parent Component for chooser dialog.
+     */
+    public PdfFileOpenAction(Consumer<File> listener, Component parent) {
+        super(Language.OPEN.getString());
+        this.listener = listener;
+        this.parent = parent;
     }
 
     @Override
-    public int getType() {
-        return OPEN_FILE_EVENT;
+    public void actionPerformed(ActionEvent evt) {
+        final JFileChooser fileChooser = new JFileChooser();
+        setCurrentDirectory(fileChooser);
+        fileChooser.setFileFilter(PdfFilter.INSTANCE);
+        if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
+            listener.accept(fileChooser.getSelectedFile());
+        }
     }
 
-    @Override
-    public Object getContent() {
-        return file;
+    private static void setCurrentDirectory(JFileChooser fileChooser) {
+        final File mostRecentOpenFile = RupsConfiguration.INSTANCE.getMruListHandler().peekMostRecent();
+        if (mostRecentOpenFile != null) {
+            final File mostRecentDir = mostRecentOpenFile.getParentFile();
+            if (mostRecentDir != null) {
+                fileChooser.setCurrentDirectory(mostRecentDir);
+                return;
+            }
+        }
+        // Fallback to home dir
+        fileChooser.setCurrentDirectory(RupsConfiguration.INSTANCE.getHomeFolder());
     }
 }

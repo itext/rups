@@ -47,6 +47,7 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.Rups;
+import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.event.CloseDocumentEvent;
 import com.itextpdf.rups.event.PostCompareEvent;
 import com.itextpdf.rups.event.RupsEvent;
@@ -74,6 +75,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.util.Observable;
 import java.util.Observer;
 import javax.swing.JOptionPane;
@@ -212,7 +214,16 @@ public class RupsInstanceController extends Observable
             }
             startObjectLoader();
             readerController.getParser().setDocument(pdfFile.getPdfDocument());
+            // At this point consider the file opened, so it can be added to MRU
+            RupsConfiguration.INSTANCE.getMruListHandler().use(file);
+        } catch (NoSuchFileException e) {
+            final String msg = String.format(Language.ERROR_CANNOT_FIND_FILE.getString(), e.getFile());
+            LoggerHelper.warn(msg, e, RupsInstanceController.class);
+            Rups.showBriefMessage(msg);
+            // Might as well remove file from MRU list, if it doesn't exist
+            RupsConfiguration.INSTANCE.getMruListHandler().remove(file);
         } catch (IOException | PdfException | com.itextpdf.io.exceptions.IOException ioe) {
+            LoggerHelper.warn(ioe.getMessage(), ioe, RupsInstanceController.class);
             Rups.showBriefMessage(ioe.getMessage());
         }
     }

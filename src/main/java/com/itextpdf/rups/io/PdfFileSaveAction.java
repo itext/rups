@@ -82,9 +82,7 @@ public final class PdfFileSaveAction extends AbstractAction {
         this.parent = parent;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public void actionPerformed(ActionEvent evt) {
         final JFileChooser fileChooser = new JFileChooser();
         fileChooser.setSelectedFile(controller.getCurrentFile().getOriginalFile());
