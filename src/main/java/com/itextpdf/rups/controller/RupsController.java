@@ -45,7 +45,6 @@ package com.itextpdf.rups.controller;
 import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.event.AllFilesClosedEvent;
 import com.itextpdf.rups.event.DisplayedTabChanged;
-import com.itextpdf.rups.event.OpenFileEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.IPdfFile;
 import com.itextpdf.rups.model.LoggerHelper;
@@ -55,9 +54,11 @@ import com.itextpdf.rups.view.RupsTabbedPane;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Observable;
 import java.util.Observer;
+import java.util.function.Consumer;
 import javax.swing.event.ChangeEvent;
 
 /**
@@ -70,6 +71,8 @@ public class RupsController extends Observable
     private final RupsTabbedPane rupsTabbedPane;
 
     private final Dimension dimension;
+
+    private final ArrayList<Consumer<File>> pdfFileOpenListeners = new ArrayList<>();
 
     /**
      * Constructs the GUI components of the RUPS application.
@@ -102,9 +105,6 @@ public class RupsController extends Observable
             switch (event.getType()) {
                 case RupsEvent.CLOSE_DOCUMENT_EVENT:
                     this.closeCurrentFile();
-                    break;
-                case RupsEvent.OPEN_FILE_EVENT:
-                    this.openNewFile((File) event.getContent());
                     break;
                 case RupsEvent.COMPARE_WITH_FILE_EVENT:
                     break;
@@ -174,7 +174,17 @@ public class RupsController extends Observable
             }
 
             this.rupsTabbedPane.openNewFile(file, this.dimension);
-            this.update(this, new OpenFileEvent(file));
+            firePdfFileOpen(file);
+        }
+    }
+
+    public void addPdfFileOpenListener(Consumer<File> listener) {
+        pdfFileOpenListeners.add(listener);
+    }
+
+    private void firePdfFileOpen(File file) {
+        for (final Consumer<File> listener: pdfFileOpenListeners) {
+            listener.accept(file);
         }
     }
 
@@ -185,7 +195,7 @@ public class RupsController extends Observable
         // the already opened file, if we fail here
 
         this.rupsTabbedPane.openNewFile(file, this.dimension, true);
-        this.update(this, new OpenFileEvent(file));
+        firePdfFileOpen(file);
     }
 
     private void closeFile(IPdfFile file) {
