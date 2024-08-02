@@ -42,9 +42,12 @@
  */
 package com.itextpdf.rups.view;
 
-import com.itextpdf.rups.event.ConsoleWriteEvent;
-import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.model.IRupsEventListener;
+import com.itextpdf.rups.model.ObjectLoader;
 
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
@@ -56,13 +59,11 @@ import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
 import java.awt.Color;
 import java.io.OutputStream;
-import java.util.Observable;
-import java.util.Observer;
 
 /**
  * A Class that is used for displaying logger messages to a {@link JTextPane}.
  */
-public class Console extends Observable implements Observer {
+public class Console implements IRupsEventListener {
 
     /**
      * Single Console instance.
@@ -78,6 +79,8 @@ public class Console extends Observable implements Observer {
      * The text area to which everything is written.
      */
     private final JTextPane textArea = new JTextPane(new DefaultStyledDocument(styleContext));
+
+    private final List<Runnable> changeListeners = new CopyOnWriteArrayList<>();
 
     private static final int MAX_TEXT_AREA_SIZE = 8192;
 
@@ -103,63 +106,63 @@ public class Console extends Observable implements Observer {
         return console;
     }
 
+    public void addChangeListener(Runnable listener) {
+        changeListeners.add(Objects.requireNonNull(listener));
+    }
+
     public void clear() {
         clearWithBuffer("");
     }
 
-    /**
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     */
-    public void update(Observable observable, Object obj) {
-        if (obj instanceof RupsEvent) {
-            final RupsEvent event = (RupsEvent) obj;
-            switch (event.getType()) {
-                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    clear();
-                    break;
-            }
-        }
+    @Override
+    public void handleCloseDocument() {
+        clear();
+    }
+
+    @Override
+    public void handleOpenDocument(ObjectLoader loader) {
+        clear();
     }
 
     private void updateTextPane(final String msg, final String type) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override public void run() {
-                try {
-                    final Document doc = textArea.getDocument();
-                    if (doc.getLength() + msg.length() > MAX_TEXT_AREA_SIZE) {
-                        Console.this.clearWithBuffer(Language.ERROR_TOO_MANY_OUTPUT.getString());
-                    }
-                    doc.insertString(doc.getLength(), msg, styleContext.getStyle(type));
-                    textArea.setCaretPosition(textArea.getDocument().getLength());
-                    Console.this.setChanged();
-                    Console.this.notifyObservers(new ConsoleWriteEvent());
-                } catch (BadLocationException ignored) {
-                    // Intentionally Empty
+        SwingUtilities.invokeLater(() -> {
+            try {
+                final Document doc = textArea.getDocument();
+                if (doc.getLength() + msg.length() > MAX_TEXT_AREA_SIZE) {
+                    Console.this.clearWithBuffer(Language.ERROR_TOO_MANY_OUTPUT.getString());
                 }
+                doc.insertString(doc.getLength(), msg, styleContext.getStyle(type));
+                textArea.setCaretPosition(textArea.getDocument().getLength());
+                fireChanged();
+            } catch (BadLocationException ignored) {
+                // Intentionally Empty
             }
         });
     }
 
     private void clearWithBuffer(final String message) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override public void run() {
-                try {
-                    final String backupString = textArea.getText(
-                            Math.max(textArea.getDocument().getLength() - BUFFER_SIZE, 0),
-                            Math.min(textArea.getDocument().getLength(), BUFFER_SIZE));
-                    textArea.setText("");
-                    final Document doc = textArea.getDocument();
-                    doc.insertString(doc.getLength(), backupString, styleContext.getStyle(ConsoleStyleContext.BACKUP));
-                    doc.insertString(doc.getLength(), message == null ? "" : message,
-                            styleContext.getStyle(ConsoleStyleContext.INFO));
-                } catch (BadLocationException any) {
-                    textArea.setText(message == null ? "" : message);
-                }
-                textArea.setCaretPosition(textArea.getDocument().getLength());
-                Console.this.setChanged();
-                Console.this.notifyObservers(new ConsoleWriteEvent());
+        SwingUtilities.invokeLater(() -> {
+            try {
+                final String backupString = textArea.getText(
+                        Math.max(textArea.getDocument().getLength() - BUFFER_SIZE, 0),
+                        Math.min(textArea.getDocument().getLength(), BUFFER_SIZE));
+                textArea.setText("");
+                final Document doc = textArea.getDocument();
+                doc.insertString(doc.getLength(), backupString, styleContext.getStyle(ConsoleStyleContext.BACKUP));
+                doc.insertString(doc.getLength(), message == null ? "" : message,
+                        styleContext.getStyle(ConsoleStyleContext.INFO));
+            } catch (BadLocationException any) {
+                textArea.setText(message == null ? "" : message);
             }
+            textArea.setCaretPosition(textArea.getDocument().getLength());
+            fireChanged();
         });
+    }
+
+    private void fireChanged() {
+        for (final Runnable listener: changeListeners) {
+            listener.run();
+        }
     }
 
     /**

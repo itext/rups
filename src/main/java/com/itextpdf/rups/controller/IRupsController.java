@@ -43,6 +43,7 @@
 package com.itextpdf.rups.controller;
 
 import com.itextpdf.rups.model.IPdfFile;
+import com.itextpdf.rups.model.IRupsEventListener;
 
 import java.awt.Component;
 import java.io.File;
@@ -51,7 +52,7 @@ import java.io.File;
  * The controller in charge of the application. To view the specific tab controllers, look at the RupsInstanceController
  * class.
  */
-public interface IRupsController {
+public interface IRupsController extends IRupsEventListener {
 
     /**
      * Returns the main component of RUPS.

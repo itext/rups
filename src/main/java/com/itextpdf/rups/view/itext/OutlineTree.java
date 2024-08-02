@@ -44,10 +44,9 @@ package com.itextpdf.rups.view.itext;
 
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
-import com.itextpdf.rups.view.IRupsEventHandler;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
 import com.itextpdf.rups.view.itext.treenodes.OutlineTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
@@ -57,19 +56,17 @@ import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
-import java.util.Observable;
-import java.util.Observer;
 
 /**
  * A JTree visualizing information about the outlines (aka bookmarks) of
  * the PDF file (if any).
  */
-public class OutlineTree extends JTree implements TreeSelectionListener, IRupsEventHandler, Observer {
+public final class OutlineTree extends JTree implements TreeSelectionListener, IRupsEventListener {
 
     /**
      * Nodes in the FormTree correspond with nodes in the main PdfTree.
      */
-    protected PdfReaderController controller;
+    private PdfReaderController controller;
 
     /**
      * Creates a new outline tree.
@@ -82,32 +79,6 @@ public class OutlineTree extends JTree implements TreeSelectionListener, IRupsEv
         setCellRenderer(new IconTreeCellRenderer());
         setModel(new DefaultTreeModel(new OutlineTreeNode()));
         addTreeSelectionListener(this);
-    }
-
-    /**
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     */
-    public void update(Observable observable, Object obj) {
-        if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
-            RupsEvent event = (RupsEvent) obj;
-            switch (event.getType()) {
-                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    ObjectLoader loader = (ObjectLoader) event.getContent();
-                    TreeNodeFactory factory = loader.getNodes();
-                    PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
-                    PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
-                    PdfObjectTreeNode outline = factory.getChildNode(catalog, PdfName.Outlines);
-                    if (outline == null) {
-                        return;
-                    }
-                    OutlineTreeNode root = new OutlineTreeNode();
-                    PdfObjectTreeNode first = factory.getChildNode(outline, PdfName.First);
-                    if (first != null) {
-                        loadOutline(factory, root, first);
-                    }
-                    setModel(new DefaultTreeModel(root));
-            }
-        }
     }
 
     /**
@@ -145,8 +116,23 @@ public class OutlineTree extends JTree implements TreeSelectionListener, IRupsEv
 
     @Override
     public void handleCloseDocument() {
-        setModel(null);
         setModel(new DefaultTreeModel(new OutlineTreeNode()));
-        repaint();
+    }
+
+    @Override
+    public void handleOpenDocument(ObjectLoader loader) {
+        TreeNodeFactory factory = loader.getNodes();
+        PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
+        PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
+        PdfObjectTreeNode outline = factory.getChildNode(catalog, PdfName.Outlines);
+        if (outline == null) {
+            return;
+        }
+        OutlineTreeNode root = new OutlineTreeNode();
+        PdfObjectTreeNode first = factory.getChildNode(outline, PdfName.First);
+        if (first != null) {
+            loadOutline(factory, root, first);
+        }
+        setModel(new DefaultTreeModel(root));
     }
 }

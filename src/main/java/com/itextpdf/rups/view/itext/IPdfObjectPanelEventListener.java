@@ -40,25 +40,49 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.event;
+package com.itextpdf.rups.view.itext;
 
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
-public class TreeNodeClickedEvent extends RupsEvent {
+/**
+ * Interface for handling events from {@link PdfObjectPanel}.
+ */
+public interface IPdfObjectPanelEventListener {
+    /**
+     * Handler for an event, when a new child was added to a PDF array.
+     *
+     * @param value  Child object, that is being added.
+     * @param parent Parent for the object in the tree.
+     * @param index  Index in the parent's tree for the object.
+     */
+    void handleArrayChildAdded(PdfObject value, PdfObjectTreeNode parent, int index);
 
-    PdfObjectTreeNode node;
+    /**
+     * Handler for an event, when an object was deleted from a PDF array.
+     *
+     * @param parent Parent for the object in the tree.
+     * @param index  Index in the parent's tree for the object.
+     */
+    void handleArrayChildDeleted(PdfObjectTreeNode parent, int index);
 
-    public TreeNodeClickedEvent(PdfObjectTreeNode node) {
-        this.node = node;
-    }
+    /**
+     * Handler for an event, when a new child was added to a PDF dictionary.
+     *
+     * @param value  Child object, that is being added.
+     * @param parent Parent for the object in the tree.
+     * @param key    Key, under which the object is added.
+     * @param index  Index in the parent's tree for the object.
+     */
+    void handleDictChildAdded(PdfObject value, PdfObjectTreeNode parent, PdfName key, int index);
 
-    @Override
-    public int getType() {
-        return TREE_NODE_CLICKED_EVENT;
-    }
 
-    @Override
-    public Object getContent() {
-        return node;
-    }
+    /**
+     * Handler for an event, when an object was deleted from a PDF dictionary.
+     *
+     * @param parent Parent for the object in the tree.
+     * @param key    Key, under which the object was located.
+     */
+    void handleDictChildDeleted(PdfObjectTreeNode parent, PdfName key);
 }

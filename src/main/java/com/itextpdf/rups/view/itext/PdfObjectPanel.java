@@ -47,14 +47,9 @@ import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfString;
-import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.event.NodeAddArrayChildEvent;
-import com.itextpdf.rups.event.NodeAddDictChildEvent;
-import com.itextpdf.rups.event.NodeDeleteArrayChildEvent;
-import com.itextpdf.rups.event.NodeDeleteDictChildEvent;
-import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfSyntaxParser;
-import com.itextpdf.rups.view.IRupsEventHandler;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
@@ -66,17 +61,20 @@ import com.itextpdf.rups.view.models.PdfArrayTableModel;
 import java.awt.CardLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableModel;
 
-public class PdfObjectPanel extends Observable implements IRupsEventHandler, Observer {
+public final class PdfObjectPanel implements IRupsEventListener {
 
     private static final String ADD_ICON = "add.png";
     private static final String CROSS_ICON = "cross.png";
@@ -94,17 +92,17 @@ public class PdfObjectPanel extends Observable implements IRupsEventHandler, Obs
     /**
      * The layout that will show the info about the PDF object that is being analyzed.
      */
-    protected CardLayout layout = new CardLayout();
+    private final CardLayout layout = new CardLayout();
 
 
     /**
      * Table with dictionary entries.
      */
-    JTable table = new JTable();
+    private final JTable table = new JTable();
     /**
      * The text pane with the info about a PDF object in the bottom panel.
      */
-    JTextArea text = new JTextArea();
+    private final JTextArea text = new JTextArea();
 
     private final JPanel panel = new JPanel();
 
@@ -112,6 +110,7 @@ public class PdfObjectPanel extends Observable implements IRupsEventHandler, Obs
 
     private boolean editable = false;
 
+    private final List<IPdfObjectPanelEventListener> eventListeners = new ArrayList<>();
 
     /**
      * Creates a PDF object panel.
@@ -134,17 +133,34 @@ public class PdfObjectPanel extends Observable implements IRupsEventHandler, Obs
         table.addMouseListener(new JTableButtonMouseListener());
     }
 
+    public void addEventListener(IPdfObjectPanelEventListener listener) {
+        eventListeners.add(Objects.requireNonNull(listener));
+    }
+
     /**
      * Clear the object panel.
      */
     public void clear() {
         target = null;
+        table.setModel(new DefaultTableModel());
         text.setText(null);
         layout.show(panel, TEXT);
     }
 
     @Override
     public void handleCloseDocument() {
+        clear();
+        setEditable(false);
+    }
+
+    @Override
+    public void handleOpenDocument(ObjectLoader loader) {
+        clear();
+        setEditable(loader.getFile().isOpenedAsOwner());
+    }
+
+    @Override
+    public void handleNewIndirectObject(PdfObject object) {
         clear();
     }
 
@@ -163,15 +179,6 @@ public class PdfObjectPanel extends Observable implements IRupsEventHandler, Obs
     }
 
     /**
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     */
-    public void update(Observable observable, Object obj) {
-        if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
-            clear();
-        }
-    }
-
-    /**
      * Shows a PdfObject as text or in a table.
      *
      * @param node   the node's content that needs to be shown.
@@ -182,6 +189,7 @@ public class PdfObjectPanel extends Observable implements IRupsEventHandler, Obs
         final PdfObject object = node.getPdfObject();
         if (object == null) {
             text.setText(null);
+            table.setModel(new DefaultTableModel());
             layout.show(panel, TEXT);
             panel.repaint();
             text.repaint();
@@ -274,12 +282,10 @@ public class PdfObjectPanel extends Observable implements IRupsEventHandler, Obs
                 case TableModelEvent.UPDATE:
                     break;
                 case TableModelEvent.DELETE:
-                    PdfObjectPanel.this.setChanged();
-                    PdfObjectPanel.this.notifyObservers(new NodeDeleteDictChildEvent(key, target));
+                    fireEvent(c -> c.handleDictChildDeleted(target, key));
                     break;
                 case TableModelEvent.INSERT:
-                    PdfObjectPanel.this.setChanged();
-                    PdfObjectPanel.this.notifyObservers(new NodeAddDictChildEvent(key, value, target, row));
+                    fireEvent(c -> c.handleDictChildAdded(value, target, key, row));
                     break;
             }
         }
@@ -300,14 +306,18 @@ public class PdfObjectPanel extends Observable implements IRupsEventHandler, Obs
                 case TableModelEvent.UPDATE:
                     break;
                 case TableModelEvent.DELETE:
-                    PdfObjectPanel.this.setChanged();
-                    PdfObjectPanel.this.notifyObservers(new NodeDeleteArrayChildEvent(row, target));
+                    fireEvent(c -> c.handleArrayChildDeleted(target, row));
                     break;
                 case TableModelEvent.INSERT:
-                    PdfObjectPanel.this.setChanged();
-                    PdfObjectPanel.this.notifyObservers(new NodeAddArrayChildEvent(value, target, row));
+                    fireEvent(c -> c.handleArrayChildAdded(value, target, row));
                     break;
             }
+        }
+    }
+
+    private void fireEvent(Consumer<IPdfObjectPanelEventListener> func) {
+        for (final IPdfObjectPanelEventListener listener: eventListeners) {
+            func.accept(listener);
         }
     }
 }

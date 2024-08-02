@@ -40,38 +40,20 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.event;
+package com.itextpdf.rups.view.itext;
 
-import com.itextpdf.kernel.pdf.PdfObject;
-import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
+import com.itextpdf.rups.model.IPdfFile;
 
-public class NodeAddArrayChildEvent extends RupsEvent {
-
-    Content content;
-
-    public NodeAddArrayChildEvent(PdfObject value, PdfObjectTreeNode parent, int index) {
-        content = new Content(value, parent, index);
-    }
-
-    @Override
-    public int getType() {
-        return NODE_ADD_ARRAY_CHILD_EVENT;
-    }
-
-    @Override
-    public Object getContent() {
-        return content;
-    }
-
-    public class Content {
-        public PdfObject value;
-        public PdfObjectTreeNode parent;
-        public int index;
-
-        public Content(PdfObject value, PdfObjectTreeNode parent, int index) {
-            this.value = value;
-            this.parent = parent;
-            this.index = index;
-        }
-    }
+/**
+ * For listening for tabs closing in {@link com.itextpdf.rups.view.RupsTabbedPane}.
+ */
+@FunctionalInterface
+public interface ITabClosedListener {
+    /**
+     * Methods, which is called, when a tab is closed in {@link com.itextpdf.rups.view.RupsTabbedPane}.
+     *
+     * @param file The file, that corresponded to the tab.
+     * @param isLastTab Whether this was the last tab or not.
+     */
+    void onTabClosed(IPdfFile file, boolean isLastTab);
 }

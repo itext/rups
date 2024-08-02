@@ -43,7 +43,6 @@
 package com.itextpdf.rups.view.itext;
 
 import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.event.PostOpenDocumentEvent;
 import com.itextpdf.rups.model.IProgressDialog;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
@@ -52,7 +51,6 @@ import com.itextpdf.test.ExtendedITextTest;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
@@ -101,7 +99,7 @@ class StructureTreeTest extends ExtendedITextTest {
         loader.doTask();
 
         // initialise the main PDF object tree view
-        controller.update(controller, new PostOpenDocumentEvent(loader));
+        controller.handleOpenDocument(loader);
 
         // set up the structure tree pane and fake-load it
         StructureTree tree = new StructureTree(controller);

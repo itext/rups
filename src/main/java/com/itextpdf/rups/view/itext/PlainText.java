@@ -42,71 +42,52 @@
  */
 package com.itextpdf.rups.view.itext;
 
-import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.IPdfFile;
 import com.itextpdf.rups.model.ObjectLoader;
-import com.itextpdf.rups.view.IRupsEventHandler;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.view.Language;
 
 import java.io.UnsupportedEncodingException;
 import javax.swing.SwingWorker;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.concurrent.ExecutionException;
 
-public class PlainText extends ReadOnlyTextArea implements IRupsEventHandler, Observer {
+public final class PlainText extends ReadOnlyTextArea implements IRupsEventListener {
 
-    protected boolean loaded = false;
+    private boolean loaded = false;
 
     private IPdfFile file;
 
     private SwingWorker<String, Object> worker;
 
-    public void update(Observable o, Object arg) {
-        if (o instanceof PdfReaderController && arg instanceof RupsEvent) {
-            final RupsEvent event = (RupsEvent) arg;
-            switch (event.getType()) {
-                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    file = ((ObjectLoader) event.getContent()).getFile();
-                    loaded = false;
-                    if (worker != null) {
-                        worker.cancel(true);
-                        worker = null;
-                    }
-                    break;
-                case RupsEvent.OPEN_PLAIN_TEXT_EVENT:
-                    if (file == null || loaded) {
-                        break;
-                    }
-                    loaded = true;
-                    setText(Language.LOADING.getString());
-                    worker = new SwingWorker<String, Object>() {
-                        @Override
-                        protected String doInBackground() {
-                            return getFileContentAsString(file);
-                        }
-
-                        @Override
-                        protected void done() {
-                            if (!isCancelled()) {
-                                String text;
-                                try {
-                                    text = get();
-                                } catch (InterruptedException any) {
-                                    text = Language.ERROR_WHILE_LOADING_TEXT.getString();
-                                    Thread.currentThread().interrupt();
-                                } catch (ExecutionException any) {
-                                    text = Language.ERROR_WHILE_LOADING_TEXT.getString();
-                                }
-                                setText(text);
-                            }
-                        }
-                    };
-                    worker.execute();
-                    break;
-            }
+    public void openPlainText() {
+        if (file == null || loaded) {
+            return;
         }
+        loaded = true;
+        setText(Language.LOADING.getString());
+        worker = new SwingWorker<>() {
+            @Override
+            protected String doInBackground() {
+                return getFileContentAsString(file);
+            }
+
+            @Override
+            protected void done() {
+                if (!isCancelled()) {
+                    String text;
+                    try {
+                        text = get();
+                    } catch (InterruptedException any) {
+                        text = Language.ERROR_WHILE_LOADING_TEXT.getString();
+                        Thread.currentThread().interrupt();
+                    } catch (ExecutionException any) {
+                        text = Language.ERROR_WHILE_LOADING_TEXT.getString();
+                    }
+                    setText(text);
+                }
+            }
+        };
+        worker.execute();
     }
 
     private static String getFileContentAsString(IPdfFile file) {
@@ -126,5 +107,15 @@ public class PlainText extends ReadOnlyTextArea implements IRupsEventHandler, Ob
             worker = null;
         }
         loaded = false;
+    }
+
+    @Override
+    public void handleOpenDocument(ObjectLoader loader) {
+        file = loader.getFile();
+        loaded = false;
+        if (worker != null) {
+            worker.cancel(true);
+            worker = null;
+        }
     }
 }
