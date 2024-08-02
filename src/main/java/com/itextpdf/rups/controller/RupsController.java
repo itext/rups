@@ -42,12 +42,12 @@
  */
 package com.itextpdf.rups.controller;
 
+import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.rups.RupsConfiguration;
-import com.itextpdf.rups.event.AllFilesClosedEvent;
-import com.itextpdf.rups.event.DisplayedTabChanged;
-import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.IPdfFile;
 import com.itextpdf.rups.model.LoggerHelper;
+import com.itextpdf.rups.model.ObjectLoader;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.RupsTabbedPane;
 
@@ -55,9 +55,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.function.Consumer;
 import javax.swing.event.ChangeEvent;
 
@@ -65,14 +64,14 @@ import javax.swing.event.ChangeEvent;
  * This class controls all the GUI components that are shown in
  * the RUPS application: the menu bar, the panels,...
  */
-public class RupsController extends Observable
-        implements Observer, IRupsController {
+public class RupsController implements IRupsController {
 
     private final RupsTabbedPane rupsTabbedPane;
 
     private final Dimension dimension;
 
-    private final ArrayList<Consumer<File>> pdfFileOpenListeners = new ArrayList<>();
+    private final List<Consumer<File>> pdfFileOpenListeners = new ArrayList<>();
+    private final List<IRupsEventListener> rupsEventListeners = new ArrayList<>();
 
     /**
      * Constructs the GUI components of the RUPS application.
@@ -99,23 +98,28 @@ public class RupsController extends Observable
     }
 
     @Override
-    public final void update(Observable o, Object arg) {
-        //Events that have come from non observable classes: ObjectLoader and FileChooserAction
-        if (o == null && arg instanceof RupsEvent) {
-            final RupsEvent event = (RupsEvent) arg;
-            switch (event.getType()) {
-                case RupsEvent.COMPARE_WITH_FILE_EVENT:
-                    break;
-                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                default:
-                    setChanged();
-                    super.notifyObservers(event);
-                    break;
-            }
-        } else {
-            setChanged();
-            super.notifyObservers(arg);
-        }
+    public void handleCloseDocument() {
+        fireRupsEvent(IRupsEventListener::handleCloseDocument);
+    }
+
+    @Override
+    public void handleOpenDocument(ObjectLoader loader) {
+        fireRupsEvent(c -> c.handleOpenDocument(loader));
+    }
+
+    @Override
+    public void handleAllFilesClosed() {
+        fireRupsEvent(IRupsEventListener::handleAllFilesClosed);
+    }
+
+    @Override
+    public void handleDisplayedTabChanged(IPdfFile file) {
+        fireRupsEvent(c -> c.handleDisplayedTabChanged(file));
+    }
+
+    @Override
+    public void handleNewIndirectObject(PdfObject object) {
+        fireRupsEvent(c -> c.handleNewIndirectObject(object));
     }
 
     @Override
@@ -173,13 +177,27 @@ public class RupsController extends Observable
         }
     }
 
+    public void createNewIndirectObject() {
+        // TODO: This functionality was removed at some point, so this is just a noop placeholder
+    }
+
     public void addPdfFileOpenListener(Consumer<File> listener) {
-        pdfFileOpenListeners.add(listener);
+        pdfFileOpenListeners.add(Objects.requireNonNull(listener));
     }
 
     private void firePdfFileOpen(File file) {
         for (final Consumer<File> listener: pdfFileOpenListeners) {
             listener.accept(file);
+        }
+    }
+
+    public void addRupsEventListener(IRupsEventListener listener) {
+        rupsEventListeners.add(Objects.requireNonNull(listener));
+    }
+
+    private void fireRupsEvent(Consumer<IRupsEventListener> func) {
+        for (final IRupsEventListener listener: rupsEventListeners) {
+            func.accept(listener);
         }
     }
 
@@ -198,13 +216,12 @@ public class RupsController extends Observable
     }
 
     private void onTabChanged(ChangeEvent e) {
-        setChanged();
-        notifyObservers(new DisplayedTabChanged(getCurrentFile()));
+        fireRupsEvent(c -> c.handleDisplayedTabChanged(getCurrentFile()));
     }
 
     private void onTabClosed(IPdfFile file, boolean isLastTab) {
         if (isLastTab) {
-            this.update(this, new AllFilesClosedEvent());
+            fireRupsEvent(IRupsEventListener::handleAllFilesClosed);
         }
     }
 }

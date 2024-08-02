@@ -103,9 +103,7 @@ public final class MruListHandler {
      * @param listener Listener to add.
      */
     public void addChangeListener(Consumer<MruListHandler> listener) {
-        Objects.requireNonNull(listener);
-
-        changeListeners.add(listener);
+        changeListeners.add(Objects.requireNonNull(listener));
     }
 
     /**

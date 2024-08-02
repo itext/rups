@@ -44,7 +44,6 @@ package com.itextpdf.rups.view;
 
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.rups.controller.RupsController;
-import com.itextpdf.rups.event.NewIndirectObjectEvent;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 
 import javax.swing.AbstractAction;
@@ -202,7 +201,7 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            controller.update(null, new NewIndirectObjectEvent());
+            this.controller.createNewIndirectObject();
         }
     }
 }

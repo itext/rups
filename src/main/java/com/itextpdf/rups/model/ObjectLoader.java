@@ -42,10 +42,8 @@
  */
 package com.itextpdf.rups.model;
 
-import com.itextpdf.rups.event.PostOpenDocumentEvent;
 import com.itextpdf.rups.view.Language;
 
-import java.util.Observer;
 import javax.swing.SwingUtilities;
 
 /**
@@ -55,7 +53,7 @@ public class ObjectLoader extends BackgroundTask {
     /**
      * This is the object that wait for task to complete.
      */
-    protected Observer observer;
+    protected IRupsEventListener eventListener;
     /**
      * RUPS's PdfFile object.
      */
@@ -80,11 +78,11 @@ public class ObjectLoader extends BackgroundTask {
      *
      * @param loaderName the loader name
      * @param progress   the progress dialog
-     * @param observer   the object that will forward the changes.
+     * @param eventListener   the object that will forward the changes.
      * @param file       the PdfFile from which the objects will be read.
      */
-    public ObjectLoader(Observer observer, IPdfFile file, String loaderName, IProgressDialog progress) {
-        this.observer = observer;
+    public ObjectLoader(IRupsEventListener eventListener, IPdfFile file, String loaderName, IProgressDialog progress) {
+        this.eventListener = eventListener;
         this.file = file;
         this.loaderName = loaderName;
         this.progress = progress;
@@ -149,7 +147,7 @@ public class ObjectLoader extends BackgroundTask {
     @Override
     public void finished() {
         try {
-            observer.update(null, new PostOpenDocumentEvent(this));
+            eventListener.handleOpenDocument(this);
         } catch (Exception ex) {
             progress.showErrorDialog(ex);
             LoggerHelper.error(ex.getLocalizedMessage(), ex, getClass());

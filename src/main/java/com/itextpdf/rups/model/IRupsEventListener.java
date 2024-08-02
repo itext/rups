@@ -40,41 +40,68 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.event;
+package com.itextpdf.rups.model;
 
-import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
-public class NodeAddDictChildEvent extends RupsEvent {
-
-    Content content;
-
-    public NodeAddDictChildEvent(PdfName key, PdfObject value, PdfObjectTreeNode parent, int index) {
-        content = new Content(key, value, parent, index);
+/**
+ * Interface for handling global RUPS events.
+ */
+public interface IRupsEventListener {
+    /**
+     * Handler for a "Close Document" event. This is fired <i>after</i> a
+     * document was closed.
+     */
+    default void handleCloseDocument() {
     }
 
-    @Override
-    public int getType() {
-        return NODE_ADD_DICT_CHILD_EVENT;
+    /**
+     * Handler for "Open Document" event. This is fired <i>after</i> a
+     * document was opened.
+     *
+     * @param loader Object loader, which loaded the document.
+     */
+    default void handleOpenDocument(ObjectLoader loader) {
     }
 
-    @Override
-    public Object getContent() {
-        return content;
+    /**
+     * Handler for "New Indirect Object" event. This is fired <i>after</i> an
+     * object was created.
+     *
+     * @param object Ned indirect object, which was created.
+     */
+    default void handleNewIndirectObject(PdfObject object) {
     }
 
-    public class Content {
-        public PdfName key;
-        public PdfObject value;
-        public PdfObjectTreeNode parent;
-        public int index;
+    /**
+     * Handler for "All Files Closed" event.
+     */
+    default void handleAllFilesClosed() {
+    }
 
-        public Content(PdfName key, PdfObject value, PdfObjectTreeNode parent, int index) {
-            this.key = key;
-            this.value = value;
-            this.parent = parent;
-            this.index = index;
-        }
+    /**
+     * Handler for "Displayed Tab Changed" event.
+     *
+     * @param file PDF file, which is now displayed.
+     */
+    default void handleDisplayedTabChanged(IPdfFile file) {
+    }
+
+    /**
+     * Handler for the "Compare" event.
+     *
+     * @param result Comparison result.
+     */
+    default void handleCompare(CompareTool.CompareResult result) {
+    }
+
+    /**
+     * Handler for an event of clicking a node in the PDF node tree.
+     *
+     * @param node Clicked node in the tree.
+     */
+    default void handlePdfTreeNodeClicked(PdfObjectTreeNode node) {
     }
 }

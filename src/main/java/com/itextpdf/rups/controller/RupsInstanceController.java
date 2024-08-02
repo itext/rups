@@ -48,15 +48,13 @@ import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.Rups;
 import com.itextpdf.rups.RupsConfiguration;
-import com.itextpdf.rups.event.PostCompareEvent;
-import com.itextpdf.rups.event.RupsEvent;
-import com.itextpdf.rups.event.TreeNodeClickedEvent;
 import com.itextpdf.rups.model.IPdfFile;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.model.ProgressDialog;
 import com.itextpdf.rups.view.Console;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.contextmenu.ConsoleContextMenu;
@@ -75,8 +73,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.function.Consumer;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -97,8 +94,7 @@ import javax.swing.event.TreeSelectionListener;
  * instance. Which in turn is controlled by a {@link com.itextpdf.rups.controller.RupsController RupsController}
  * instance.
  */
-public class RupsInstanceController extends Observable
-        implements TreeSelectionListener, PageSelectionListener, Observer {
+public class RupsInstanceController implements TreeSelectionListener, PageSelectionListener, IRupsEventListener {
 
     private final JPanel ownerPanel;
 
@@ -134,10 +130,7 @@ public class RupsInstanceController extends Observable
         // creating components and controllers
         this.ownerPanel = owner;
         final Console console = Console.getInstance();
-        addObserver(console);
-        console.addObserver(this);
         readerController = new PdfReaderController(this, this);
-        addObserver(readerController);
 
         // creating the master component
         masterComponent = new JSplitPane();
@@ -171,27 +164,15 @@ public class RupsInstanceController extends Observable
         info.add(editorPane, JSplitPane.RIGHT);
 
         ownerPanel.add(masterComponent, BorderLayout.CENTER);
+        // FIXME: Since console is global, this, most likely, causes a
+        //        reference leak, as all created controllers have a reference
+        //        from singleton.
+        console.addChangeListener(this::onConsoleChange);
     }
 
-    public final void update(Observable o, Object arg) {
-        //Events that have come from non observable classes: ObjectLoader and FileChooserAction
-        if (o == null && arg instanceof RupsEvent) {
-            final RupsEvent event = (RupsEvent) arg;
-            switch (event.getType()) {
-                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    setChanged();
-                    super.notifyObservers(event);
-                    break;
-            }
-        }
-        //Events from observable classes
-        if (o != null && arg instanceof RupsEvent) {
-            final RupsEvent event = (RupsEvent) arg;
-            if (RupsEvent.CONSOLE_WRITE_EVENT == event.getType()) {
-                readerController.getEditorTabs()
-                        .setSelectedIndex(readerController.getEditorTabs().getComponentCount() - 1);
-            }
-        }
+    @Override
+    public void handleOpenDocument(ObjectLoader loader) {
+        forAllComponents(c -> c.handleOpenDocument(loader));
     }
 
     /**
@@ -282,9 +263,7 @@ public class RupsInstanceController extends Observable
             docToClose = pdfFile.getPdfDocument();
         }
         pdfFile = null;
-        setChanged();
-        Console.getInstance().clear();
-        readerController.reset();
+        forAllComponents(IRupsEventListener::handleCloseDocument);
         if (docToClose != null) {
             docToClose.close();
         }
@@ -334,7 +313,7 @@ public class RupsInstanceController extends Observable
      * @param compareResult the compare result
      */
     public void highlightChanges(CompareTool.CompareResult compareResult) {
-        readerController.update(this, new PostCompareEvent(compareResult));
+        readerController.handleCompare(compareResult);
         if (compareResult != null) {
             if (compareResult.isOk()) {
                 LoggerHelper.info(Language.COMPARE_EQUAL.getString(), getClass());
@@ -347,11 +326,7 @@ public class RupsInstanceController extends Observable
     private void startObjectLoader() {
         final ProgressDialog dialog =
                 new ProgressDialog(this.ownerPanel, Language.PDF_READING.getString(), null);
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                dialog.setVisible(true);
-            }
-        });
+        SwingUtilities.invokeLater(() -> dialog.setVisible(true));
         loader = new ObjectLoader(
                 this, pdfFile, pdfFile.getOriginalFile().getName(), dialog
         );
@@ -379,7 +354,7 @@ public class RupsInstanceController extends Observable
             return;
         }
         if (selectedNode instanceof PdfObjectTreeNode) {
-            readerController.update(this, new TreeNodeClickedEvent((PdfObjectTreeNode) selectedNode));
+            readerController.handlePdfTreeNodeClicked((PdfObjectTreeNode) selectedNode);
         }
     }
 
@@ -400,4 +375,13 @@ public class RupsInstanceController extends Observable
         return pdfFile;
     }
 
+    private void onConsoleChange() {
+        final JTabbedPane editorTabs = readerController.getEditorTabs();
+        editorTabs.setSelectedIndex(editorTabs.getComponentCount() - 1);
+    }
+
+    private void forAllComponents(Consumer<IRupsEventListener> func) {
+        func.accept(Console.getInstance());
+        func.accept(readerController);
+    }
 }

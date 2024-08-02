@@ -44,12 +44,11 @@ package com.itextpdf.rups.view.itext;
 
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.model.XfaFile;
-import com.itextpdf.rups.view.IRupsEventHandler;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
 import com.itextpdf.rups.view.itext.treenodes.FormTreeNode;
@@ -65,33 +64,31 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.Observable;
-import java.util.Observer;
 
 /**
  * A JTree visualizing information about the Interactive Form of the
  * PDF file (if any). Normally shows a tree view of the field hierarchy
  * and individual XDP packets.
  */
-public class FormTree extends JTree implements TreeSelectionListener, IRupsEventHandler, Observer {
+public final class FormTree extends JTree implements TreeSelectionListener, IRupsEventListener {
 
     /**
      * Nodes in the FormTree correspond with nodes in the main PdfTree.
      */
-    protected PdfReaderController controller;
+    private PdfReaderController controller;
 
     /**
      * If the form is an XFA form, the XML file is stored in this object.
      */
-    protected XfaFile xfaFile;
+    private XfaFile xfaFile;
     /**
      * Treeview of the XFA file.
      */
-    protected XfaTree xfaTree;
+    private XfaTree xfaTree;
     /**
      * Textview of the XFA file.
      */
-    protected XfaTextArea xfaTextArea;
+    private XfaTextArea xfaTextArea;
 
     /**
      * Creates a new FormTree.
@@ -107,54 +104,6 @@ public class FormTree extends JTree implements TreeSelectionListener, IRupsEvent
         xfaTree = new XfaTree();
         xfaTree.clear();
         xfaTextArea = new XfaTextArea();
-    }
-
-    /**
-     * Loads the fields of a PDF document into the FormTree.
-     *
-     * @param observable the observable object
-     * @param obj        the object
-     */
-    public void update(Observable observable, Object obj) {
-        if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
-            final RupsEvent event = (RupsEvent) obj;
-            switch (event.getType()) {
-                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    final ObjectLoader loader = (ObjectLoader) event.getContent();
-                    final TreeNodeFactory factory = loader.getNodes();
-                    final PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
-                    final PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
-                    final PdfObjectTreeNode form = factory.getChildNode(catalog, PdfName.AcroForm);
-                    if (form == null) {
-                        return;
-                    }
-                    final PdfObjectTreeNode fields = factory.getChildNode(form, PdfName.Fields);
-                    final FormTreeNode root = new FormTreeNode();
-                    if (fields != null) {
-                        final FormTreeNode node = new FormTreeNode(fields);
-                        node.setUserObject(Language.FORM_FIELDS.getString());
-                        loadFields(factory, node, fields);
-                        root.add(node);
-                    }
-                    final PdfObjectTreeNode xfa = factory.getChildNode(form, PdfName.XFA);
-                    if (xfa != null) {
-                        final XfaTreeNode node = new XfaTreeNode(xfa);
-                        node.setUserObject(Language.FORM_XFA.getString());
-                        loadXfa(factory, node, xfa);
-                        root.add(node);
-                        try {
-                            xfaFile = new XfaFile(node);
-                            xfaTree.load(xfaFile);
-                            xfaTextArea.load(xfaFile);
-                        } catch (IOException e) {
-                            LoggerHelper.warn(Language.ERROR_LOADING_XFA.getString(), e, getClass());
-                        } catch (DocumentException e) {
-                            LoggerHelper.error(Language.ERROR_PARSING_XML.getString(), e, getClass());
-                        }
-                    }
-                    setModel(new DefaultTreeModel(root));
-            }
-        }
     }
 
     /**
@@ -244,10 +193,45 @@ public class FormTree extends JTree implements TreeSelectionListener, IRupsEvent
 
     @Override
     public void handleCloseDocument() {
-        setModel(new DefaultTreeModel(new FormTreeNode()));
         xfaFile = null;
         xfaTree.clear();
         xfaTextArea.clear();
-        repaint();
+        setModel(new DefaultTreeModel(new FormTreeNode()));
+    }
+
+    @Override
+    public void handleOpenDocument(ObjectLoader loader) {
+        final TreeNodeFactory factory = loader.getNodes();
+        final PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
+        final PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
+        final PdfObjectTreeNode form = factory.getChildNode(catalog, PdfName.AcroForm);
+        if (form == null) {
+            return;
+        }
+        final PdfObjectTreeNode fields = factory.getChildNode(form, PdfName.Fields);
+        final FormTreeNode root = new FormTreeNode();
+        if (fields != null) {
+            final FormTreeNode node = new FormTreeNode(fields);
+            node.setUserObject(Language.FORM_FIELDS.getString());
+            loadFields(factory, node, fields);
+            root.add(node);
+        }
+        final PdfObjectTreeNode xfa = factory.getChildNode(form, PdfName.XFA);
+        if (xfa != null) {
+            final XfaTreeNode node = new XfaTreeNode(xfa);
+            node.setUserObject(Language.FORM_XFA.getString());
+            loadXfa(factory, node, xfa);
+            root.add(node);
+            try {
+                xfaFile = new XfaFile(node);
+                xfaTree.load(xfaFile);
+                xfaTextArea.load(xfaFile);
+            } catch (IOException e) {
+                LoggerHelper.warn(Language.ERROR_LOADING_XFA.getString(), e, getClass());
+            } catch (DocumentException e) {
+                LoggerHelper.error(Language.ERROR_PARSING_XML.getString(), e, getClass());
+            }
+        }
+        setModel(new DefaultTreeModel(root));
     }
 }

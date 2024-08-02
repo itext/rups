@@ -46,26 +46,24 @@ import com.itextpdf.kernel.actions.data.ITextCoreProductData;
 import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.controller.IRupsController;
 import com.itextpdf.rups.controller.RupsController;
-import com.itextpdf.rups.event.RupsEvent;
-import com.itextpdf.rups.io.FileCloseAction;
 import com.itextpdf.rups.io.OpenInViewerAction;
 import com.itextpdf.rups.io.PdfFileOpenAction;
 import com.itextpdf.rups.io.PdfFileSaveAction;
 import com.itextpdf.rups.model.IPdfFile;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.model.MruListHandler;
+import com.itextpdf.rups.model.ObjectLoader;
 
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.io.File;
-import java.util.Observable;
-import java.util.Observer;
 import javax.swing.Box;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
 
-public final class RupsMenuBar extends JMenuBar implements Observer {
+public final class RupsMenuBar extends JMenuBar implements IRupsEventListener {
     private final IRupsController controller;
     /**
      * The action needed to open a file.
@@ -107,7 +105,7 @@ public final class RupsMenuBar extends JMenuBar implements Observer {
         closeMenuItem = addItem(
                 file,
                 Language.MENU_BAR_CLOSE,
-                new FileCloseAction(controller),
+                e -> controller.closeCurrentFile(),
                 KeyStroke.getKeyStroke('W', InputEvent.CTRL_DOWN_MASK)
         );
         saveAsMenuItem = addItem(
@@ -150,24 +148,22 @@ public final class RupsMenuBar extends JMenuBar implements Observer {
         onDisplayedFileChanged(controller);
 
         controller.addPdfFileOpenListener(f -> onDisplayedFileChanged(controller));
+        controller.addRupsEventListener(this);
     }
 
-    /**
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     */
-    public void update(Observable observable, Object obj) {
-        if (observable instanceof RupsController && obj instanceof RupsEvent) {
-            final RupsEvent event = (RupsEvent) obj;
-            switch (event.getType()) {
-                case RupsEvent.ALL_FILES_CLOSED:
-                case RupsEvent.DISPLAYED_TAB_CHANGED:
-                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    onDisplayedFileChanged((RupsController) observable);
-                    break;
-                case RupsEvent.ROOT_NODE_CLICKED_EVENT:
-                    fileOpenAction.actionPerformed(null);
-            }
-        }
+    @Override
+    public void handleAllFilesClosed() {
+        onDisplayedFileChanged(controller);
+    }
+
+    @Override
+    public void handleDisplayedTabChanged(IPdfFile file) {
+        onDisplayedFileChanged(controller);
+    }
+
+    @Override
+    public void handleOpenDocument(ObjectLoader loader) {
+        onDisplayedFileChanged(controller);
     }
 
     private void onDisplayedFileChanged(IRupsController controller) {

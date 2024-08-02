@@ -48,9 +48,9 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.LoggerHelper;
-import com.itextpdf.rups.view.IRupsEventHandler;
+import com.itextpdf.rups.model.ObjectLoader;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.contextmenu.SaveImageAction;
@@ -69,8 +69,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-import java.util.Observable;
-import java.util.Observer;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -88,7 +86,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
-public class SyntaxHighlightedStreamPane extends JScrollPane implements IRupsEventHandler, Observer {
+public final class SyntaxHighlightedStreamPane extends JScrollPane implements IRupsEventListener {
 
     private static final int MAX_NUMBER_OF_EDITS = 8192;
 
@@ -99,11 +97,11 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements IRupsEve
      */
     private final JSyntaxPane text;
 
-    protected StreamPanelContextMenu popupMenu;
+    private StreamPanelContextMenu popupMenu;
 
-    protected PdfObjectTreeNode target;
+    private PdfObjectTreeNode target;
 
-    protected UndoManager manager;
+    private UndoManager manager;
 
     //Todo: Remove that field after proper application structure will be implemented.
     private final PdfReaderController controller;
@@ -142,15 +140,6 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements IRupsEve
                 KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
         text.registerKeyboardAction(new RedoAction(manager),
                 KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
-    }
-
-    /**
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     */
-    public void update(Observable observable, Object obj) {
-        if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
-            clearPane();
-        }
     }
 
     /**
@@ -265,6 +254,13 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements IRupsEve
     @Override
     public void handleCloseDocument() {
         clearPane();
+        setEditable(false);
+    }
+
+    @Override
+    public void handleOpenDocument(ObjectLoader loader) {
+        clearPane();
+        setEditable(loader.getFile().isOpenedAsOwner());
     }
 
     private void setTextEditableRoutine(boolean editable) {

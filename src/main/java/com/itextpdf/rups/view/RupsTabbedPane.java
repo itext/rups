@@ -46,7 +46,7 @@ import com.itextpdf.rups.Rups;
 import com.itextpdf.rups.controller.RupsInstanceController;
 import com.itextpdf.rups.model.IPdfFile;
 import com.itextpdf.rups.view.itext.CloseableTabComponent;
-import com.itextpdf.rups.view.itext.TabClosedListener;
+import com.itextpdf.rups.view.itext.ITabClosedListener;
 
 import java.awt.Component;
 import java.awt.Dimension;
@@ -70,7 +70,7 @@ public class RupsTabbedPane {
 
     private final JPanel defaultTab;
     private final JTabbedPane jTabbedPane;
-    private final List<TabClosedListener> tabClosedListeners = new ArrayList<>();
+    private final List<ITabClosedListener> tabClosedListeners = new ArrayList<>();
 
     public RupsTabbedPane() {
         this.jTabbedPane = new JTabbedPane();
@@ -79,7 +79,7 @@ public class RupsTabbedPane {
         ensureDefaultTab();
     }
 
-    public void addTabClosedListener(TabClosedListener listener) {
+    public void addTabClosedListener(ITabClosedListener listener) {
         tabClosedListeners.add(Objects.requireNonNull(listener));
     }
 
@@ -215,7 +215,7 @@ public class RupsTabbedPane {
     }
 
     private void fireTabClosed(IPdfFile file) {
-        for (final TabClosedListener listener: tabClosedListeners) {
+        for (final ITabClosedListener listener: tabClosedListeners) {
             listener.onTabClosed(file, isDefaultTabShown());
         }
     }

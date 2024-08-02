@@ -45,10 +45,9 @@ package com.itextpdf.rups.view.itext;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
-import com.itextpdf.rups.view.IRupsEventHandler;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
@@ -57,18 +56,18 @@ import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 import com.itextpdf.rups.view.models.JTableAutoModel;
 import com.itextpdf.rups.view.models.JTableAutoModelInterface;
 
-import javax.swing.JTable;
-import javax.swing.event.ListSelectionEvent;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Observable;
-import java.util.Observer;
+import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 
 /**
  * A JTable listing all the pages in a PDF file: the object number of each
  * page dictionary and the page numbers (with label information if present).
  */
-public class PagesTable extends JTable implements JTableAutoModelInterface, IRupsEventHandler, Observer {
+public final class PagesTable extends JTable implements JTableAutoModelInterface, IRupsEventListener {
 
     /**
      * A list with page nodes.
@@ -78,8 +77,8 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, IRup
     /**
      * Nodes in the FormTree correspond with nodes in the main PdfTree.
      */
-    protected PdfReaderController controller;
-    protected PageSelectionListener listener;
+    private final PdfReaderController controller;
+    private final PageSelectionListener listener;
 
     /**
      * Constructs a PagesTable.
@@ -91,44 +90,6 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, IRup
         this.controller = controller;
         this.listener = listener;
         setModel(new JTableAutoModel(this));
-    }
-
-    /**
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     */
-    public void update(Observable observable, Object obj) {
-        if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
-            RupsEvent event = (RupsEvent) obj;
-            switch (event.getType()) {
-                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    ObjectLoader loader = (ObjectLoader) event.getContent();
-                    String[] pageLabels = loader.getFile().getPdfDocument().getPageLabels();
-                    int i = 0;
-                    TreeNodeFactory factory = loader.getNodes();
-                    PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
-                    PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
-                    final Enumeration<PdfPageTreeNode> p =
-                            new PageEnumerator((PdfDictionary) catalog.getPdfObject(), factory);
-                    PdfPageTreeNode child;
-                    final StringBuilder stringBuilder = new StringBuilder();
-                    while (p.hasMoreElements()) {
-                        child = p.nextElement();
-                        stringBuilder.setLength(0);
-                        i++;
-                        stringBuilder.append(String.format(Language.PAGE_NUMBER.getString(), i));
-                        if (pageLabels != null) {
-                            stringBuilder.append(" ( ");
-                            stringBuilder.append(pageLabels[i - 1]);
-                            stringBuilder.append(" )");
-                        }
-                        child.setUserObject(stringBuilder.toString());
-                        list.add(child);
-                    }
-                    break;
-            }
-            setModel(new JTableAutoModel(this));
-            repaint();
-        }
     }
 
     /**
@@ -152,7 +113,9 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, IRup
      */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        if (getRowCount() == 0) return null;
+        if (getRowCount() == 0) {
+            return null;
+        }
         switch (columnIndex) {
             case 0:
                 return String.format(Language.PAGES_TABLE_OBJECT.getString(), list.get(rowIndex).getNumber());
@@ -203,7 +166,40 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, IRup
     @Override
     public void handleCloseDocument() {
         list = new ArrayList<>();
-        setModel(new JTableAutoModel(this));
-        repaint();
+        fireTableDataChanged();
+    }
+
+    @Override
+    public void handleOpenDocument(ObjectLoader loader) {
+        String[] pageLabels = loader.getFile().getPdfDocument().getPageLabels();
+        int i = 0;
+        TreeNodeFactory factory = loader.getNodes();
+        PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
+        PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
+        final Enumeration<PdfPageTreeNode> p =
+                new PageEnumerator((PdfDictionary) catalog.getPdfObject(), factory);
+        PdfPageTreeNode child;
+        final StringBuilder stringBuilder = new StringBuilder();
+        while (p.hasMoreElements()) {
+            child = p.nextElement();
+            stringBuilder.setLength(0);
+            i++;
+            stringBuilder.append(String.format(Language.PAGE_NUMBER.getString(), i));
+            if (pageLabels != null) {
+                stringBuilder.append(" ( ");
+                stringBuilder.append(pageLabels[i - 1]);
+                stringBuilder.append(" )");
+            }
+            child.setUserObject(stringBuilder.toString());
+            list.add(child);
+        }
+        fireTableDataChanged();
+    }
+
+    private void fireTableDataChanged() {
+        final TableModel model = getModel();
+        if (model instanceof AbstractTableModel) {
+            ((AbstractTableModel) model).fireTableDataChanged();
+        }
     }
 }

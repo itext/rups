@@ -44,7 +44,9 @@ package com.itextpdf.rups.view.itext;
 
 import com.itextpdf.rups.io.listeners.PdfTreeExpansionListener;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
-import com.itextpdf.rups.view.IRupsEventHandler;
+import com.itextpdf.rups.model.ObjectLoader;
+import com.itextpdf.rups.model.IRupsEventListener;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
@@ -52,13 +54,11 @@ import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import java.util.Observable;
-import java.util.Observer;
 
 /**
  * A JTree that shows the object hierarchy of a PDF document.
  */
-public final class PdfTree extends JTree implements IRupsEventHandler, Observer {
+public final class PdfTree extends JTree implements IRupsEventListener {
 
     /**
      * The root of the PDF tree.
@@ -75,7 +75,7 @@ public final class PdfTree extends JTree implements IRupsEventHandler, Observer 
         addMouseListener(listener);
         setCellRenderer(new IconTreeCellRenderer());
         addTreeExpansionListener(new PdfTreeExpansionListener());
-        handleCloseDocument();
+        reset();
     }
 
     /**
@@ -85,19 +85,6 @@ public final class PdfTree extends JTree implements IRupsEventHandler, Observer 
      */
     public PdfTrailerTreeNode getRoot() {
         return root;
-    }
-
-    /**
-     * Updates the PdfTree when a file is closed or when a ObjectLoader
-     * has finished loading objects.
-     *
-     * @param observable the Observable class that started the update
-     * @param obj        the object that has all the updates
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     */
-    public void update(Observable observable, Object obj) {
-        setModel(new DefaultTreeModel(root));
-        repaint();
     }
 
     /**
@@ -117,8 +104,19 @@ public final class PdfTree extends JTree implements IRupsEventHandler, Observer 
 
     @Override
     public void handleCloseDocument() {
+        reset();
+    }
+
+    @Override
+    public void handleOpenDocument(ObjectLoader loader) {
+        root.setTrailer(loader.getFile().getPdfDocument().getTrailer());
+        root.setUserObject(String.format(Language.PDF_OBJECT_TREE.getString(), loader.getLoaderName()));
+        loader.getNodes().expandNode(root);
+        setModel(new DefaultTreeModel(root));
+    }
+
+    private void reset() {
         root = new PdfTrailerTreeNode();
         setModel(new DefaultTreeModel(root));
-        repaint();
     }
 }
