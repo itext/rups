@@ -48,7 +48,6 @@ import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.rups.Rups;
 import com.itextpdf.rups.RupsConfiguration;
-import com.itextpdf.rups.event.CloseDocumentEvent;
 import com.itextpdf.rups.event.PostCompareEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.event.TreeNodeClickedEvent;
@@ -284,7 +283,8 @@ public class RupsInstanceController extends Observable
         }
         pdfFile = null;
         setChanged();
-        super.notifyObservers(new CloseDocumentEvent());
+        Console.getInstance().clear();
+        readerController.reset();
         if (docToClose != null) {
             docToClose.close();
         }

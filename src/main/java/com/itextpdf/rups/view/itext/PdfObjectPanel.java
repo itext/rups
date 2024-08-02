@@ -54,6 +54,7 @@ import com.itextpdf.rups.event.NodeDeleteArrayChildEvent;
 import com.itextpdf.rups.event.NodeDeleteDictChildEvent;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.PdfSyntaxParser;
+import com.itextpdf.rups.view.IRupsEventHandler;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
@@ -75,7 +76,7 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 
-public class PdfObjectPanel extends Observable implements Observer {
+public class PdfObjectPanel extends Observable implements IRupsEventHandler, Observer {
 
     private static final String ADD_ICON = "add.png";
     private static final String CROSS_ICON = "cross.png";
@@ -140,6 +141,11 @@ public class PdfObjectPanel extends Observable implements Observer {
         target = null;
         text.setText(null);
         layout.show(panel, TEXT);
+    }
+
+    @Override
+    public void handleCloseDocument() {
+        clear();
     }
 
     public JPanel getPanel() {

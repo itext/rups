@@ -50,6 +50,7 @@ import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.LoggerHelper;
+import com.itextpdf.rups.view.IRupsEventHandler;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.contextmenu.SaveImageAction;
@@ -87,7 +88,7 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 
-public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer {
+public class SyntaxHighlightedStreamPane extends JScrollPane implements IRupsEventHandler, Observer {
 
     private static final int MAX_NUMBER_OF_EDITS = 8192;
 
@@ -259,6 +260,11 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
     public void setEditable(boolean editable) {
         this.editable = editable;
         setTextEditableRoutine(editable);
+    }
+
+    @Override
+    public void handleCloseDocument() {
+        clearPane();
     }
 
     private void setTextEditableRoutine(boolean editable) {

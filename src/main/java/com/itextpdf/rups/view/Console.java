@@ -103,6 +103,10 @@ public class Console extends Observable implements Observer {
         return console;
     }
 
+    public void clear() {
+        clearWithBuffer("");
+    }
+
     /**
      * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
      */
@@ -110,9 +114,8 @@ public class Console extends Observable implements Observer {
         if (obj instanceof RupsEvent) {
             final RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
-                case RupsEvent.CLOSE_DOCUMENT_EVENT:
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    clearWithBuffer("");
+                    clear();
                     break;
             }
         }

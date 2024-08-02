@@ -45,10 +45,15 @@ package com.itextpdf.rups.view;
 import com.itextpdf.rups.Rups;
 import com.itextpdf.rups.controller.RupsInstanceController;
 import com.itextpdf.rups.model.IPdfFile;
+import com.itextpdf.rups.view.itext.CloseableTabComponent;
+import com.itextpdf.rups.view.itext.TabClosedListener;
 
 import java.awt.Component;
 import java.awt.Dimension;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -65,12 +70,17 @@ public class RupsTabbedPane {
 
     private final JPanel defaultTab;
     private final JTabbedPane jTabbedPane;
+    private final List<TabClosedListener> tabClosedListeners = new ArrayList<>();
 
     public RupsTabbedPane() {
         this.jTabbedPane = new JTabbedPane();
         this.defaultTab = new JPanel();
         this.defaultTab.add(new JLabel(Language.DEFAULT_TAB_TEXT.getString()));
-        this.jTabbedPane.addTab(Language.DEFAULT_TAB_TITLE.getString(), defaultTab);
+        ensureDefaultTab();
+    }
+
+    public void addTabClosedListener(TabClosedListener listener) {
+        tabClosedListeners.add(Objects.requireNonNull(listener));
     }
 
     public void openNewFile(File file, Dimension dimension) {
@@ -88,22 +98,20 @@ public class RupsTabbedPane {
                     new RupsInstanceController(dimension, rupsPanel);
             rupsPanel.setRupsInstanceController(rupsInstanceController);
             rupsInstanceController.loadFile(file, requireEditable);
-            this.jTabbedPane.addTab(file.getName(), null, rupsPanel);
+            addTab(file.getName(), rupsPanel);
             this.jTabbedPane.setSelectedComponent(rupsPanel);
             showReadOnlyWarning();
         }
     }
 
     public boolean closeCurrentFile() {
-        boolean isLastTab = this.jTabbedPane.getTabCount() == 1;
-
-        this.jTabbedPane.removeTabAt(this.jTabbedPane.getSelectedIndex());
-
-        if (this.jTabbedPane.getTabCount() == 0) {
-            this.jTabbedPane.addTab(Language.DEFAULT_TAB_TITLE.getString(), this.defaultTab);
+        final Component comp = this.jTabbedPane.getSelectedComponent();
+        if (comp instanceof RupsPanel) {
+            this.jTabbedPane.removeTabAt(this.jTabbedPane.getSelectedIndex());
+            ensureDefaultTab();
+            fireTabClosed(((RupsPanel) comp).getPdfFile());
         }
-
-        return isLastTab;
+        return isDefaultTabShown();
     }
 
     public void closeFile(IPdfFile file) {
@@ -111,17 +119,27 @@ public class RupsTabbedPane {
             final Component comp = this.jTabbedPane.getComponentAt(i);
             if ((comp instanceof RupsPanel) && ((RupsPanel) comp).getPdfFile() == file) {
                 this.jTabbedPane.removeTabAt(i);
+                ensureDefaultTab();
+                fireTabClosed(file);
                 return;
             }
         }
     }
 
-    public IPdfFile getCurrentFile() {
-        final Component currentComponent = this.jTabbedPane.getSelectedComponent();
-        if (currentComponent instanceof RupsPanel) {
-            return ((RupsPanel) currentComponent).getPdfFile();
+    public IPdfFile getFile(int index) {
+        final Component component = this.jTabbedPane.getComponentAt(index);
+        if (component instanceof RupsPanel) {
+            return ((RupsPanel) component).getPdfFile();
         }
         return null;
+    }
+
+    public IPdfFile getCurrentFile() {
+        final int idx = this.jTabbedPane.getSelectedIndex();
+        if (idx < 0) {
+            return null;
+        }
+        return getFile(idx);
     }
 
     public void saveCurrentFile(File file) {
@@ -148,7 +166,7 @@ public class RupsTabbedPane {
         for (int tabIndex = 0; tabIndex < this.jTabbedPane.getTabCount(); tabIndex++) {
             final Component component = this.jTabbedPane.getComponentAt(tabIndex);
 
-            if ( component instanceof RupsPanel ) {
+            if (component instanceof RupsPanel) {
                 final RupsPanel rupsPanel = (RupsPanel) component;
                 final IPdfFile pdfFile = rupsPanel.getPdfFile();
                 if (pdfFile != null && pdfFile.getOriginalFile().equals(file)) {
@@ -168,6 +186,37 @@ public class RupsTabbedPane {
         final IPdfFile currentFile = getCurrentFile();
         if (currentFile != null && !currentFile.isOpenedAsOwner()) {
             Rups.showBriefMessage(Language.WARNING_OPENED_IN_READ_ONLY_MODE.getString());
+        }
+    }
+
+    private void addTab(String title, Component component) {
+        final int index = this.jTabbedPane.getTabCount();
+        this.jTabbedPane.addTab(title, component);
+        final CloseableTabComponent tabComponent = new CloseableTabComponent(this.jTabbedPane);
+        tabComponent.addCloseButtonListener(this::onTabCloseButtonClicked);
+        this.jTabbedPane.setTabComponentAt(index, tabComponent);
+    }
+
+    private void onTabCloseButtonClicked(int i) {
+        final IPdfFile file = getFile(i);
+        this.jTabbedPane.removeTabAt(i);
+        ensureDefaultTab();
+        if (file != null) {
+            fireTabClosed(file);
+        }
+    }
+
+    private void ensureDefaultTab() {
+        if (this.jTabbedPane.getTabCount() == 0) {
+            // We don't call addTab class method for the default tab, as you
+            // cannot close it, so there is no need for a close button.
+            this.jTabbedPane.addTab(Language.DEFAULT_TAB_TITLE.getString(), this.defaultTab);
+        }
+    }
+
+    private void fireTabClosed(IPdfFile file) {
+        for (final TabClosedListener listener: tabClosedListeners) {
+            listener.onTabClosed(file, isDefaultTabShown());
         }
     }
 }

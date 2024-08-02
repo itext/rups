@@ -46,6 +46,7 @@ import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.IPdfFile;
 import com.itextpdf.rups.model.ObjectLoader;
+import com.itextpdf.rups.view.IRupsEventHandler;
 import com.itextpdf.rups.view.Language;
 
 import java.io.UnsupportedEncodingException;
@@ -54,7 +55,7 @@ import java.util.Observable;
 import java.util.Observer;
 import java.util.concurrent.ExecutionException;
 
-public class PlainText extends ReadOnlyTextArea implements Observer {
+public class PlainText extends ReadOnlyTextArea implements IRupsEventHandler, Observer {
 
     protected boolean loaded = false;
 
@@ -66,15 +67,6 @@ public class PlainText extends ReadOnlyTextArea implements Observer {
         if (o instanceof PdfReaderController && arg instanceof RupsEvent) {
             final RupsEvent event = (RupsEvent) arg;
             switch (event.getType()) {
-                case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    file = null;
-                    setText("");
-                    if (worker != null) {
-                        worker.cancel(true);
-                        worker = null;
-                    }
-                    loaded = false;
-                    break;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
                     file = ((ObjectLoader) event.getContent()).getFile();
                     loaded = false;
@@ -123,5 +115,16 @@ public class PlainText extends ReadOnlyTextArea implements Observer {
         } catch (UnsupportedEncodingException e) {
             return Language.ERROR_WRONG_ENCODING.getString();
         }
+    }
+
+    @Override
+    public void handleCloseDocument() {
+        file = null;
+        setText("");
+        if (worker != null) {
+            worker.cancel(true);
+            worker = null;
+        }
+        loaded = false;
     }
 }

@@ -66,6 +66,7 @@ import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.DebugView;
+import com.itextpdf.rups.view.IRupsEventHandler;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu;
@@ -88,8 +89,8 @@ import java.awt.event.KeyListener;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.Stack;
+import java.util.function.Consumer;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
@@ -295,11 +296,6 @@ public class PdfReaderController extends Observable implements Observer {
         if (observable != null && obj instanceof RupsEvent) {
             RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
-                case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    nodes = null;
-                    setChanged();
-                    super.notifyObservers(event);
-                    break;
                 case RupsEvent.COMPARE_POST_EVENT:
                     highlightChanges((CompareTool.CompareResult) event.getContent());
                     pdfTree.repaint();
@@ -493,5 +489,23 @@ public class PdfReaderController extends Observable implements Observer {
         nodes.expandNode(child);
         ((DefaultTreeModel) pdfTree.getModel()).reload(parent);
         return index;
+    }
+
+    public void reset() {
+        nodes = null;
+        setChanged();
+        forAllComponents(IRupsEventHandler::handleCloseDocument);
+    }
+
+    private void forAllComponents(Consumer<IRupsEventHandler> func) {
+        func.accept(pdfTree);
+        func.accept(pages);
+        func.accept(outlines);
+        func.accept(structure);
+        func.accept(form);
+        func.accept(xref);
+        func.accept(text);
+        func.accept(objectPanel);
+        func.accept(streamPane);
     }
 }
