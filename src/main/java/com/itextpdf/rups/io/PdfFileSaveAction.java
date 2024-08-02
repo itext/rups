@@ -45,11 +45,10 @@ package com.itextpdf.rups.io;
 import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.controller.IRupsController;
 import com.itextpdf.rups.io.filters.PdfFilter;
-import com.itextpdf.rups.view.Language;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import javax.swing.AbstractAction;
+import java.awt.event.ActionListener;
 import javax.swing.JFileChooser;
 
 /**
@@ -60,7 +59,7 @@ import javax.swing.JFileChooser;
  * location with the same name. Will send a save event to the controller.
  * </p>
  */
-public final class PdfFileSaveAction extends AbstractAction {
+public final class PdfFileSaveAction implements ActionListener {
     /**
      * The controller, that is expecting the result of the file chooser action.
      */
@@ -77,7 +76,6 @@ public final class PdfFileSaveAction extends AbstractAction {
      * @param parent     A parent Component for chooser dialog.
      */
     public PdfFileSaveAction(IRupsController controller, Component parent) {
-        super(Language.MENU_BAR_SAVE_AS.getString());
         this.controller = controller;
         this.parent = parent;
     }

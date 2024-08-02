@@ -44,12 +44,11 @@ package com.itextpdf.rups.io;
 
 import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.io.filters.PdfFilter;
-import com.itextpdf.rups.view.Language;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.function.Consumer;
-import javax.swing.AbstractAction;
 import javax.swing.JFileChooser;
 import java.awt.Component;
 
@@ -61,7 +60,7 @@ import java.awt.Component;
  * recently opened file. Will send an open event to the controller.
  * </p>
  */
-public final class PdfFileOpenAction extends AbstractAction {
+public final class PdfFileOpenAction implements ActionListener {
     /**
      * The listener, that is expecting the result of the file chooser action.
      */
@@ -78,7 +77,6 @@ public final class PdfFileOpenAction extends AbstractAction {
      * @param parent   A parent Component for chooser dialog.
      */
     public PdfFileOpenAction(Consumer<File> listener, Component parent) {
-        super(Language.OPEN.getString());
         this.listener = listener;
         this.parent = parent;
     }

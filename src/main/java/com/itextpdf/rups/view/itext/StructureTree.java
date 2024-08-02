@@ -87,7 +87,7 @@ public final class StructureTree extends JTree implements TreeSelectionListener,
      */
     private final PdfReaderController controller;
 
-    private ObjectLoader loader;
+    private transient ObjectLoader loader = null;
 
     private boolean loaded = false;
 
