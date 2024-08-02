@@ -55,9 +55,13 @@ public final class PlainText extends ReadOnlyTextArea implements IRupsEventListe
 
     private boolean loaded = false;
 
-    private IPdfFile file;
+    private IPdfFile file = null;
 
-    private SwingWorker<String, Object> worker;
+    private SwingWorker<String, Object> worker = null;
+
+    public PlainText() {
+        // Empty
+    }
 
     public void openPlainText() {
         if (file == null || loaded) {

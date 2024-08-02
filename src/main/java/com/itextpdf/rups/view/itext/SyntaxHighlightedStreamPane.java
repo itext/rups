@@ -97,11 +97,11 @@ public final class SyntaxHighlightedStreamPane extends JScrollPane implements IR
      */
     private final JSyntaxPane text;
 
-    private StreamPanelContextMenu popupMenu;
+    private final StreamPanelContextMenu popupMenu;
 
     private PdfObjectTreeNode target;
 
-    private UndoManager manager;
+    private final UndoManager manager;
 
     //Todo: Remove that field after proper application structure will be implemented.
     private final PdfReaderController controller;

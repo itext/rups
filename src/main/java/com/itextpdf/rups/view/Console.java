@@ -63,7 +63,7 @@ import java.io.OutputStream;
 /**
  * A Class that is used for displaying logger messages to a {@link JTextPane}.
  */
-public class Console implements IRupsEventListener {
+public final class Console implements IRupsEventListener {
 
     /**
      * Single Console instance.

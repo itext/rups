@@ -80,16 +80,6 @@ public final class PdfObjectPanel implements IRupsEventListener {
     private static final String CROSS_ICON = "cross.png";
 
     /**
-     * Name of a panel in the CardLayout.
-     */
-    private static final String TABLE = Language.TABLE.getString();
-
-    /**
-     * Name of a panel in the CardLayout.
-     */
-    private static final String TEXT = Language.TEXT.getString();
-
-    /**
      * The layout that will show the info about the PDF object that is being analyzed.
      */
     private final CardLayout layout = new CardLayout();
@@ -122,13 +112,13 @@ public final class PdfObjectPanel implements IRupsEventListener {
         // dictionary / array / stream
         final JScrollPane dictScrollPane = new JScrollPane();
         dictScrollPane.setViewportView(table);
-        panel.add(dictScrollPane, TABLE);
+        panel.add(dictScrollPane);
 
         // number / string / ...
         final JScrollPane textScrollPane = new JScrollPane();
         textScrollPane.setViewportView(text);
         text.setEditable(false);
-        panel.add(textScrollPane, TEXT);
+        panel.add(textScrollPane);
 
         table.addMouseListener(new JTableButtonMouseListener());
     }
@@ -144,7 +134,7 @@ public final class PdfObjectPanel implements IRupsEventListener {
         target = null;
         table.setModel(new DefaultTableModel());
         text.setText(null);
-        layout.show(panel, TEXT);
+        layout.show(panel, Language.TEXT.getString());
     }
 
     @Override
@@ -190,7 +180,7 @@ public final class PdfObjectPanel implements IRupsEventListener {
         if (object == null) {
             text.setText(null);
             table.setModel(new DefaultTableModel());
-            layout.show(panel, TEXT);
+            layout.show(panel, Language.TEXT.getString());
             panel.repaint();
             text.repaint();
             return;
@@ -208,7 +198,7 @@ public final class PdfObjectPanel implements IRupsEventListener {
                         DictionaryTableModelButton.class,
                         new DictionaryTableModelButton(IconFetcher.getIcon(CROSS_ICON), IconFetcher.getIcon(ADD_ICON))
                 );
-                layout.show(panel, TABLE);
+                layout.show(panel, Language.TABLE.getString());
                 panel.repaint();
                 break;
             case PdfObject.ARRAY:
@@ -221,16 +211,16 @@ public final class PdfObjectPanel implements IRupsEventListener {
                         DictionaryTableModelButton.class,
                         new DictionaryTableModelButton(IconFetcher.getIcon(CROSS_ICON), IconFetcher.getIcon(ADD_ICON))
                 );
-                layout.show(panel, TABLE);
+                layout.show(panel, Language.TABLE.getString());
                 panel.repaint();
                 break;
             case PdfObject.STRING:
                 text.setText(((PdfString) object).toUnicodeString());
-                layout.show(panel, TEXT);
+                layout.show(panel, Language.TEXT.getString());
                 break;
             default:
                 text.setText(object.toString());
-                layout.show(panel, TEXT);
+                layout.show(panel, Language.TEXT.getString());
                 break;
         }
     }
@@ -241,6 +231,12 @@ public final class PdfObjectPanel implements IRupsEventListener {
             return (AbstractPdfObjectPanelTableModel) model;
         }
         return null;
+    }
+
+    private void fireEvent(Consumer<IPdfObjectPanelEventListener> func) {
+        for (final IPdfObjectPanelEventListener listener: eventListeners) {
+            func.accept(listener);
+        }
     }
 
     private class JTableButtonMouseListener extends MouseAdapter {
@@ -312,12 +308,6 @@ public final class PdfObjectPanel implements IRupsEventListener {
                     fireEvent(c -> c.handleArrayChildAdded(value, target, row));
                     break;
             }
-        }
-    }
-
-    private void fireEvent(Consumer<IPdfObjectPanelEventListener> func) {
-        for (final IPdfObjectPanelEventListener listener: eventListeners) {
-            func.accept(listener);
         }
     }
 }

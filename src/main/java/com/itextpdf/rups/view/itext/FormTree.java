@@ -75,20 +75,16 @@ public final class FormTree extends JTree implements TreeSelectionListener, IRup
     /**
      * Nodes in the FormTree correspond with nodes in the main PdfTree.
      */
-    private PdfReaderController controller;
+    private final PdfReaderController controller;
 
-    /**
-     * If the form is an XFA form, the XML file is stored in this object.
-     */
-    private XfaFile xfaFile;
     /**
      * Treeview of the XFA file.
      */
-    private XfaTree xfaTree;
+    private final XfaTree xfaTree;
     /**
      * Textview of the XFA file.
      */
-    private XfaTextArea xfaTextArea;
+    private final XfaTextArea xfaTextArea;
 
     /**
      * Creates a new FormTree.
@@ -193,7 +189,6 @@ public final class FormTree extends JTree implements TreeSelectionListener, IRup
 
     @Override
     public void handleCloseDocument() {
-        xfaFile = null;
         xfaTree.clear();
         xfaTextArea.clear();
         setModel(new DefaultTreeModel(new FormTreeNode()));
@@ -223,7 +218,7 @@ public final class FormTree extends JTree implements TreeSelectionListener, IRup
             loadXfa(factory, node, xfa);
             root.add(node);
             try {
-                xfaFile = new XfaFile(node);
+                final XfaFile xfaFile = new XfaFile(node);
                 xfaTree.load(xfaFile);
                 xfaTextArea.load(xfaFile);
             } catch (IOException e) {

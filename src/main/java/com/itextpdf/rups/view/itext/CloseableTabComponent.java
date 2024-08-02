@@ -67,6 +67,8 @@ import javax.swing.UIManager;
  * </p>
  */
 public final class CloseableTabComponent extends JPanel {
+    private static final int SEPARATOR_WIDTH = 8;
+
     private final List<IntConsumer> closeButtonListeners = new ArrayList<>();
 
     public CloseableTabComponent(JTabbedPane parent) {
@@ -88,7 +90,7 @@ public final class CloseableTabComponent extends JPanel {
 
         final JButton button = new CloseButton();
         button.addActionListener((ActionEvent e) -> {
-            final int idx = parent.indexOfTabComponent(CloseableTabComponent.this);
+            final int idx = parent.indexOfTabComponent(this);
             if (idx >= 0) {
                 for (final IntConsumer listener : closeButtonListeners) {
                     listener.accept(idx);
@@ -97,7 +99,7 @@ public final class CloseableTabComponent extends JPanel {
         });
 
         add(label);
-        add(Box.createHorizontalStrut(8));
+        add(Box.createHorizontalStrut(SEPARATOR_WIDTH));
         add(button);
     }
 

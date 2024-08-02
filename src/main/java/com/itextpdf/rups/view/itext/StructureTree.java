@@ -85,7 +85,7 @@ public final class StructureTree extends JTree implements TreeSelectionListener,
     /**
      * Nodes in the FormTree correspond with nodes in the main PdfTree.
      */
-    private PdfReaderController controller;
+    private final PdfReaderController controller;
 
     private ObjectLoader loader;
 
