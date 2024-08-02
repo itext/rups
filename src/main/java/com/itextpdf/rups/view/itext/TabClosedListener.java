@@ -40,71 +40,20 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.controller;
+package com.itextpdf.rups.view.itext;
 
-import com.itextpdf.rups.view.RupsTabbedPane;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import com.itextpdf.rups.model.IPdfFile;
 
-import java.awt.Dimension;
-import java.io.File;
-
-class RupsControllerTest {
-
-    @Test
-    void closeTest() {
-        MockRupsTabbedPane rupsTabbedPane = new MockRupsTabbedPane();
-        RupsController rupsController = new RupsController(null, rupsTabbedPane);
-
-        rupsController.closeCurrentFile();
-        Assertions.assertTrue(rupsTabbedPane.closed);
-        Assertions.assertFalse(rupsTabbedPane.opened);
-        Assertions.assertFalse(rupsTabbedPane.saved);
-    }
-
-    @Test
-    void saveTest() {
-        MockRupsTabbedPane rupsTabbedPane = new MockRupsTabbedPane();
-        RupsController rupsController = new RupsController(null, rupsTabbedPane);
-
-        rupsController.saveCurrentFile(new File(""));
-        Assertions.assertTrue(rupsTabbedPane.saved);
-        Assertions.assertFalse(rupsTabbedPane.opened);
-        Assertions.assertFalse(rupsTabbedPane.closed);
-    }
-
-    @Test
-    void openTest() {
-        MockRupsTabbedPane rupsTabbedPane = new MockRupsTabbedPane();
-        RupsController rupsController = new RupsController(null, rupsTabbedPane);
-
-        rupsController.openNewFile(new File("test.pdf"));
-        Assertions.assertTrue(rupsTabbedPane.opened);
-        Assertions.assertFalse(rupsTabbedPane.saved);
-        Assertions.assertFalse(rupsTabbedPane.closed);
-    }
-
-
-    class MockRupsTabbedPane extends RupsTabbedPane {
-        private boolean closed, saved, opened;
-        public MockRupsTabbedPane() {
-            super();
-        }
-
-        @Override
-        public boolean closeCurrentFile() {
-            closed = true;
-            return closed;
-        }
-
-        @Override
-        public void saveCurrentFile(File file) {
-            saved = true;
-        }
-
-        @Override
-        public void openNewFile(File file, Dimension dimension) {
-            opened = true;
-        }
-    }
+/**
+ * For listening for tabs closing in {@link com.itextpdf.rups.view.RupsTabbedPane}.
+ */
+@FunctionalInterface
+public interface TabClosedListener {
+    /**
+     * Methods, which is called, when a tab is closed in {@link com.itextpdf.rups.view.RupsTabbedPane}.
+     *
+     * @param file The file, that corresponded to the tab.
+     * @param isLastTab Whether this was the last tab or not.
+     */
+    void onTabClosed(IPdfFile file, boolean isLastTab);
 }

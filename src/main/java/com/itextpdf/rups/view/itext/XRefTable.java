@@ -48,6 +48,7 @@ import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.IndirectObjectFactory;
 import com.itextpdf.rups.model.ObjectLoader;
+import com.itextpdf.rups.view.IRupsEventHandler;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.models.JTableAutoModel;
@@ -62,7 +63,7 @@ import java.util.Observer;
 /**
  * A JTable that shows the indirect objects of a PDF xref table.
  */
-public class XRefTable extends JTable implements JTableAutoModelInterface, Observer {
+public class XRefTable extends JTable implements JTableAutoModelInterface, IRupsEventHandler, Observer {
 
     /**
      * The factory that can produce all the indirect objects.
@@ -91,11 +92,6 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
         if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
             final RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
-                case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    objects = null;
-                    setModel(new JTableAutoModel(this));
-                    repaint();
-                    return;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
                     final ObjectLoader loader = (ObjectLoader) event.getContent();
                     objects = loader.getObjects();
@@ -211,5 +207,12 @@ public class XRefTable extends JTable implements JTableAutoModelInterface, Obser
         if (controller != null && objects != null) {
             controller.selectNode(getObjectReferenceByRow(this.getSelectedRow()));
         }
+    }
+
+    @Override
+    public void handleCloseDocument() {
+        objects = null;
+        setModel(new JTableAutoModel(this));
+        repaint();
     }
 }

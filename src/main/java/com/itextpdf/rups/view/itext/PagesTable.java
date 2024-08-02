@@ -48,6 +48,7 @@ import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
+import com.itextpdf.rups.view.IRupsEventHandler;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
@@ -67,7 +68,7 @@ import java.util.Observer;
  * A JTable listing all the pages in a PDF file: the object number of each
  * page dictionary and the page numbers (with label information if present).
  */
-public class PagesTable extends JTable implements JTableAutoModelInterface, Observer {
+public class PagesTable extends JTable implements JTableAutoModelInterface, IRupsEventHandler, Observer {
 
     /**
      * A list with page nodes.
@@ -99,9 +100,6 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
         if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
             RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
-                case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    list = new ArrayList<>();
-                    break;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
                     ObjectLoader loader = (ObjectLoader) event.getContent();
                     String[] pageLabels = loader.getFile().getPdfDocument().getPageLabels();
@@ -200,5 +198,12 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
                 }
             }
         }
+    }
+
+    @Override
+    public void handleCloseDocument() {
+        list = new ArrayList<>();
+        setModel(new JTableAutoModel(this));
+        repaint();
     }
 }

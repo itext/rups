@@ -83,6 +83,7 @@ public class RupsController extends Observable
     public RupsController(Dimension dimension, RupsTabbedPane rupsTabbedPane) {
         this.rupsTabbedPane = rupsTabbedPane;
         this.rupsTabbedPane.addChangeListener(this::onTabChanged);
+        this.rupsTabbedPane.addTabClosedListener(this::onTabClosed);
 
         this.dimension = dimension;
     }
@@ -103,9 +104,6 @@ public class RupsController extends Observable
         if (o == null && arg instanceof RupsEvent) {
             final RupsEvent event = (RupsEvent) arg;
             switch (event.getType()) {
-                case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    this.closeCurrentFile();
-                    break;
                 case RupsEvent.COMPARE_WITH_FILE_EVENT:
                     break;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
@@ -122,10 +120,7 @@ public class RupsController extends Observable
 
     @Override
     public final void closeCurrentFile() {
-        final boolean lastOne = this.rupsTabbedPane.closeCurrentFile();
-        if (lastOne) {
-            this.update(this, new AllFilesClosedEvent());
-        }
+        this.rupsTabbedPane.closeCurrentFile();
     }
 
     /**
@@ -205,5 +200,11 @@ public class RupsController extends Observable
     private void onTabChanged(ChangeEvent e) {
         setChanged();
         notifyObservers(new DisplayedTabChanged(getCurrentFile()));
+    }
+
+    private void onTabClosed(IPdfFile file, boolean isLastTab) {
+        if (isLastTab) {
+            this.update(this, new AllFilesClosedEvent());
+        }
     }
 }

@@ -47,6 +47,7 @@ import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
+import com.itextpdf.rups.view.IRupsEventHandler;
 import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
 import com.itextpdf.rups.view.itext.treenodes.OutlineTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
@@ -63,7 +64,7 @@ import java.util.Observer;
  * A JTree visualizing information about the outlines (aka bookmarks) of
  * the PDF file (if any).
  */
-public class OutlineTree extends JTree implements TreeSelectionListener, Observer {
+public class OutlineTree extends JTree implements TreeSelectionListener, IRupsEventHandler, Observer {
 
     /**
      * Nodes in the FormTree correspond with nodes in the main PdfTree.
@@ -90,11 +91,6 @@ public class OutlineTree extends JTree implements TreeSelectionListener, Observe
         if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
             RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
-                case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    setModel(null);
-                    setModel(new DefaultTreeModel(new OutlineTreeNode()));
-                    repaint();
-                    return;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
                     ObjectLoader loader = (ObjectLoader) event.getContent();
                     TreeNodeFactory factory = loader.getNodes();
@@ -145,5 +141,12 @@ public class OutlineTree extends JTree implements TreeSelectionListener, Observe
         if (node != null) {
             controller.selectNode(node);
         }
+    }
+
+    @Override
+    public void handleCloseDocument() {
+        setModel(null);
+        setModel(new DefaultTreeModel(new OutlineTreeNode()));
+        repaint();
     }
 }

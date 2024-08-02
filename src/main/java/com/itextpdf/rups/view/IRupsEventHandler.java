@@ -40,16 +40,15 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.event;
+package com.itextpdf.rups.view;
 
-public class CloseDocumentEvent extends RupsEvent {
-    @Override
-    public int getType() {
-        return CLOSE_DOCUMENT_EVENT;
-    }
-
-    @Override
-    public Object getContent() {
-        return null;
+/**
+ * Interface for handling RUPS events.
+ */
+public interface IRupsEventHandler {
+    /**
+     * Handler for a "Close Document" event.
+     */
+    default void handleCloseDocument() {
     }
 }

@@ -51,6 +51,7 @@ import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
+import com.itextpdf.rups.view.IRupsEventHandler;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
 import com.itextpdf.rups.view.itext.contentstream.MarkedContentInfoGatherer;
@@ -78,7 +79,7 @@ import java.util.concurrent.ExecutionException;
  * A JTree visualizing information about the structure tree of
  * the PDF file (if any).
  */
-public class StructureTree extends JTree implements TreeSelectionListener, Observer {
+public class StructureTree extends JTree implements TreeSelectionListener, IRupsEventHandler, Observer {
 
     private static final String BULLET_GO_ICON = "bullet_go.png";
 
@@ -110,11 +111,6 @@ public class StructureTree extends JTree implements TreeSelectionListener, Obser
         if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
             final RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
-                case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    setLoader(null);
-                    setModel(new DefaultTreeModel(new StructureTreeNode()));
-                    repaint();
-                    break;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
                     setLoader((ObjectLoader) event.getContent());
                     break;
@@ -281,6 +277,13 @@ public class StructureTree extends JTree implements TreeSelectionListener, Obser
             worker = null;
         }
         loaded = false;
+    }
+
+    @Override
+    public void handleCloseDocument() {
+        setLoader(null);
+        setModel(new DefaultTreeModel(new StructureTreeNode()));
+        repaint();
     }
 
     private final class TreeUpdateWorker extends SwingWorker<TreeModel, Integer> {

@@ -42,12 +42,10 @@
  */
 package com.itextpdf.rups.view.itext;
 
-import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.listeners.PdfTreeExpansionListener;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
+import com.itextpdf.rups.view.IRupsEventHandler;
 import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
-import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
 import javax.swing.JTree;
@@ -60,26 +58,24 @@ import java.util.Observer;
 /**
  * A JTree that shows the object hierarchy of a PDF document.
  */
-public class PdfTree extends JTree implements Observer {
+public final class PdfTree extends JTree implements IRupsEventHandler, Observer {
 
     /**
      * The root of the PDF tree.
      */
-    protected PdfTrailerTreeNode root;
+    private PdfTrailerTreeNode root;
 
     /**
      * Constructs a PDF tree.
      */
     public PdfTree() {
         super();
-        root = new PdfTrailerTreeNode();
         final PdfTreeNavigationListener listener = new PdfTreeNavigationListener();
         addKeyListener(listener);
         addMouseListener(listener);
         setCellRenderer(new IconTreeCellRenderer());
         addTreeExpansionListener(new PdfTreeExpansionListener());
-        setModel(new DefaultTreeModel(root));
-        repaint();
+        handleCloseDocument();
     }
 
     /**
@@ -100,12 +96,6 @@ public class PdfTree extends JTree implements Observer {
      * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
      */
     public void update(Observable observable, Object obj) {
-        if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
-            final RupsEvent event = (RupsEvent) obj;
-            if (RupsEvent.CLOSE_DOCUMENT_EVENT == event.getType()) {
-                root = new PdfTrailerTreeNode();
-            }
-        }
         setModel(new DefaultTreeModel(root));
         repaint();
     }
@@ -123,5 +113,12 @@ public class PdfTree extends JTree implements Observer {
             setSelectionPath(path);
             scrollPathToVisible(path);
         }
+    }
+
+    @Override
+    public void handleCloseDocument() {
+        root = new PdfTrailerTreeNode();
+        setModel(new DefaultTreeModel(root));
+        repaint();
     }
 }

@@ -49,6 +49,7 @@ import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.model.XfaFile;
+import com.itextpdf.rups.view.IRupsEventHandler;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
 import com.itextpdf.rups.view.itext.treenodes.FormTreeNode;
@@ -72,7 +73,7 @@ import java.util.Observer;
  * PDF file (if any). Normally shows a tree view of the field hierarchy
  * and individual XDP packets.
  */
-public class FormTree extends JTree implements TreeSelectionListener, Observer {
+public class FormTree extends JTree implements TreeSelectionListener, IRupsEventHandler, Observer {
 
     /**
      * Nodes in the FormTree correspond with nodes in the main PdfTree.
@@ -118,13 +119,6 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
         if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
             final RupsEvent event = (RupsEvent) obj;
             switch (event.getType()) {
-                case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    setModel(new DefaultTreeModel(new FormTreeNode()));
-                    xfaFile = null;
-                    xfaTree.clear();
-                    xfaTextArea.clear();
-                    repaint();
-                    return;
                 case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
                     final ObjectLoader loader = (ObjectLoader) event.getContent();
                     final TreeNodeFactory factory = loader.getNodes();
@@ -246,5 +240,14 @@ public class FormTree extends JTree implements TreeSelectionListener, Observer {
         } else if (object_node.isStream()) {
             form_node.addPacket(Language.FORM_XDP.getString(), object_node);
         }
+    }
+
+    @Override
+    public void handleCloseDocument() {
+        setModel(new DefaultTreeModel(new FormTreeNode()));
+        xfaFile = null;
+        xfaTree.clear();
+        xfaTextArea.clear();
+        repaint();
     }
 }
