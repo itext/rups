@@ -66,10 +66,6 @@ import javax.swing.KeyStroke;
 public final class RupsMenuBar extends JMenuBar implements IRupsEventListener {
     private final IRupsController controller;
     /**
-     * The action needed to open a file.
-     */
-    private final PdfFileOpenAction fileOpenAction;
-    /**
      * The Preferences Window
      */
     private final PreferencesWindow preferencesWindow;
@@ -87,13 +83,11 @@ public final class RupsMenuBar extends JMenuBar implements IRupsEventListener {
 
         preferencesWindow = new PreferencesWindow();
 
-        fileOpenAction = new PdfFileOpenAction(controller::openNewFile, controller.getMasterComponent());
-
         final JMenu file = new JMenu(Language.MENU_BAR_FILE.getString());
         addItem(
                 file,
                 Language.MENU_BAR_OPEN,
-                fileOpenAction,
+                new PdfFileOpenAction(controller::openNewFile, controller.getMasterComponent()),
                 KeyStroke.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK)
         );
         file.add(createOpenRecentSubMenu());

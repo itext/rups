@@ -66,7 +66,7 @@ public final class OutlineTree extends JTree implements TreeSelectionListener, I
     /**
      * Nodes in the FormTree correspond with nodes in the main PdfTree.
      */
-    private PdfReaderController controller;
+    private final PdfReaderController controller;
 
     /**
      * Creates a new outline tree.

@@ -79,6 +79,8 @@ import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
 import java.awt.Color;
 import java.awt.event.KeyListener;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Stack;
 import java.util.function.Consumer;
 import javax.swing.JPanel;
@@ -145,7 +147,7 @@ public class PdfReaderController implements IPdfObjectPanelEventListener, IRupsE
      */
     protected PlainText text;
 
-    private final Stack<IconTreeNode> highlights = new Stack<>();
+    private final Deque<IconTreeNode> highlights = new ArrayDeque<>();
 
     private final PdfSyntaxParser parser = new PdfSyntaxParser();
 
@@ -359,7 +361,7 @@ public class PdfReaderController implements IPdfObjectPanelEventListener, IRupsE
     }
 
     protected void clearHighlights() {
-        while (!highlights.empty()) {
+        while (!highlights.isEmpty()) {
             highlights.pop().restoreDefaultTextColor();
         }
     }
