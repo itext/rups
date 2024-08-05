@@ -72,7 +72,7 @@
     <launch4j-maven-plugin.version>2.5.1</launch4j-maven-plugin.version>
 
     <!-- Build dependencies (mac) -->
-    <macosappbundler-maven-plugin.version>1.20.1</macosappbundler-maven-plugin.version>
+    <macosappbundler-maven-plugin.version>1.21.0</macosappbundler-maven-plugin.version>
 
     <!-- Application dependencies -->
     <dom4j.version>2.1.4</dom4j.version>
@@ -409,6 +409,18 @@
                 <CFBundleName>RUPS</CFBundleName>
                 <CFBundleDisplayName>RUPS</CFBundleDisplayName>
                 <CFBundleIconFile>config/logo.icns</CFBundleIconFile>
+                <CFBundleDocumentTypes>
+                  <CFBundleDocumentTypes>
+                    <CFBundleTypeName>Adobe PDF document</CFBundleTypeName>
+                    <CFBundleTypeRole>Editor</CFBundleTypeRole>
+                    <CFBundleTypeExtensions>
+                      <string>pdf</string>
+                    </CFBundleTypeExtensions>
+                    <CFBundleTypeOSTypes>
+                      <string>PDF </string>
+                    </CFBundleTypeOSTypes>
+                  </CFBundleDocumentTypes>
+                </CFBundleDocumentTypes>
                 <JVMMainClassName>com.itextpdf.rups.RupsLauncher</JVMMainClassName>
                 <JVMVersion>11+</JVMVersion>
                 <JVMOptions>

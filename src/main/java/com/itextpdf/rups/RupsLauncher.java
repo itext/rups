@@ -45,26 +45,24 @@ package com.itextpdf.rups;
 import com.itextpdf.rups.model.FilePathPreProcessor;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * iText RUPS is a tool that allows you to inspect the internal structure
  * of a PDF file.
  */
 public class RupsLauncher {
-
     /**
      * Main method. Starts the RUPS application.
      *
      * @param args no arguments needed
      */
     public static void main(String[] args) {
-        final File f;
-        if (args.length > 0) {
-            f = new File(FilePathPreProcessor.process(args[0]));
-        } else {
-            f = null;
+        final List<File> files = new ArrayList<>(args.length);
+        for (final String arg : args) {
+            files.add(new File(FilePathPreProcessor.process(arg)));
         }
-        Rups.startNewApplication(f);
+        Rups.startNewApplication(files);
     }
 }
