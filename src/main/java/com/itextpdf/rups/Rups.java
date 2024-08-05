@@ -53,15 +53,18 @@ import com.itextpdf.rups.view.RupsTabbedPane;
 import com.itextpdf.rups.view.icons.FrameIconUtil;
 
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.awt.desktop.OpenFilesEvent;
 import java.io.File;
+import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-public class Rups {
+public final class Rups {
     private Rups() {
     }
 
@@ -73,20 +76,29 @@ public class Rups {
     /**
      * Initializes the main components of the Rups application.
      *
-     * @param f a file that should be opened on launch
+     * @param files A list of files, that should be opened on launch.
      */
-    public static void startNewApplication(final File f) {
+    public static void startNewApplication(final List<File> files) {
         SwingUtilities.invokeLater(() -> {
             setLookandFeel();
             final IRupsController rupsController = initApplication(new JFrame());
-            if (f != null) {
-                loadDocumentFromFile(rupsController, f);
-            }
+            Desktop.getDesktop().setOpenFileHandler(
+                    (OpenFilesEvent e) -> loadDocumentFromFile(rupsController, e.getFiles())
+            );
+            loadDocumentFromFile(rupsController, files);
         });
     }
 
-    static void loadDocumentFromFile(IRupsController rupsController, File f) {
-        SwingUtilities.invokeLater(() -> rupsController.openNewFile(f));
+    static void loadDocumentFromFile(IRupsController rupsController, List<File> files) {
+        if (files != null) {
+            files.forEach(f -> loadDocumentFromFile(rupsController, f));
+        }
+    }
+
+    static void loadDocumentFromFile(IRupsController rupsController, File file) {
+        if (file != null) {
+            SwingUtilities.invokeLater(() -> rupsController.openNewFile(file));
+        }
     }
 
     static void setLookandFeel() {
