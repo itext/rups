@@ -72,10 +72,7 @@
     <launch4j-maven-plugin.version>2.5.1</launch4j-maven-plugin.version>
 
     <!-- Build dependencies (mac) -->
-    <appbundle-maven-plugin.version>1.2.0</appbundle-maven-plugin.version>
-    <exec-maven-plugin.version>3.3.0</exec-maven-plugin.version>
-    <plexus-archiver.version>4.10.0</plexus-archiver.version>
-    <velocity-tools.version>2.0</velocity-tools.version>
+    <macosappbundler-maven-plugin.version>1.20.1</macosappbundler-maven-plugin.version>
 
     <!-- Application dependencies -->
     <dom4j.version>2.1.4</dom4j.version>
@@ -396,31 +393,9 @@
         </resources>
         <plugins>
           <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>exec-maven-plugin</artifactId>
-            <version>${exec-maven-plugin.version}</version>
-            <executions>
-              <execution>
-                <id>Update Info.plist</id>
-                <phase>package</phase>
-                <goals>
-                  <goal>exec</goal>
-                </goals>
-                <configuration>
-                  <executable>sed</executable>
-                  <arguments>
-                    <argument>-ie</argument>
-                    <argument>s/{project.version}/${project.version}/g</argument>
-                    <argument>${project.build.outputDirectory}/Info.plist</argument>
-                  </arguments>
-                </configuration>
-              </execution>
-            </executions>
-          </plugin>
-          <plugin>
-            <groupId>sh.tak.appbundler</groupId>
-            <artifactId>appbundle-maven-plugin</artifactId>
-            <version>${appbundle-maven-plugin.version}</version>
+            <groupId>de.perdian.maven.plugins</groupId>
+            <artifactId>macosappbundler-maven-plugin</artifactId>
+            <version>${macosappbundler-maven-plugin.version}</version>
             <executions>
               <execution>
                 <phase>package</phase>
@@ -429,23 +404,19 @@
                 </goals>
               </execution>
             </executions>
-            <dependencies>
-              <dependency>
-                <groupId>org.apache.velocity</groupId>
-                <artifactId>velocity-tools</artifactId>
-                <version>${velocity-tools.version}</version>
-              </dependency>
-              <dependency>
-                <groupId>org.codehaus.plexus</groupId>
-                <artifactId>plexus-archiver</artifactId>
-                <version>${plexus-archiver.version}</version>
-              </dependency>
-            </dependencies>
             <configuration>
-              <mainClass>com.itextpdf.rups.RupsLauncher</mainClass>
-              <dictionaryFile>Info.plist</dictionaryFile>
-              <generateDiskImageFile>false</generateDiskImageFile>
-              <iconFile>logo.icns</iconFile>
+              <plist>
+                <CFBundleName>RUPS</CFBundleName>
+                <CFBundleDisplayName>RUPS</CFBundleDisplayName>
+                <CFBundleIconFile>config/logo.icns</CFBundleIconFile>
+                <JVMMainClassName>com.itextpdf.rups.RupsLauncher</JVMMainClassName>
+                <JVMVersion>11+</JVMVersion>
+                <JVMOptions>
+                  <string>-Dapple.awt.antialiasing=true</string>
+                  <string>-Dapple.awt.textantialiasing=true</string>
+                  <string>-Dapple.laf.useScreenMenuBar=true</string>
+                </JVMOptions>
+              </plist>
             </configuration>
           </plugin>
         </plugins>
