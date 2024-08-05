@@ -32,7 +32,7 @@ This should produce `Rups.exe` in your `target` folder which you can run as any 
 
 ##### Creating an application bundle (.app) on macOS
 
-Similar to Windows executable, there is a possibility to create a RUPS application bundle (`.app` application) for macOS. Again, it requires Java Runtime Environment to run. Mind that in order to build it one requires Java version prior to 10, additionally proper application bundle can only be built on macOS.
+Similar to Windows executable, there is a possibility to create a RUPS application bundle (`.app` application) for macOS. Again, it requires Java Runtime Environment to run. Proper application bundle can only be built on macOS.
 
 To create application bundle, run the following command:
 
@@ -40,7 +40,7 @@ To create application bundle, run the following command:
 mvn clean package -P mac
 ```
 
-This will produce `itext-rups.app` in your `target` folder (in itext-rups-{project.version} subfolder). You can copy it to your 'Applications' folder and run it as any other application assuming you have Java installed on your system. Maven 'appbundle' should handle executable file permissions automatically, but you can always give the rights manually like this: `chmod +x /Applications/itext-rups.app/Contents/MacOS/*`.
+This will produce `RUPS.app` in your `target` folder. You can copy it to your 'Applications' folder and run it as any other application assuming you have Java installed on your system.
 
 ##### Troubleshooting
 
@@ -61,7 +61,7 @@ org.apache.maven.reporting.MavenReportException: Unable to find javadoc command:
 
 Make sure to define your JAVA_HOME pointing to your jdk installation folder. Or make sure that javadoc is on your command path.
 
--- Warnings downlaoding package-lists
+-- Warnings downloading package-lists
 
 [WARNING] Error fetching link: http://dom4j.github.io/apidocs/package-list. Ignored it
 
