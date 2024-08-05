@@ -42,7 +42,6 @@
  */
 package com.itextpdf.rups;
 
-import com.itextpdf.kernel.actions.data.ITextCoreProductData;
 import com.itextpdf.rups.controller.IRupsController;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.model.LoggerHelper;
@@ -58,13 +57,18 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.desktop.OpenFilesEvent;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.Properties;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
 public final class Rups {
+    private static final String UNKNOWN_VERSION_STRING = "N/A";
+
     private Rups() {
     }
 
@@ -120,8 +124,7 @@ public final class Rups {
         frame.setResizable(true);
 
         // title bar
-        frame.setTitle(
-                String.format(Language.TITLE.getString(), ITextCoreProductData.getInstance().getVersion()));
+        frame.setTitle(String.format(Language.TITLE.getString(), getVersion()));
         frame.setIconImages(FrameIconUtil.loadFrameIcons());
         frame.setDefaultCloseOperation(RupsConfiguration.INSTANCE.getCloseOperation());
 
@@ -137,5 +140,20 @@ public final class Rups {
         frame.setVisible(true);
 
         return rupsController;
+    }
+
+    private static String getVersion() {
+        final Properties maven = new Properties();
+        try (final InputStream rsc = getResourceAsStream("maven.properties")) {
+            maven.load(rsc);
+        } catch (IOException e) {
+            LoggerHelper.error(Language.ERROR_LOADING_MAVEN_SETTINGS.getString(), e, Rups.class);
+            return UNKNOWN_VERSION_STRING;
+        }
+        return maven.getProperty("version", UNKNOWN_VERSION_STRING);
+    }
+
+    private static InputStream getResourceAsStream(String name) {
+        return Thread.currentThread().getContextClassLoader().getResourceAsStream(name);
     }
 }
