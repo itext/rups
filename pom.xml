@@ -330,8 +330,10 @@
                     <addDependencies>true</addDependencies>
                     <preCp>anything</preCp>
                   </classPath>
+                  <downloadUrl>https://adoptium.net/temurin/releases/?os=windows&amp;package=jre</downloadUrl>
                   <jre>
-                    <minVersion>1.7.0</minVersion>
+                    <path>%JAVA_HOME%;%PATH%</path>
+                    <minVersion>11</minVersion>
                   </jre>
                   <versionInfo>
                     <!-- parsedVersion property is initialized by build-helper-maven-plugin plugin -->
