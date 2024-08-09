@@ -109,4 +109,20 @@ public final class LoggerHelper {
     public static void info(String message, Class<?> c) {
         info(message, c.getName());
     }
+
+    public static void debug(String message, Exception e, String className) {
+        LoggerFactory.getLogger(className).debug(message, e);
+    }
+
+    public static void debug(String message, Exception e, Class<?> c) {
+        debug(message, e, c.getName());
+    }
+
+    public static void debug(String message, String className) {
+        LoggerFactory.getLogger(className).debug(message);
+    }
+
+    public static void debug(String message, Class<?> c) {
+        debug(message, c.getName());
+    }
 }
