@@ -56,6 +56,7 @@ import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.desktop.OpenFilesEvent;
+import java.awt.desktop.OpenFilesHandler;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -86,7 +87,7 @@ public final class Rups {
         SwingUtilities.invokeLater(() -> {
             setLookandFeel();
             final IRupsController rupsController = initApplication(new JFrame());
-            Desktop.getDesktop().setOpenFileHandler(
+            setOpenFileHandler(
                     (OpenFilesEvent e) -> loadDocumentFromFile(rupsController, e.getFiles())
             );
             loadDocumentFromFile(rupsController, files);
@@ -140,6 +141,15 @@ public final class Rups {
         frame.setVisible(true);
 
         return rupsController;
+    }
+
+    private static void setOpenFileHandler(OpenFilesHandler openFileHandler) {
+        try {
+            Desktop.getDesktop().setOpenFileHandler(openFileHandler);
+        } catch (SecurityException | UnsupportedOperationException e) {
+            LoggerHelper.debug(Language.ERROR_SETTING_OPEN_FILE_HANDLER.getString(), e, Rups.class);
+            // If "Open File Handler" is not supported/allowed, just skip it
+        }
     }
 
     private static String getVersion() {
