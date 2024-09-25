@@ -4,7 +4,7 @@
 
   <groupId>com.itextpdf</groupId>
   <artifactId>itext-rups</artifactId>
-  <version>23.6-SNAPSHOT</version>
+  <version>24.10-SNAPSHOT</version>
 
 
   <name>itext-rups</name>
