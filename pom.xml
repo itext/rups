@@ -80,7 +80,7 @@
     <icu4j.version>75.1</icu4j.version>
     <itext.version>8.0.5</itext.version>
     <jackson.version>2.17.2</jackson.version>
-    <logback.version>1.5.8</logback.version>
+    <logback.version>1.5.13</logback.version>
 
     <!-- Test dependencies -->
     <junit-jupiter-api.version>5.11.0</junit-jupiter-api.version>
