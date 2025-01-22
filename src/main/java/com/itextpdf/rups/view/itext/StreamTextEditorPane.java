@@ -58,6 +58,7 @@ import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.contextmenu.StreamPanelContextMenu;
 import com.itextpdf.rups.view.itext.editor.Latin1Filter;
 import com.itextpdf.rups.view.itext.editor.PdfFoldParser;
+import com.itextpdf.rups.view.itext.editor.PdfParser;
 import com.itextpdf.rups.view.itext.editor.PdfTokenMaker;
 import com.itextpdf.rups.view.itext.editor.PdfTokenPainterFactory;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
@@ -73,6 +74,7 @@ import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.DefaultTokenPainterFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
 import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
 import org.fife.ui.rtextarea.ExpandedFoldRenderStrategy;
@@ -82,11 +84,7 @@ public final class StreamTextEditorPane extends RTextScrollPane implements IRups
     /**
      * MIME type for a PDF content stream.
      */
-    private static final String MIME_PDF = "application/pdf";
-    /**
-     * MIME type for plain text.
-     */
-    private static final String MIME_PLAIN_TEXT = "plain/text";
+    private static final String SYNTAX_STYLE_PDF = "application/pdf";
 
     /**
      * Char buffer with a single LF character.
@@ -115,8 +113,8 @@ public final class StreamTextEditorPane extends RTextScrollPane implements IRups
          */
         final AbstractTokenMakerFactory tokenMakerFactory =
                 (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
-        tokenMakerFactory.putMapping(MIME_PDF, PdfTokenMaker.class.getName());
-        FoldParserManager.get().addFoldParserMapping(MIME_PDF, new PdfFoldParser());
+        tokenMakerFactory.putMapping(SYNTAX_STYLE_PDF, PdfTokenMaker.class.getName());
+        FoldParserManager.get().addFoldParserMapping(SYNTAX_STYLE_PDF, new PdfFoldParser());
         /*
          * There doesn't seem to be a good way to detect, whether you can call
          * setData on a PdfStream or not in advance. It cannot be called if a
@@ -187,7 +185,7 @@ public final class StreamTextEditorPane extends RTextScrollPane implements IRups
         // Assuming that this will stop parsing for a moment...
         getTextArea().setVisible(false);
         String textToSet;
-        String mimeToSet;
+        String styleToSet;
         boolean editableToSet;
         /*
          * TODO: Differentiate between different content. See below.
@@ -207,21 +205,21 @@ public final class StreamTextEditorPane extends RTextScrollPane implements IRups
         try {
             if (isFont(stream) || isImage(stream)) {
                 textToSet = getText(stream, false);
-                mimeToSet = MIME_PLAIN_TEXT;
+                styleToSet = SyntaxConstants.SYNTAX_STYLE_NONE;
                 editableToSet = false;
             } else {
                 textToSet = prepareContentStreamText(getText(stream, true));
-                mimeToSet = MIME_PDF;
+                styleToSet = SYNTAX_STYLE_PDF;
                 editableToSet = true;
             }
             setTextEditableRoutine(true);
         } catch (RuntimeException e) {
             LoggerHelper.error(Language.ERROR_UNEXPECTED_EXCEPTION.getString(), e, getClass());
             textToSet = "";
-            mimeToSet = MIME_PLAIN_TEXT;
+            styleToSet = SyntaxConstants.SYNTAX_STYLE_NONE;
             editableToSet = false;
         }
-        setContentType(mimeToSet);
+        setContentType(styleToSet);
         getTextArea().setText(textToSet);
         getTextArea().setCaretPosition(0);
         setTextEditableRoutine(editableToSet);
@@ -316,8 +314,8 @@ public final class StreamTextEditorPane extends RTextScrollPane implements IRups
         setTextEditableRoutine(false);
     }
 
-    private void setContentType(String mime) {
-        setContentType(getTextArea(), mime);
+    private void setContentType(String style) {
+        setContentType(getTextArea(), style);
     }
 
     private void setUndoEnabled(boolean enabled) {
@@ -404,7 +402,8 @@ public final class StreamTextEditorPane extends RTextScrollPane implements IRups
          * metadata we should just use the regular XML editor available. But
          * by default we will just assume a PDF content stream.
          */
-        setContentType(textArea, MIME_PDF);
+        setContentType(textArea, SYNTAX_STYLE_PDF);
+        textArea.addParser(new PdfParser());
         // This will allow to fold code blocks (like BT/ET blocks)
         textArea.setCodeFoldingEnabled(true);
         // This will automatically add tabulations, when you enter a new line
@@ -417,15 +416,15 @@ public final class StreamTextEditorPane extends RTextScrollPane implements IRups
         return textArea;
     }
 
-    private static void setContentType(RSyntaxTextArea textArea, String mime) {
-        if (MIME_PDF.equals(mime)) {
+    private static void setContentType(RSyntaxTextArea textArea, String style) {
+        if (SYNTAX_STYLE_PDF.equals(style)) {
             getDocument(textArea).setDocumentFilter(new Latin1Filter());
             textArea.setTokenPainterFactory(new PdfTokenPainterFactory());
         } else {
             getDocument(textArea).setDocumentFilter(null);
             textArea.setTokenPainterFactory(new DefaultTokenPainterFactory());
         }
-        textArea.setSyntaxEditingStyle(mime);
+        textArea.setSyntaxEditingStyle(style);
     }
 
     private static String getText(PdfStream stream, boolean decoded) {
