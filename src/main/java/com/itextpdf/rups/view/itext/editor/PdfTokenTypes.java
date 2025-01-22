@@ -40,20 +40,37 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.contextmenu;
+package com.itextpdf.rups.view.itext.editor;
 
-import com.itextpdf.rups.view.itext.StreamTextEditorPane;
+import org.fife.ui.rsyntaxtextarea.TokenTypes;
 
-import java.awt.event.ActionEvent;
+/**
+ * Static class, which matches PDF-relevant token types to what is present in
+ * {@link TokenTypes} for RSyntaxTextArea.
+ *
+ * <p>
+ * Ideally would be to make our own custom token types and add support for
+ * them in RSyntaxTextArea. But it would be much more work, than just mapping
+ * our types to existing ones. Especially, since only the SEPARATOR type is
+ * special, it doesn't really matter, what the underlying type is. This way
+ * we could reuse existing styles.
+ * </p>
+ */
+public final class PdfTokenTypes {
+    public static final int WHITESPACE = TokenTypes.WHITESPACE;
+    public static final int COMMENT = TokenTypes.COMMENT_EOL;
+    public static final int BOOLEAN = TokenTypes.LITERAL_BOOLEAN;
+    public static final int NUMERIC = TokenTypes.LITERAL_NUMBER_FLOAT;
+    public static final int STRING_DATA = TokenTypes.LITERAL_STRING_DOUBLE_QUOTE;
+    public static final int NAME = TokenTypes.DATA_TYPE;
+    public static final int NULL = TokenTypes.LITERAL_BACKQUOTE;
+    public static final int OPERATOR = TokenTypes.OPERATOR;
+    public static final int FUNCTION = TokenTypes.FUNCTION;
+    public static final int SEPARATOR = TokenTypes.SEPARATOR;
+    public static final int BINARY_DATA = TokenTypes.PREPROCESSOR;
+    public static final int ERROR = TokenTypes.ERROR_CHAR;
 
-public class SaveToPdfStreamJTextPaneAction extends AbstractRupsAction {
-
-    public SaveToPdfStreamJTextPaneAction(String name, StreamTextEditorPane invoker) {
-        super(name, invoker);
-    }
-
-    public void actionPerformed(ActionEvent event) {
-        final StreamTextEditorPane pane = (StreamTextEditorPane) invoker;
-        pane.saveToTarget();
+    private PdfTokenTypes() {
+        // Static class
     }
 }

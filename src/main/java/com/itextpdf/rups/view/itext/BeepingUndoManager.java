@@ -40,74 +40,34 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.contextmenu;
+package com.itextpdf.rups.view.itext;
 
-import com.itextpdf.rups.view.Language;
-import com.itextpdf.rups.view.itext.StreamTextEditorPane;
-
-import javax.swing.Action;
-import javax.swing.JComponent;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
-import javax.swing.text.DefaultEditorKit;
+import java.awt.Toolkit;
+import javax.swing.undo.CannotRedoException;
+import javax.swing.undo.CannotUndoException;
+import javax.swing.undo.UndoManager;
 
 /**
- * Convenience class/factory to get a context menu for a text pane. This context menu contains two actions as of yet:
- * - copy
- * - select all
- *
- * @author Michael Demey
+ * A variation of an {@link UndoManager}, which will issue a beep instead of
+ * throwing {@link CannotUndoException} and {@link CannotRedoException}
+ * exceptions.
  */
-public final class StreamPanelContextMenu extends JPopupMenu {
-
-    private final JMenuItem saveToStream;
-
-    /**
-     * Creates a context menu (right click menu) with two actions:
-     * - copy
-     * - select all
-     * <p>
-     * Copy copies the selected text or when no text is selected, it copies the entire text.
-     *
-     * @param textPane   the text pane
-     * @param controller the controller
-     */
-    public StreamPanelContextMenu(final JComponent textPane, final StreamTextEditorPane controller) {
-        super();
-
-        final JMenuItem copyItem = getJMenuItem(
-                new CopyToClipboardAction(Language.COPY.getString(), textPane)
-        );
-
-        final JMenuItem selectAllItem = getJMenuItem(
-                textPane.getActionMap().get(DefaultEditorKit.selectAllAction)
-        );
-        selectAllItem.setText(Language.SELECT_ALL.getString());
-
-        final JMenuItem saveToFile = getJMenuItem(
-                new SaveToFileJTextPaneAction(Language.SAVE_TO_FILE.getString(), textPane)
-        );
-
-        saveToStream = getJMenuItem(
-                new SaveToPdfStreamJTextPaneAction(Language.SAVE_TO_STREAM.getString(), controller)
-        );
-
-        add(selectAllItem);
-        add(copyItem);
-        add(new JSeparator());
-        add(saveToFile);
-        add(this.saveToStream);
+public final class BeepingUndoManager extends UndoManager {
+    @Override
+    public void redo() {
+        try {
+            super.redo();
+        } catch (CannotRedoException ignored) {
+            Toolkit.getDefaultToolkit().beep();
+        }
     }
 
-    public void setSaveToStreamEnabled(boolean enabled) {
-        saveToStream.setEnabled(enabled);
-    }
-
-    private static JMenuItem getJMenuItem(Action rupsAction) {
-        final JMenuItem jMenuItem = new JMenuItem();
-        jMenuItem.setText((String) rupsAction.getValue(Action.NAME));
-        jMenuItem.setAction(rupsAction);
-        return jMenuItem;
+    @Override
+    public void undo() {
+        try {
+            super.undo();
+        } catch (CannotUndoException ignored) {
+            Toolkit.getDefaultToolkit().beep();
+        }
     }
 }

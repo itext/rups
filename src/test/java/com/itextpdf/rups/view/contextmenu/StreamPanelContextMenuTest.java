@@ -43,7 +43,7 @@
 package com.itextpdf.rups.view.contextmenu;
 
 import com.itextpdf.rups.view.Language;
-import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
+import com.itextpdf.rups.view.itext.StreamTextEditorPane;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -60,7 +60,7 @@ public class StreamPanelContextMenuTest {
     @Test
     public void jMenuLengthTest() {
         JPopupMenu popupMenu =
-                new StreamPanelContextMenu(new JTextPane(), new SyntaxHighlightedStreamPane(null));
+                new StreamPanelContextMenu(new JTextPane(), new StreamTextEditorPane(null));
 
         MenuElement[] subElements = popupMenu.getSubElements();
         Assertions.assertEquals(4, subElements.length);
@@ -69,7 +69,7 @@ public class StreamPanelContextMenuTest {
     @Test
     public void jMenuSubItemTypeTest() {
         JPopupMenu popupMenu =
-                new StreamPanelContextMenu(new JTextPane(), new SyntaxHighlightedStreamPane(null));
+                new StreamPanelContextMenu(new JTextPane(), new StreamTextEditorPane(null));
 
         MenuElement[] subElements = popupMenu.getSubElements();
 
@@ -81,7 +81,7 @@ public class StreamPanelContextMenuTest {
     @Test
     public void assignedActionsTest() {
         JPopupMenu popupMenu =
-                new StreamPanelContextMenu(new JTextPane(), new SyntaxHighlightedStreamPane(null));
+                new StreamPanelContextMenu(new JTextPane(), new StreamTextEditorPane(null));
 
         MenuElement[] subElements = popupMenu.getSubElements();
 
@@ -97,7 +97,7 @@ public class StreamPanelContextMenuTest {
     @Test
     public void saveToStreamDisabledTest() {
         StreamPanelContextMenu popupMenu =
-                new StreamPanelContextMenu(new JTextPane(), new SyntaxHighlightedStreamPane(null));
+                new StreamPanelContextMenu(new JTextPane(), new StreamTextEditorPane(null));
         popupMenu.setSaveToStreamEnabled(false);
 
         MenuElement[] subElements = popupMenu.getSubElements();
@@ -114,7 +114,7 @@ public class StreamPanelContextMenuTest {
     @Test
     public void saveToStreamReEnabledTest() {
         StreamPanelContextMenu popupMenu =
-                new StreamPanelContextMenu(new JTextPane(), new SyntaxHighlightedStreamPane(null));
+                new StreamPanelContextMenu(new JTextPane(), new StreamTextEditorPane(null));
         popupMenu.setSaveToStreamEnabled(false);
         popupMenu.setSaveToStreamEnabled(true);
 

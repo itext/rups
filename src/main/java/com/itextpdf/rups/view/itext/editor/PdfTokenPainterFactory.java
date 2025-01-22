@@ -40,74 +40,21 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.contextmenu;
+package com.itextpdf.rups.view.itext.editor;
 
-import com.itextpdf.rups.view.Language;
-import com.itextpdf.rups.view.itext.StreamTextEditorPane;
-
-import javax.swing.Action;
-import javax.swing.JComponent;
-import javax.swing.JMenuItem;
-import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
-import javax.swing.text.DefaultEditorKit;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.TokenPainter;
+import org.fife.ui.rsyntaxtextarea.TokenPainterFactory;
 
 /**
- * Convenience class/factory to get a context menu for a text pane. This context menu contains two actions as of yet:
- * - copy
- * - select all
- *
- * @author Michael Demey
+ * Returns the {@link PdfTokenPainter} to use for a text area.
  */
-public final class StreamPanelContextMenu extends JPopupMenu {
-
-    private final JMenuItem saveToStream;
-
+public final class PdfTokenPainterFactory implements TokenPainterFactory {
     /**
-     * Creates a context menu (right click menu) with two actions:
-     * - copy
-     * - select all
-     * <p>
-     * Copy copies the selected text or when no text is selected, it copies the entire text.
-     *
-     * @param textPane   the text pane
-     * @param controller the controller
+     * {@inheritDoc}
      */
-    public StreamPanelContextMenu(final JComponent textPane, final StreamTextEditorPane controller) {
-        super();
-
-        final JMenuItem copyItem = getJMenuItem(
-                new CopyToClipboardAction(Language.COPY.getString(), textPane)
-        );
-
-        final JMenuItem selectAllItem = getJMenuItem(
-                textPane.getActionMap().get(DefaultEditorKit.selectAllAction)
-        );
-        selectAllItem.setText(Language.SELECT_ALL.getString());
-
-        final JMenuItem saveToFile = getJMenuItem(
-                new SaveToFileJTextPaneAction(Language.SAVE_TO_FILE.getString(), textPane)
-        );
-
-        saveToStream = getJMenuItem(
-                new SaveToPdfStreamJTextPaneAction(Language.SAVE_TO_STREAM.getString(), controller)
-        );
-
-        add(selectAllItem);
-        add(copyItem);
-        add(new JSeparator());
-        add(saveToFile);
-        add(this.saveToStream);
-    }
-
-    public void setSaveToStreamEnabled(boolean enabled) {
-        saveToStream.setEnabled(enabled);
-    }
-
-    private static JMenuItem getJMenuItem(Action rupsAction) {
-        final JMenuItem jMenuItem = new JMenuItem();
-        jMenuItem.setText((String) rupsAction.getValue(Action.NAME));
-        jMenuItem.setAction(rupsAction);
-        return jMenuItem;
+    @Override
+    public TokenPainter getTokenPainter(RSyntaxTextArea textArea) {
+        return new PdfTokenPainter(textArea);
     }
 }

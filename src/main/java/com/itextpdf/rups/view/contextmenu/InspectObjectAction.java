@@ -45,7 +45,7 @@ package com.itextpdf.rups.view.contextmenu;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.FrameIconUtil;
 import com.itextpdf.rups.view.itext.PdfTree;
-import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
+import com.itextpdf.rups.view.itext.StreamTextEditorPane;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
 import javax.swing.AbstractAction;
@@ -83,10 +83,10 @@ public class InspectObjectAction extends AbstractRupsAction {
 
         final PdfObjectTreeNode node =
                 (PdfObjectTreeNode) ((PdfTree) invoker).getSelectionPath().getLastPathComponent();
-        final SyntaxHighlightedStreamPane syntaxHighlightedStreamPane = new SyntaxHighlightedStreamPane(null);
+        final StreamTextEditorPane streamPane = new StreamTextEditorPane(null);
 
-        frame.add(syntaxHighlightedStreamPane);
-        syntaxHighlightedStreamPane.render(node);
+        frame.add(streamPane);
+        streamPane.render(node);
 
         final Language dialogCancel = Language.DIALOG_CANCEL;
         frame.getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
