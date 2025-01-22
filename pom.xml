@@ -81,6 +81,8 @@
     <itext.version>9.1.0</itext.version>
     <jackson.version>2.18.3</jackson.version>
     <logback.version>1.5.17</logback.version>
+    <rsyntaxtextarea.version>3.6.0</rsyntaxtextarea.version>
+    <rstaui.version>3.3.1</rstaui.version>
 
     <!-- Test dependencies -->
     <junit-jupiter-api.version>5.12.0</junit-jupiter-api.version>
@@ -133,6 +135,16 @@
       <groupId>com.formdev</groupId>
       <artifactId>flatlaf</artifactId>
       <version>${flatlaf.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fifesoft</groupId>
+      <artifactId>rsyntaxtextarea</artifactId>
+      <version>${rsyntaxtextarea.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fifesoft</groupId>
+      <artifactId>rstaui</artifactId>
+      <version>${rstaui.version}</version>
     </dependency>
     <dependency>
       <groupId>com.itextpdf</groupId>
