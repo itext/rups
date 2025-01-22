@@ -188,6 +188,18 @@ public final class ParseTreeNode {
     }
 
     /**
+     * Returns whether text of this node matches the specified text. This
+     * operation is valid only for primitive nodes.
+     *
+     * @param text Expected text.
+     *
+     * @return Whether text of this node matches the specified text.
+     */
+    public boolean is(char[] text) {
+        return Arrays.equals(text, 0, text.length, textArray, textOffset, textOffset + textCount);
+    }
+
+    /**
      * Returns whether this is an operator type node with the specified text.
      *
      * @param operator Operator text.
@@ -198,10 +210,7 @@ public final class ParseTreeNode {
         if (type != ParseTreeNodeType.OPERATOR) {
             return false;
         }
-        return Arrays.equals(
-                operator, 0, operator.length,
-                textArray, textOffset, textOffset + textCount
-        );
+        return is(operator);
     }
 
     /**

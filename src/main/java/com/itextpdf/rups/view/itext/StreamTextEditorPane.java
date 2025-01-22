@@ -57,6 +57,7 @@ import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.contextmenu.StreamPanelContextMenu;
 import com.itextpdf.rups.view.itext.editor.Latin1Filter;
+import com.itextpdf.rups.view.itext.editor.PdfFoldParser;
 import com.itextpdf.rups.view.itext.editor.PdfTokenMaker;
 import com.itextpdf.rups.view.itext.editor.PdfTokenPainterFactory;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
@@ -73,6 +74,7 @@ import org.fife.ui.rsyntaxtextarea.DefaultTokenPainterFactory;
 import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
+import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
 import org.fife.ui.rtextarea.ExpandedFoldRenderStrategy;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
@@ -114,6 +116,7 @@ public final class StreamTextEditorPane extends RTextScrollPane implements IRups
         final AbstractTokenMakerFactory tokenMakerFactory =
                 (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
         tokenMakerFactory.putMapping(MIME_PDF, PdfTokenMaker.class.getName());
+        FoldParserManager.get().addFoldParserMapping(MIME_PDF, new PdfFoldParser());
         /*
          * There doesn't seem to be a good way to detect, whether you can call
          * setData on a PdfStream or not in advance. It cannot be called if a
