@@ -270,6 +270,50 @@ public final class ParseTreeNode {
     }
 
     /**
+     * Returns the start offset for the node. If this is a primitive node,
+     * then it is equivalent to calling {@link #getTextOffset()}. But if it is
+     * a composite node, it returns the text offset of the leftmost
+     * primitive descendant.
+     *
+     * @return The start offset for the node.
+     */
+    public int getStartOffset() {
+        if (textArray != null) {
+            return textOffset;
+        }
+        ParseTreeNode child = getFirstChild();
+        while (child != null) {
+            if (child.textArray != null) {
+                return child.textOffset;
+            }
+            child = child.getFirstChild();
+        }
+        return 0;
+    }
+
+    /**
+     * Returns the end offset for the node. If this is a primitive node, then
+     * it is equivalent to summing {@link #getTextOffset()} and
+     * {@link #getTextCount()}. But if it is a composite node, it returns the
+     * end offset of the leftmost primitive descendant.
+     *
+     * @return The start offset for the node.
+     */
+    public int getEndOffset() {
+        if (textArray != null) {
+            return textOffset + textCount;
+        }
+        ParseTreeNode child = getLastChild();
+        while (child != null) {
+            if (child.textArray != null) {
+                return child.textOffset + child.textCount;
+            }
+            child = child.getLastChild();
+        }
+        return 0;
+    }
+
+    /**
      * Returns the first child of a node, or null, if it is a leaf.
      *
      * @return The first child of a node, or null, if it is a leaf.
