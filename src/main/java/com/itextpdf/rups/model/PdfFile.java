@@ -112,7 +112,6 @@ public final class PdfFile implements IPdfFile {
         return openAsOwner(file, content, DialogPasswordProvider.ownerPassword());
     }
 
-
     public static PdfFile openAsOwner(File file, byte[] content, IPasswordProvider passwordProvider)
             throws IOException {
         final PdfFile pdfFile = new PdfFile(file, content);
@@ -148,24 +147,18 @@ public final class PdfFile implements IPdfFile {
     private void openDocument(IPasswordProvider passwordProvider, boolean requireEditable)
             throws IOException {
         /*
-         * This should pass in the majority of cases (i.e. if the document is
-         * non-encrypted).
-         */
-        if (openDocumentReadWrite()) {
-            return;
-        }
-
-        /*
-         * If it is, actually, protected, we will try to open it in a read-only
-         * mode. This should pass, if the document is protected, but there is no
-         * user password.
+         * This block should succeed, if there is no password protection.
          *
-         * In this case any editing operations in RUPS should be disabled.
+         * By default, editing operations in RUPS should be disabled. Ideally
+         * we would just open the document in the read-write mode everytime
+         * for convenience. But, annoyingly, in iText, if you open the document
+         * in the read-write mode, some of the original information will get
+         * lost, like, for example, the /Info dictionary.
          *
-         * If the requireEditable flag is set to true, we skip trying to open
-         * the document in a read-only mode.
+         * If the requireEditable flag is set to true, we only try to open the
+         * document in the read-write mode.
          */
-        if (!requireEditable && openDocumentReadOnly()) {
+        if (openDocument(requireEditable)) {
             return;
         }
 
@@ -174,23 +167,17 @@ public final class PdfFile implements IPdfFile {
          * password provider to get the password and will try to use it to open
          * the document.
          *
-         * Since user can provide any of the two password, we will try first to
-         * open as an owner (read/write) and then, if failed, as a user
-         * (read-only). If both failed, we will keep asking for the correct
-         * password until password provider signals cancellation.
-         *
-         * If the requireEditable flag is set to true, we skip trying to open
-         * the document in a read-only mode.
+         * Since user can provide any of the two passwords, if editing was
+         * requested, but only a user password was provided, it will fail.
+         * We will keep asking for the correct password until password
+         * provider signals cancellation.
          */
         while (true) {
             final byte[] password = passwordProvider.get(getOriginalFile());
             if (password == null) {
                 throw new BadPasswordException(Language.ERROR_MISSING_PASSWORD.getString());
             }
-            if (openDocumentReadWrite(password)) {
-                return;
-            }
-            if (!requireEditable && openDocumentReadOnly(password)) {
+            if (openDocument(password, requireEditable)) {
                 return;
             }
             /*
@@ -201,6 +188,41 @@ public final class PdfFile implements IPdfFile {
                 throw new BadPasswordException(Language.ERROR_WRONG_PASSWORD.getString());
             }
         }
+    }
+
+    /**
+     * Tries to open the PDF document without a password. Read-only or
+     * read-write mode depends on the requireEditable parameter.
+     * If the document is encrypted, returns {@code false}.
+     *
+     * @param requireEditable {@code true}, if document should be opened in a
+     *                        read-write mode
+     *
+     * @return {@code true} on success; {@code false} if encrypted
+     */
+    private boolean openDocument(boolean requireEditable) throws IOException {
+        if (requireEditable) {
+            return openDocumentReadWrite();
+        }
+        return openDocumentReadOnly();
+    }
+
+    /**
+     * Tries to open the PDF document with the provided password. Read-only or
+     * read-write mode depends on the requireEditable parameter.
+     * If the password is incorrect, returns {@code false}.
+     *
+     * @param password password to use, when decrypting
+     * @param requireEditable {@code true}, if document should be opened in a
+     *                        read-write mode
+     *
+     * @return {@code true} on success; {@code false} if encrypted
+     */
+    private boolean openDocument(byte[] password, boolean requireEditable) throws IOException {
+        if (requireEditable) {
+            return openDocumentReadWrite(password);
+        }
+        return openDocumentReadOnly(password);
     }
 
     /**
