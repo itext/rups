@@ -78,12 +78,12 @@
     <dom4j.version>2.1.4</dom4j.version>
     <flatlaf.version>3.5.4</flatlaf.version>
     <icu4j.version>76.1</icu4j.version>
-    <itext.version>8.0.5</itext.version>
+    <itext.version>9.1.0</itext.version>
     <jackson.version>2.18.2</jackson.version>
     <logback.version>1.5.17</logback.version>
 
     <!-- Test dependencies -->
-    <junit-jupiter-api.version>5.11.0</junit-jupiter-api.version>
+    <junit-jupiter-api.version>5.12.0</junit-jupiter-api.version>
   </properties>
 
   <dependencies>
