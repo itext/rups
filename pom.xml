@@ -4,7 +4,7 @@
 
   <groupId>com.itextpdf</groupId>
   <artifactId>itext-rups</artifactId>
-  <version>24.10-SNAPSHOT</version>
+  <version>25.03-SNAPSHOT</version>
 
 
   <name>itext-rups</name>
@@ -60,27 +60,27 @@
     <!-- Build dependencies (common) -->
     <assembly-plugin.version>3.7.1</assembly-plugin.version>
     <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
-    <maven-bundle-plugin.version>5.1.9</maven-bundle-plugin.version>
+    <maven-bundle-plugin.version>6.0.0</maven-bundle-plugin.version>
     <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
-    <maven-surefire-plugin.version>3.5.0</maven-surefire-plugin.version>
+    <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
 
     <!-- Build dependencies (qa) -->
-    <japicmp-maven-plugin.version>0.23.0</japicmp-maven-plugin.version>
+    <japicmp-maven-plugin.version>0.23.1</japicmp-maven-plugin.version>
 
     <!-- Build dependencies (exe) -->
     <build-helper-maven-plugin.version>3.6.0</build-helper-maven-plugin.version>
-    <launch4j-maven-plugin.version>2.5.1</launch4j-maven-plugin.version>
+    <launch4j-maven-plugin.version>2.5.3</launch4j-maven-plugin.version>
 
     <!-- Build dependencies (mac) -->
-    <macosappbundler-maven-plugin.version>1.21.0</macosappbundler-maven-plugin.version>
+    <macosappbundler-maven-plugin.version>1.21.1</macosappbundler-maven-plugin.version>
 
     <!-- Application dependencies -->
     <dom4j.version>2.1.4</dom4j.version>
-    <flatlaf.version>3.5.1</flatlaf.version>
-    <icu4j.version>75.1</icu4j.version>
+    <flatlaf.version>3.5.4</flatlaf.version>
+    <icu4j.version>76.1</icu4j.version>
     <itext.version>8.0.5</itext.version>
-    <jackson.version>2.17.2</jackson.version>
-    <logback.version>1.5.8</logback.version>
+    <jackson.version>2.18.2</jackson.version>
+    <logback.version>1.5.17</logback.version>
 
     <!-- Test dependencies -->
     <junit-jupiter-api.version>5.11.0</junit-jupiter-api.version>
@@ -355,9 +355,6 @@
                     <internalName>itext-rups</internalName>
                     <originalFilename>Rups.exe</originalFilename>
                   </versionInfo>
-                  <!-- <splash> <file>${basedir}/src/main/installer/images/splash.bmp</file>
-                                        <waitForWindow>true</waitForWindow> <timeout>60</timeout> <timeoutErr>false</timeoutErr>
-                                        </splash> -->
                 </configuration>
               </execution>
             </executions>
