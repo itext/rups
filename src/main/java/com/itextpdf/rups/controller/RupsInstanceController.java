@@ -72,6 +72,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.NoSuchFileException;
 import java.util.function.Consumer;
 import javax.swing.JOptionPane;
@@ -196,8 +197,8 @@ public class RupsInstanceController implements TreeSelectionListener, PageSelect
             readerController.getParser().setDocument(pdfFile.getPdfDocument());
             // At this point consider the file opened, so it can be added to MRU
             RupsConfiguration.INSTANCE.getMruListHandler().use(file);
-        } catch (NoSuchFileException e) {
-            final String msg = String.format(Language.ERROR_CANNOT_FIND_FILE.getString(), e.getFile());
+        } catch (InvalidPathException | NoSuchFileException e) {
+            final String msg = String.format(Language.ERROR_CANNOT_FIND_FILE.getString(), file);
             LoggerHelper.warn(msg, e, RupsInstanceController.class);
             Rups.showBriefMessage(msg);
             // Might as well remove file from MRU list, if it doesn't exist
