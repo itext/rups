@@ -44,6 +44,7 @@ package com.itextpdf.rups.io;
 
 import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.io.filters.PdfFilter;
+import com.itextpdf.rups.view.EnhancedFileSystemView;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -83,24 +84,24 @@ public final class PdfFileOpenAction implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent evt) {
-        final JFileChooser fileChooser = new JFileChooser();
-        setCurrentDirectory(fileChooser);
+        final JFileChooser fileChooser = new JFileChooser(
+                getCurrentDirectory(), EnhancedFileSystemView.INSTANCE
+        );
         fileChooser.setFileFilter(PdfFilter.INSTANCE);
         if (fileChooser.showOpenDialog(parent) == JFileChooser.APPROVE_OPTION) {
             listener.accept(fileChooser.getSelectedFile());
         }
     }
 
-    private static void setCurrentDirectory(JFileChooser fileChooser) {
+    private static File getCurrentDirectory() {
         final File mostRecentOpenFile = RupsConfiguration.INSTANCE.getMruListHandler().peekMostRecent();
         if (mostRecentOpenFile != null) {
             final File mostRecentDir = mostRecentOpenFile.getParentFile();
             if (mostRecentDir != null) {
-                fileChooser.setCurrentDirectory(mostRecentDir);
-                return;
+                return mostRecentDir;
             }
         }
         // Fallback to home dir
-        fileChooser.setCurrentDirectory(RupsConfiguration.INSTANCE.getHomeFolder());
+        return RupsConfiguration.INSTANCE.getHomeFolder();
     }
 }
