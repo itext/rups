@@ -123,7 +123,7 @@ public final class FilePathPreProcessor {
             if (isFile(currentDir, decoded)) {
                 return Optional.of(decoded);
             }
-        } catch (Exception ignored) {
+        } catch (RuntimeException ignored) {
             // Ignored
         }
         return Optional.empty();
@@ -165,7 +165,7 @@ public final class FilePathPreProcessor {
                 path = path.replace(File.separatorChar, '/');
             }
             return Optional.of(path);
-        } catch (Exception ignored) {
+        } catch (RuntimeException ignored) {
             // Ignored
         }
         return Optional.empty();
@@ -183,7 +183,7 @@ public final class FilePathPreProcessor {
     private static boolean isFile(File currentDir, String path) {
         try {
             return new File(currentDir, path).isFile();
-        } catch (Exception ignored) {
+        } catch (RuntimeException ignored) {
             // Ignored
         }
         return false;
