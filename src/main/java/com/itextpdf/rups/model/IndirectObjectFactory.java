@@ -90,22 +90,6 @@ public class IndirectObjectFactory {
      */
     protected ArrayList<Boolean> isLoaded = new ArrayList<>();
 
-    private static final String METHOD_NAME = "checkState";
-    private static final String FIELD_NAME = "FORBID_RELEASE";
-    private static Method checkStateMethod;
-    private static Field forbidReleaseField;
-
-    static {
-        try {
-            checkStateMethod = PdfObject.class.getDeclaredMethod(METHOD_NAME, short.class);
-            checkStateMethod.setAccessible(true);
-            forbidReleaseField = PdfObject.class.getDeclaredField(FIELD_NAME);
-            forbidReleaseField.setAccessible(true);
-        } catch (NoSuchFieldException | NoSuchMethodException | SecurityException ignored) {
-            // left intentionally empty
-        }
-    }
-
     /**
      * Creates a list that will contain all the indirect objects
      * in a PDF document.
@@ -186,11 +170,11 @@ public class IndirectObjectFactory {
             }
         }
         isLoaded.add(object.isNull());
-        if (canRelease(object)) {
+        if (object.isReleaseForbidden()) {
+            objects.add(object);
+        } else {
             object.release();
             objects.add(PdfNull.PDF_NULL);
-        } else {
-            objects.add(object);
         }
     }
 
@@ -269,14 +253,6 @@ public class IndirectObjectFactory {
             isLoaded.set(idx, true);
         }
         return object;
-    }
-
-    private boolean canRelease(PdfObject obj) {
-        try {
-            return !(Boolean) checkStateMethod.invoke(obj, forbidReleaseField.get(obj));
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException any) {
-            return true;
-        }
     }
 
     void addNewIndirectObject(PdfObject object) {
