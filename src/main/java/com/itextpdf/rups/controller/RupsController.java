@@ -84,7 +84,7 @@ public class RupsController implements IRupsController {
         this.rupsTabbedPane.addChangeListener(this::onTabChanged);
         this.rupsTabbedPane.addTabClosedListener(this::onTabClosed);
 
-        this.dimension = dimension;
+        this.dimension = new Dimension(dimension);
     }
 
     /**

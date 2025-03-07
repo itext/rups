@@ -42,6 +42,7 @@
  */
 package com.itextpdf.rups.view;
 
+import java.nio.charset.StandardCharsets;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.text.BadLocationException;
@@ -121,7 +122,7 @@ public final class DebugView {
 
         @Override
         public void write(byte[] b, int off, int len) {
-            updateTextPane(new String(b, off, len));
+            updateTextPane(new String(b, off, len, StandardCharsets.UTF_8));
         }
 
         @Override

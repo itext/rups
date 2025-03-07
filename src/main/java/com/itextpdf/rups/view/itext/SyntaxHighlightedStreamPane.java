@@ -190,7 +190,8 @@ public final class SyntaxHighlightedStreamPane extends JScrollPane implements IR
             try {
                 setTextEditableRoutine(true);
                 byte[] bytes = stream.getBytes(false);
-                text.setText(new String(bytes));
+                // This is binary content, so encoding doesn't really matter
+                text.setText(new String(bytes, StandardCharsets.ISO_8859_1));
                 text.setCaretPosition(0);
             } catch (com.itextpdf.io.exceptions.IOException e) {
                 text.setText("");

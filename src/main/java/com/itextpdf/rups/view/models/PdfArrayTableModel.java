@@ -136,7 +136,7 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
                 tempValue = (String) aValue;
             }
         } else {
-            if (!(aValue instanceof String) || "".equalsIgnoreCase(((String) aValue).trim())) {
+            if (!(aValue instanceof String) || ((String) aValue).isBlank()) {
                 LoggerHelper.warn(Language.ERROR_EMPTY_FIELD.getString(), getClass());
                 return;
             }
@@ -175,7 +175,7 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
 
     @Override
     public void validateTempRow() {
-        if ("".equalsIgnoreCase(tempValue.trim())) {
+        if (tempValue.isBlank()) {
             LoggerHelper.warn(Language.ERROR_EMPTY_FIELD.getString(), getClass());
             return;
         }
