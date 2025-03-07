@@ -54,6 +54,7 @@ import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.canvas.parser.util.PdfCanvasParser;
 import com.itextpdf.rups.view.Language;
 
+import java.nio.charset.StandardCharsets;
 import javax.swing.JOptionPane;
 import java.awt.Component;
 import java.io.IOException;
@@ -89,7 +90,11 @@ public class PdfSyntaxParser {
         unrecognizedChunks.clear();
         openArraysCount = 0;
         openDictionaryCount = 0;
-        final byte[] bytesToParse = s.getBytes();
+        /*
+         * This is not that great, as this API prevents us from adding Unicode
+         * string into arrays and dictionaries...
+         */
+        final byte[] bytesToParse = s.getBytes(StandardCharsets.ISO_8859_1);
         final RandomAccessSourceFactory factory = new RandomAccessSourceFactory();
         final PdfTokenizer tokenizer =
                 new PdfTokenizer(new RandomAccessFileOrArray(factory.createSource(bytesToParse)));

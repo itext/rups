@@ -42,16 +42,19 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
+import com.itextpdf.rups.Rups;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.view.Language;
 
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import javax.swing.JFileChooser;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 
 /**
@@ -65,50 +68,40 @@ public class SaveToFileJTextPaneAction extends AbstractRupsAction {
     }
 
     public void actionPerformed(ActionEvent event) {
-        final Runnable saveRunnable = new Runnable() {
-            @Override public void run() {
-                // get saving location
-                final JFileChooser fileChooser = new JFileChooser();
+        SwingUtilities.invokeLater(this::handleAction);
+    }
 
-                final int choice = fileChooser.showSaveDialog(null);
-                final String path;
+    private void handleAction() {
+        // get saving location
+        final JFileChooser fileChooser = new JFileChooser();
 
-                if (choice == JFileChooser.APPROVE_OPTION) {
-                    path = fileChooser.getSelectedFile().getPath();
+        final int choice = fileChooser.showSaveDialog(null);
 
-                    boolean nothingSelected = false;
-                    final JTextPane textPane = (JTextPane) invoker;
+        // Early exit on cancel
+        if (choice != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+        final Path path = fileChooser.getSelectedFile().toPath();
 
-                    if (textPane.getSelectedText() == null || textPane.getSelectedText().trim().length() == 0) {
-                        nothingSelected = true;
-                        textPane.selectAll();
-                    }
+        final JTextPane textPane = (JTextPane) invoker;
 
-                    BufferedWriter writer = null;
+        String text = textPane.getSelectedText();
+        if (text == null || text.isBlank()) {
+            text = textPane.getText();
+        }
 
-                    try {
-                        writer = new BufferedWriter(new FileWriter(path));
-                        writer.write(textPane.getSelectedText());
-
-                    } catch (IOException e) { //TODO
-                        LoggerHelper.warn(Language.ERROR_WRITING_FILE.getString(), e, getClass());
-                    } finally {
-                        try {
-                            if (writer != null) {
-                                writer.close();
-                            }
-                        } catch (IOException e) { //TODO
-                            LoggerHelper.error(Language.ERROR_CLOSING_STREAM.getString(), e, getClass());
-                        }
-                    }
-
-                    if (nothingSelected) {
-                        textPane.select(0, 0);
-                    }
-                }
-            }
-        };
-
-        SwingUtilities.invokeLater(saveRunnable);
+        /*
+         * This doesn't look that nice. This logic was there before with the
+         * default charset, and I've changed it to Latin-1, which somewhat
+         * matches the text pane initialization. But streams themselves are
+         * binary data, so this is not ideal...
+         */
+        try (final Writer writer = Files.newBufferedWriter(path, StandardCharsets.ISO_8859_1)) {
+            writer.write(text);
+        } catch (IOException e) {
+            final String errorMessage = Language.ERROR_WRITING_FILE.getString();
+            LoggerHelper.error(errorMessage, e, getClass());
+            Rups.showBriefMessage(errorMessage);
+        }
     }
 }

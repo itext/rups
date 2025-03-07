@@ -216,7 +216,6 @@ public class RupsInstanceController implements TreeSelectionListener, PageSelect
      * @param file java.io.File file to save
      */
     public void saveFile(File file) {
-        OutputStream fos = null;
         File localFile = file;
         try {
             if (!localFile.getName().endsWith(PDF_FILE_SUFFIX)) {
@@ -236,8 +235,9 @@ public class RupsInstanceController implements TreeSelectionListener, PageSelect
             closeRoutine();
             if (bos != null) {
                 bos.close();
-                fos = Files.newOutputStream(localFile.toPath());
-                bos.writeTo(fos);
+                try (final OutputStream fos = Files.newOutputStream(localFile.toPath())) {
+                    bos.writeTo(fos);
+                }
             }
 
             JOptionPane.showMessageDialog(masterComponent, Language.SAVE_SUCCESS.getString(),
@@ -246,14 +246,6 @@ public class RupsInstanceController implements TreeSelectionListener, PageSelect
         } catch (PdfException | IOException | com.itextpdf.io.exceptions.IOException de) {
             JOptionPane.showMessageDialog(masterComponent, de.getMessage(), Language.DIALOG.getString(),
                     JOptionPane.ERROR_MESSAGE);
-        } finally {
-            try {
-                if (fos != null) {
-                    fos.close();
-                }
-            } catch (IOException e) {
-                LoggerHelper.error(Language.ERROR_CLOSING_STREAM.getString(), e, getClass());
-            }
         }
     }
 

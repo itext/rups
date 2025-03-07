@@ -62,7 +62,8 @@ public class CopyToClipboardAction extends AbstractRupsAction {
         boolean nothingSelected = false;
         JTextPane textPane = (JTextPane) invoker;
 
-        if (textPane.getSelectedText() == null || textPane.getSelectedText().trim().length() == 0) {
+        final String selectedText = textPane.getSelectedText();
+        if (selectedText == null || selectedText.isBlank()) {
             nothingSelected = true;
             textPane.selectAll();
         }

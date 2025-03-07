@@ -56,7 +56,9 @@ import com.itextpdf.kernel.pdf.canvas.parser.data.IEventData;
 import com.itextpdf.kernel.pdf.canvas.parser.data.TextRenderInfo;
 import com.itextpdf.kernel.pdf.canvas.parser.listener.IEventListener;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -148,7 +150,7 @@ public final class MarkedContentInfoGatherer {
     }
 
     private static final class StreamTrackingPdfCanvasProcessor extends PdfCanvasProcessor {
-        private final Stack<PdfIndirectReference> streamRefs = new Stack<>();
+        private final Deque<PdfIndirectReference> streamRefs = new ArrayDeque<>();
 
         StreamTrackingPdfCanvasProcessor(TextListener eventListener) {
             super(eventListener);

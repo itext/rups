@@ -45,6 +45,7 @@ package com.itextpdf.rups.view.contextmenu;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.pdf.PdfString;
+import com.itextpdf.rups.Rups;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.itext.PdfTree;
@@ -78,38 +79,37 @@ public final class SaveToFilePdfTreeAction extends AbstractRupsAction {
     }
 
     public void actionPerformed(ActionEvent event) {
-        final Runnable saveRunnable = new Runnable() {
-            @Override
-            public void run() {
-                // get saving location
-                final JFileChooser fileChooser = new JFileChooser();
+        SwingUtilities.invokeLater(this::handleAction);
+    }
 
-                if (saveRawBytes) {
-                    fileChooser.setDialogTitle(fileChooser.getDialogTitle() + Language.RAW_BYTES.getString());
-                }
+    private void handleAction() {
+        // get saving location
+        final JFileChooser fileChooser = new JFileChooser();
 
-                final int choice = fileChooser.showSaveDialog(null);
-                final String path;
+        if (saveRawBytes) {
+            fileChooser.setDialogTitle(fileChooser.getDialogTitle() + Language.RAW_BYTES.getString());
+        }
 
-                if (choice == JFileChooser.APPROVE_OPTION) {
-                    path = fileChooser.getSelectedFile().getPath();
+        final int choice = fileChooser.showSaveDialog(null);
+        // Early exit on cancel
+        if (choice != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+        final Path path = fileChooser.getSelectedFile().toPath();
 
-                    // Get path to the node
-                    final PdfTree tree = (PdfTree) invoker;
-                    final TreeSelectionModel selectionModel = tree.getSelectionModel();
-                    final TreePath[] paths = selectionModel.getSelectionPaths();
+        // Get path to the node
+        final PdfTree tree = (PdfTree) invoker;
+        final TreeSelectionModel selectionModel = tree.getSelectionModel();
+        final TreePath[] paths = selectionModel.getSelectionPaths();
 
-                    // get the bytes and write away
-                    try (final OutputStream fos = Files.newOutputStream(Path.of(path))) {
-                        writeBytes(fos, paths, saveRawBytes);
-                    } catch (IOException e) { // TODO : Catch this exception properly
-                        LoggerHelper.error(Language.ERROR_WRITING_FILE.getString(), e, getClass());
-                    }
-                }
-            }
-        };
-
-        SwingUtilities.invokeLater(saveRunnable);
+        // get the bytes and write away
+        try (final OutputStream fos = Files.newOutputStream(path)) {
+            writeBytes(fos, paths, saveRawBytes);
+        } catch (IOException e) {
+            final String errorMessage = Language.ERROR_WRITING_FILE.getString();
+            LoggerHelper.error(errorMessage, e, getClass());
+            Rups.showBriefMessage(errorMessage);
+        }
     }
 
     private static void writeBytes(OutputStream os, TreePath[] paths, boolean raw)

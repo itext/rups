@@ -65,7 +65,7 @@ public class ContextMenuMouseListener extends MouseAdapter {
 
     private void showMenuIfPopupTrigger(MouseEvent e) {
         if (e.isPopupTrigger() && showPopupHook(e)) {
-            popup.show(component, e.getX() + 3, e.getY() + 3);
+            popup.show(component, e.getX(), e.getY());
         }
     }
 

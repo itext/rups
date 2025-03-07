@@ -45,6 +45,7 @@ package com.itextpdf.rups.view;
 import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.model.ObjectLoader;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -189,7 +190,9 @@ public final class Console implements IRupsEventListener {
 
         @Override
         public void write(byte[] b, int off, int len) {
-            Console.getInstance().updateTextPane(new String(b, off, len), type);
+            Console.getInstance().updateTextPane(
+                    new String(b, off, len, StandardCharsets.UTF_8), type
+            );
         }
 
         @Override

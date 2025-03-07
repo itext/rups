@@ -163,19 +163,18 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
                 tempValue = (String) aValue;
             }
         } else {
-            if (!(aValue instanceof String) || "".equalsIgnoreCase(((String) aValue).trim())) {
+            if (!(aValue instanceof String) || ((String) aValue).isBlank()) {
                 LoggerHelper.warn(Language.ERROR_EMPTY_FIELD.getString(), getClass());
                 return;
             }
             if (columnIndex == KEY_COLUMN_INDEX) {
                 final String key = (String) aValue;
-
-                final PdfName oldName = keys.get(rowIndex);
                 final PdfName newName = getCorrectKey(key);
                 if (newName == null) {
                     return;
                 }
 
+                final PdfName oldName = keys.get(rowIndex);
                 final PdfObject pdfObject = dictionary.get(oldName, false);
                 removeRow(rowIndex);
                 addRow(newName, pdfObject);
@@ -225,8 +224,8 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
 
     @Override
     public void validateTempRow() {
-
-        if ("".equalsIgnoreCase(tempKey.trim()) || "".equalsIgnoreCase(tempValue.trim())) {
+        // We check only the value, as key is guaranteed to be at least "/"
+        if (tempValue.isBlank()) {
             LoggerHelper.warn(Language.ERROR_EMPTY_FIELD.getString(), getClass());
             return;
         }
