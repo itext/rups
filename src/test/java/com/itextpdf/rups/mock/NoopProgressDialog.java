@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2024 Apryse Group NV
+    Copyright (c) 1998-2025 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -42,24 +42,34 @@
  */
 package com.itextpdf.rups.mock;
 
-import com.itextpdf.rups.model.BackgroundTask;
+import com.itextpdf.rups.model.IProgressDialog;
 
-public class MockedBackgroundTask extends BackgroundTask {
-
-    private boolean taskExecuted;
-
-    public MockedBackgroundTask() {
-        this.taskExecuted = false;
+/**
+ * {@link IProgressDialog} implementation, that does nothing.
+ */
+public final class NoopProgressDialog implements IProgressDialog {
+    @Override
+    public void setMessage(String msg) {
+        // noop
     }
 
-    @Override public void doTask() {
-        taskExecuted = true;
+    @Override
+    public void setValue(int value) {
+        // noop
     }
 
-    @Override public void finished() {
+    @Override
+    public void setTotal(int n) {
+        // noop
     }
 
-    public boolean hasTaskExecuted() {
-        return taskExecuted;
+    @Override
+    public void showErrorDialog(Exception ex) {
+        // noop
+    }
+
+    @Override
+    public void setVisible(boolean visible) {
+        // noop
     }
 }

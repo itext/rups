@@ -45,11 +45,12 @@ package com.itextpdf.rups.model;
 import com.itextpdf.rups.view.Language;
 
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 /**
  * Loads the necessary iText PDF objects in Background.
  */
-public class ObjectLoader extends BackgroundTask {
+public class ObjectLoader extends SwingWorker<Void, Void> {
     /**
      * This is the object that wait for task to complete.
      */
@@ -125,11 +126,8 @@ public class ObjectLoader extends BackgroundTask {
         return loaderName;
     }
 
-    /**
-     * @see BackgroundTask#doTask()
-     */
     @Override
-    public void doTask() {
+    protected Void doInBackground() {
         objects = new IndirectObjectFactory(file.getPdfDocument());
         final int n = objects.getXRefMaximum();
         SwingUtilities.invokeLater(() -> {
@@ -142,10 +140,11 @@ public class ObjectLoader extends BackgroundTask {
         SwingUtilities.invokeLater(() -> progress.setTotal(0));
         nodes = new TreeNodeFactory(objects);
         SwingUtilities.invokeLater(() -> progress.setMessage(Language.GUI_UPDATING.getString()));
+        return null;
     }
 
     @Override
-    public void finished() {
+    protected void done() {
         try {
             eventListener.handleOpenDocument(this);
         } catch (Exception ex) {
