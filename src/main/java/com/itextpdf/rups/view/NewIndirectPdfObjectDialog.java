@@ -63,7 +63,9 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChangeListener {
+public final class NewIndirectPdfObjectDialog extends JDialog implements PropertyChangeListener {
+    private static final Dimension DIALOG_SIZE = new Dimension(300, 450);
+    private static final Dimension TEXT_AREA_MIN_SIZE = new Dimension(100, 200);
 
     private PdfObject result;
     private final JTextArea textArea;
@@ -87,10 +89,10 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
 
         this.parser = parser;
         textArea = new JTextArea();
-        textArea.setMinimumSize(new Dimension(100, 200));
+        textArea.setMinimumSize(TEXT_AREA_MIN_SIZE);
 
         final JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setMinimumSize(new Dimension(100, 200));
+        scrollPane.setMinimumSize(TEXT_AREA_MIN_SIZE);
         //Create an array of the text and components to be displayed.
         final Object[] array = {Language.DIALOG_VALUE.getString(), scrollPane};
 
@@ -107,7 +109,7 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
         setContentPane(optionPane);
 
         pack();
-        setSize(300, 450);
+        setSize(DIALOG_SIZE);
         final Point parentLocation = parent.getLocation();
         setLocation(parentLocation.x + 20, parentLocation.y + 40);
 
@@ -161,7 +163,8 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
             if (btnString1.equals(value)) {
                 result = parser.parseString(textArea.getText(), getContentPane());
                 clearAndHide();
-            } else { //user closed dialog or clicked cancel
+            } else {
+                // User closed dialog or clicked cancel
                 result = null;
                 clearAndHide();
             }

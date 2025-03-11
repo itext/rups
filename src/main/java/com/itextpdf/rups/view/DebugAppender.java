@@ -46,6 +46,9 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
 
 public class DebugAppender extends OutputStreamAppender<ILoggingEvent> {
+    public DebugAppender() {
+        // noop
+    }
 
     @Override
     public void start() {

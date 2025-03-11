@@ -53,7 +53,9 @@ import java.io.StringWriter;
 /**
  * A utility to display a dialog showing Throwable object
  */
-public class ErrorDialogPane {
+public final class ErrorDialogPane {
+    private static final Dimension DIALOG_PREFERRED_SIZE = new Dimension(300, 200);
+
     private ErrorDialogPane() {
         // do not instantiate
     }
@@ -62,7 +64,7 @@ public class ErrorDialogPane {
         final String msg = getTraceString(th);
         final JTextArea textArea = new JTextArea(msg);
         final JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setPreferredSize(new Dimension(300, 200));
+        scrollPane.setPreferredSize(DIALOG_PREFERRED_SIZE);
         JOptionPane.showMessageDialog(parent, scrollPane);
     }
 

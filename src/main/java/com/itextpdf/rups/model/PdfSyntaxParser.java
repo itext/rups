@@ -64,9 +64,13 @@ public class PdfSyntaxParser {
     private int openArraysCount = 0;
     private int openDictionaryCount = 0;
 
-    private PdfDocument document;
+    private PdfDocument document = null;
     private boolean isValid = true;
     private final List<PdfLiteral> unrecognizedChunks = new LinkedList<>();
+
+    public PdfSyntaxParser() {
+        // noop
+    }
 
     public void setDocument(PdfDocument document) {
         this.document = document;
@@ -90,9 +94,8 @@ public class PdfSyntaxParser {
         final PdfTokenizer tokenizer =
                 new PdfTokenizer(new RandomAccessFileOrArray(factory.createSource(bytesToParse)));
         final UnderlineParser parser = new UnderlineParser(tokenizer);
-        PdfObject result;
         try {
-            result = parser.readObject();
+            final PdfObject result = parser.readObject();
             if (parser.nextValidToken()) {
                 LoggerHelper.warn(Language.ERROR_TRUNCATED_INPUT.getString(), getClass());
             }
@@ -110,21 +113,20 @@ public class PdfSyntaxParser {
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.WARNING_MESSAGE);
                 if (input != JOptionPane.YES_OPTION || failOnError) {
-                    result = null;
+                    return null;
                 }
             }
+            return result;
         } catch (IOException | RuntimeException any) {
             LoggerHelper.warn(Language.ERROR_PARSING_PDF_OBJECT.getString(), any, getClass());
-            result = null;
+            return null;
         }
-        return result;
     }
 
     private String getUnknownValues() {
         final StringBuilder builder = new StringBuilder();
         for (final PdfLiteral literal : unrecognizedChunks) {
-            builder.append(literal.toString());
-            builder.append("\n");
+            builder.append(literal).append('\n');
         }
         return builder.toString();
     }

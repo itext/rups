@@ -48,7 +48,6 @@ import org.dom4j.DocumentException;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
-import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
 import java.io.ByteArrayInputStream;
@@ -83,7 +82,10 @@ public class XfaFile implements OutputStreamResource {
         final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         // TODO DEVSIX-5299 refactor logic to use XML processing from com.itextpdf.kernel.utils.XmlUtils
         final SAXReader reader = new SAXReader();
-        reader.setEntityResolver(new SafeEmptyEntityResolver());
+        // Prevents XXE attacks
+        reader.setEntityResolver((String publicId, String systemId) ->
+                new InputSource(new StringReader(""))
+        );
         xfaDocument = reader.read(bais);
     }
 
@@ -109,12 +111,4 @@ public class XfaFile implements OutputStreamResource {
         final XMLWriter writer = new XMLWriter(os, format);
         writer.write(xfaDocument);
     }
-
-    // Prevents XXE attacks
-    private static class SafeEmptyEntityResolver implements EntityResolver {
-        public InputSource resolveEntity(String publicId, String systemId) {
-            return new InputSource(new StringReader(""));
-        }
-    }
-
 }

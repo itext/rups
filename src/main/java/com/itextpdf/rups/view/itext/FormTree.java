@@ -105,27 +105,26 @@ public final class FormTree extends JTree implements TreeSelectionListener, IRup
     /**
      * Method that can be used recursively to load the fields hierarchy into the tree.
      *
-     * @param factory     a factory that can produce new PDF object nodes
-     * @param form_node   the parent node in the form tree
-     * @param object_node the object node that will be used to create a child node
+     * @param factory    a factory that can produce new PDF object nodes
+     * @param formNode   the parent node in the form tree
+     * @param objectNode the object node that will be used to create a child node
      */
-    @SuppressWarnings("unchecked")
-    private void loadFields(TreeNodeFactory factory, FormTreeNode form_node, PdfObjectTreeNode object_node) {
-        if (object_node == null) {
+    private static void loadFields(TreeNodeFactory factory, FormTreeNode formNode, PdfObjectTreeNode objectNode) {
+        if (objectNode == null) {
             return;
         }
-        factory.expandNode(object_node);
-        if (object_node.isIndirectReference()) {
-            loadFields(factory, form_node, (PdfObjectTreeNode) object_node.getFirstChild());
-        } else if (object_node.isArray()) {
-            Enumeration<TreeNode> children = object_node.children();
+        factory.expandNode(objectNode);
+        if (objectNode.isIndirectReference()) {
+            loadFields(factory, formNode, (PdfObjectTreeNode) objectNode.getFirstChild());
+        } else if (objectNode.isArray()) {
+            Enumeration<TreeNode> children = objectNode.children();
             while (children.hasMoreElements()) {
-                loadFields(factory, form_node, (PdfObjectTreeNode) children.nextElement());
+                loadFields(factory, formNode, (PdfObjectTreeNode) children.nextElement());
             }
-        } else if (object_node.isDictionary()) {
-            FormTreeNode leaf = new FormTreeNode(object_node);
-            form_node.add(leaf);
-            PdfObjectTreeNode kids = factory.getChildNode(object_node, PdfName.Kids);
+        } else if (objectNode.isDictionary()) {
+            FormTreeNode leaf = new FormTreeNode(objectNode);
+            formNode.add(leaf);
+            PdfObjectTreeNode kids = factory.getChildNode(objectNode, PdfName.Kids);
             loadFields(factory, leaf, kids);
         }
     }
@@ -158,19 +157,18 @@ public final class FormTree extends JTree implements TreeSelectionListener, IRup
     /**
      * Method that will load the nodes that refer to XFA streams.
      *
-     * @param form_node   the parent node in the form tree
-     * @param object_node the object node that will be used to create a child node
+     * @param formNode   the parent node in the form tree
+     * @param objectNode the object node that will be used to create a child node
      */
-    @SuppressWarnings("unchecked")
-    void loadXfa(TreeNodeFactory factory, XfaTreeNode form_node, PdfObjectTreeNode object_node) {
-        if (object_node == null) {
+    static void loadXfa(TreeNodeFactory factory, XfaTreeNode formNode, PdfObjectTreeNode objectNode) {
+        if (objectNode == null) {
             return;
         }
-        factory.expandNode(object_node);
-        if (object_node.isIndirectReference()) {
-            loadXfa(factory, form_node, (PdfObjectTreeNode) object_node.getFirstChild());
-        } else if (object_node.isArray()) {
-            Enumeration<TreeNode> children = object_node.children();
+        factory.expandNode(objectNode);
+        if (objectNode.isIndirectReference()) {
+            loadXfa(factory, formNode, (PdfObjectTreeNode) objectNode.getFirstChild());
+        } else if (objectNode.isArray()) {
+            Enumeration<TreeNode> children = objectNode.children();
             PdfObjectTreeNode key;
             PdfObjectTreeNode value;
             while (children.hasMoreElements()) {
@@ -180,10 +178,10 @@ public final class FormTree extends JTree implements TreeSelectionListener, IRup
                     factory.expandNode(value);
                     value = (PdfObjectTreeNode) value.getFirstChild();
                 }
-                form_node.addPacket(key.getPdfObject().toString(), value);
+                formNode.addPacket(key.getPdfObject().toString(), value);
             }
-        } else if (object_node.isStream()) {
-            form_node.addPacket(Language.FORM_XDP.getString(), object_node);
+        } else if (objectNode.isStream()) {
+            formNode.addPacket(Language.FORM_XDP.getString(), objectNode);
         }
     }
 

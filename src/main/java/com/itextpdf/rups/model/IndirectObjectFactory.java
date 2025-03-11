@@ -165,7 +165,7 @@ public class IndirectObjectFactory {
             final PdfDictionary dict = (PdfDictionary) object;
             if (PdfName.Page.equals(dict.get(PdfName.Type, false))) {
                 objects.add(dict);
-                isLoaded.add(true);
+                isLoaded.add(Boolean.TRUE);
                 return;
             }
         }
@@ -247,10 +247,10 @@ public class IndirectObjectFactory {
     public PdfObject loadObjectByReference(int ref) {
         PdfObject object = getObjectByReference(ref);
         final int idx = getIndexByRef(ref);
-        if (object instanceof PdfNull && !isLoaded.get(idx)) {
+        if (object instanceof PdfNull && !Boolean.TRUE.equals(isLoaded.get(idx))) {
             object = document.getPdfObject(ref);
             objects.set(idx, object);
-            isLoaded.set(idx, true);
+            isLoaded.set(idx, Boolean.TRUE);
         }
         return object;
     }

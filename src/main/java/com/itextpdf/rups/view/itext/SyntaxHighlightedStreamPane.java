@@ -322,7 +322,8 @@ public final class SyntaxHighlightedStreamPane extends JScrollPane implements IR
 
         @Override
         public String getToolTipText(MouseEvent ev) {
-            final String toolTip = getStyledSyntaxDocument().getToolTipAt(viewToModel(ev.getPoint()));
+            final String toolTip = getStyledSyntaxDocument()
+                    .getToolTipAt(viewToModel2D(ev.getPoint()));
             return toolTip == null ? super.getToolTipText(ev) : toolTip;
         }
 

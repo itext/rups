@@ -73,7 +73,9 @@ class PageEnumerator implements Enumeration<PdfPageTreeNode> {
 
     @Override
     public PdfPageTreeNode nextElement() {
-        return pages.get(cursor++);
+        final PdfPageTreeNode node = pages.get(cursor);
+        ++cursor;
+        return node;
     }
 
     public final void expand(PdfIndirectReference ref, PdfDictionary dict) {

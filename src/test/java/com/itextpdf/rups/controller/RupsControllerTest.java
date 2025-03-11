@@ -54,7 +54,7 @@ class RupsControllerTest {
     @Test
     void closeTest() {
         MockRupsTabbedPane rupsTabbedPane = new MockRupsTabbedPane();
-        RupsController rupsController = new RupsController(null, rupsTabbedPane);
+        RupsController rupsController = new RupsController(new Dimension(), rupsTabbedPane);
 
         rupsController.closeCurrentFile();
         Assertions.assertTrue(rupsTabbedPane.closed);
@@ -65,7 +65,7 @@ class RupsControllerTest {
     @Test
     void saveTest() {
         MockRupsTabbedPane rupsTabbedPane = new MockRupsTabbedPane();
-        RupsController rupsController = new RupsController(null, rupsTabbedPane);
+        RupsController rupsController = new RupsController(new Dimension(), rupsTabbedPane);
 
         rupsController.saveCurrentFile(new File(""));
         Assertions.assertTrue(rupsTabbedPane.saved);
@@ -76,7 +76,7 @@ class RupsControllerTest {
     @Test
     void openTest() {
         MockRupsTabbedPane rupsTabbedPane = new MockRupsTabbedPane();
-        RupsController rupsController = new RupsController(null, rupsTabbedPane);
+        RupsController rupsController = new RupsController(new Dimension(), rupsTabbedPane);
 
         rupsController.openNewFile(new File("test.pdf"));
         Assertions.assertTrue(rupsTabbedPane.opened);
@@ -84,8 +84,7 @@ class RupsControllerTest {
         Assertions.assertFalse(rupsTabbedPane.closed);
     }
 
-
-    class MockRupsTabbedPane extends RupsTabbedPane {
+    private static final class MockRupsTabbedPane extends RupsTabbedPane {
         private boolean closed, saved, opened;
         public MockRupsTabbedPane() {
             super();

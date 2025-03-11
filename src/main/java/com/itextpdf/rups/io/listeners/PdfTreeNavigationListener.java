@@ -54,6 +54,10 @@ public class PdfTreeNavigationListener implements KeyListener, MouseListener {
 
     private boolean arrowsUsedAsNavigation = false;
 
+    public PdfTreeNavigationListener() {
+        // noop
+    }
+
     public boolean isLastActionKeyboardNavigation() {
         return arrowsUsedAsNavigation;
     }

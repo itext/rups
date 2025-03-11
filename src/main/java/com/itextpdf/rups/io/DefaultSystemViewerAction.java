@@ -50,6 +50,10 @@ import java.io.File;
 import java.io.IOException;
 
 public class DefaultSystemViewerAction implements ISystemViewerAction {
+    public DefaultSystemViewerAction() {
+        // noop
+    }
+
     @Override
     public final boolean isViewingSupported() {
         return Desktop.isDesktopSupported();

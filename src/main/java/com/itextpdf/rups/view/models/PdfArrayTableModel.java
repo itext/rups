@@ -119,7 +119,9 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         if (columnIndex == 0) {
-            if (rowIndex == array.size()) return tempValue;
+            if (rowIndex == array.size()) {
+                return tempValue;
+            }
             return PdfSyntaxUtils.getSyntaxString(array.get(rowIndex, false));
         }
         return null;

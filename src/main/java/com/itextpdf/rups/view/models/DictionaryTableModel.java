@@ -57,6 +57,9 @@ import java.util.ArrayList;
  * A TableModel in case we want to show a PDF dictionary in a JTable.
  */
 public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
+    private static final int KEY_COLUMN_INDEX = 0;
+    private static final int VALUE_COLUMN_INDEX = 1;
+    private static final int BUTTON_COLUMN_INDEX = 2;
     private static final int DATA_COLUMN_COUNT = 2;
 
     private final PdfSyntaxParser parser;
@@ -72,6 +75,9 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
      * An ArrayList with the dictionary keys.
      */
     protected ArrayList<PdfName> keys = new ArrayList<>();
+
+    private String tempKey = "/";
+    private String tempValue = "";
 
     /**
      * Creates the TableModel.
@@ -125,37 +131,35 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
         final int lastRow = keys.size();
 
         if (rowIndex == lastRow) {
-            if (columnIndex == 0) {
+            if (columnIndex == KEY_COLUMN_INDEX) {
                 return tempKey;
             }
-            if (columnIndex == 1) {
+            if (columnIndex == VALUE_COLUMN_INDEX) {
                 return tempValue;
             }
         }
 
         switch (columnIndex) {
-            case 0:
+            case KEY_COLUMN_INDEX:
                 return keys.get(rowIndex);
-            case 1:
+            case VALUE_COLUMN_INDEX:
                 return PdfSyntaxUtils.getSyntaxString(dictionary.get(keys.get(rowIndex), false));
             default:
                 return null;
         }
     }
 
-    private String tempKey = "/", tempValue = "";
-
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         final int rowCount = getRowCount();
 
         if (rowIndex == rowCount - 1) {
-            if (columnIndex == 0) {
+            if (columnIndex == KEY_COLUMN_INDEX) {
                 tempKey = (String) aValue;
                 if (!tempKey.startsWith("/")) {
                     tempKey = "/" + tempKey;
                 }
-            } else if (columnIndex == 1) {
+            } else if (columnIndex == VALUE_COLUMN_INDEX) {
                 tempValue = (String) aValue;
             }
         } else {
@@ -163,7 +167,7 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
                 LoggerHelper.warn(Language.ERROR_EMPTY_FIELD.getString(), getClass());
                 return;
             }
-            if (columnIndex == 0) {
+            if (columnIndex == KEY_COLUMN_INDEX) {
                 final String key = (String) aValue;
 
                 final PdfName oldName = keys.get(rowIndex);
@@ -195,11 +199,11 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
     @Override
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
-            case 0:
+            case KEY_COLUMN_INDEX:
                 return Language.DICTIONARY_KEY.getString();
-            case 1:
+            case VALUE_COLUMN_INDEX:
                 return Language.DICTIONARY_VALUE.getString();
-            case 2:
+            case BUTTON_COLUMN_INDEX:
                 return "";
             default:
                 return null;
@@ -208,7 +212,7 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
 
     @Override
     public int getButtonColumn() {
-        return 2;
+        return BUTTON_COLUMN_INDEX;
     }
 
     @Override
@@ -261,11 +265,12 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
         fireTableRowsInserted(index, index);
     }
 
-    private PdfName getCorrectKey(String value) {
-        if (!value.startsWith("/")) {
-            value = "/" + value;
+    private PdfName getCorrectKey(String key) {
+        String nameKey = key;
+        if (!nameKey.startsWith("/")) {
+            nameKey = "/" + nameKey;
         }
-        final PdfObject result = parser.parseString(value);
+        final PdfObject result = parser.parseString(nameKey);
 
         if (result instanceof PdfName) {
             return (PdfName) result;

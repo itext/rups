@@ -52,36 +52,43 @@ import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.XfaTreeNode;
 import com.itextpdf.test.ExtendedITextTest;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.IOException;
 
 @Tag("UnitTest")
-public class FormTreeTest extends ExtendedITextTest {
-
-    private static final String sourceFolder = "./src/test/resources/com/itextpdf/rups/view/itext/";
+class FormTreeTest extends ExtendedITextTest {
+    private static final String SOURCE_DIR = "./src/test/resources/com/itextpdf/rups/view/itext/";
 
     @Test
-    public void testLoadXfa() throws IOException {
-        File inPdf = new File(sourceFolder + "cmp_purchase_order_filled.pdf");
-
-        PdfDocument pdfDocument = new PdfDocument(new PdfReader(inPdf));
-
-        IndirectObjectFactory indirectObjectFactory = new IndirectObjectFactory(pdfDocument);
-        while (indirectObjectFactory.storeNextObject());
-        TreeNodeFactory factory = new TreeNodeFactory(indirectObjectFactory);
-
-        PdfReaderController controller = new PdfReaderController(null, null);
-        FormTree formTree = new FormTree(controller);
-
-        PdfObject xfa = pdfDocument.getCatalog().getPdfObject().getAsDictionary(PdfName.AcroForm).getAsArray(PdfName.XFA);
-        PdfObjectTreeNode xfaObjTreeNode = PdfObjectTreeNode.getInstance(xfa);
-        XfaTreeNode xfaTreeNode = new XfaTreeNode(xfaObjTreeNode);
-
-        formTree.loadXfa(factory, xfaTreeNode, xfaObjTreeNode);
+    void testConstructorSmoke() {
+        Assertions.assertDoesNotThrow(() -> {
+            new FormTree(new PdfReaderController(null, null));
+        });
     }
 
+    @Test
+    void testLoadXfa() {
+        Assertions.assertDoesNotThrow(() -> {
+            File inPdf = new File(SOURCE_DIR + "cmp_purchase_order_filled.pdf");
 
+            PdfDocument pdfDocument = new PdfDocument(new PdfReader(inPdf));
+
+            IndirectObjectFactory indirectObjectFactory = new IndirectObjectFactory(pdfDocument);
+            while (indirectObjectFactory.storeNextObject()) {
+                // Empty
+            }
+            TreeNodeFactory factory = new TreeNodeFactory(indirectObjectFactory);
+
+            PdfObject xfa = pdfDocument.getCatalog().getPdfObject().getAsDictionary(PdfName.AcroForm)
+                    .getAsArray(PdfName.XFA);
+            PdfObjectTreeNode xfaObjTreeNode = PdfObjectTreeNode.getInstance(xfa);
+            XfaTreeNode xfaTreeNode = new XfaTreeNode(xfaObjTreeNode);
+
+            FormTree.loadXfa(factory, xfaTreeNode, xfaObjTreeNode);
+        });
+    }
 }

@@ -134,6 +134,8 @@ public class PdfObjectTreeNode extends IconTreeNode implements IPdfContextMenuTa
             case PdfObject.STRING:
                 icon = IconFetcher.getIcon(STRING_ICON);
                 break;
+            default:
+                throw new IllegalArgumentException("Unexpected object type: " + object.getType());
         }
     }
 

@@ -42,6 +42,7 @@
  */
 package com.itextpdf.rups;
 
+import java.util.Set;
 import org.junit.jupiter.api.*;
 
 import java.io.File;
@@ -51,6 +52,12 @@ import javax.swing.WindowConstants;
 
 @Tag("UnitTest")
 public class RupsConfigurationTest {
+    private static final Set<Integer> VALID_CLOSE_OPERATION_VALUES = Set.of(
+            WindowConstants.DO_NOTHING_ON_CLOSE,
+            WindowConstants.HIDE_ON_CLOSE,
+            WindowConstants.DISPOSE_ON_CLOSE,
+            WindowConstants.EXIT_ON_CLOSE
+    );
 
     private static Properties copy;
 
@@ -123,13 +130,8 @@ public class RupsConfigurationTest {
 
     @Test
     public void closingOperationsPossibleValuesTest() {
-        int closeOperation = RupsConfiguration.INSTANCE.getCloseOperation();
-        Assertions.assertTrue(
-                closeOperation == WindowConstants.DO_NOTHING_ON_CLOSE ||
-                        closeOperation == WindowConstants.HIDE_ON_CLOSE ||
-                        closeOperation == WindowConstants.EXIT_ON_CLOSE ||
-                        closeOperation == WindowConstants.DISPOSE_ON_CLOSE
-                );
+        final int closeOperation = RupsConfiguration.INSTANCE.getCloseOperation();
+        Assertions.assertTrue(VALID_CLOSE_OPERATION_VALUES.contains(closeOperation));
     }
 
     @AfterAll

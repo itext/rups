@@ -92,9 +92,11 @@ public class MockedRupsController implements IRupsController {
 
     @Override
     public void reopenAsOwner() {
+        // noop
     }
 
     @Override
     public void saveCurrentFile(File newFile) {
+        // noop
     }
 }

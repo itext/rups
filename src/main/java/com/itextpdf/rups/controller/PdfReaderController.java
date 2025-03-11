@@ -313,15 +313,15 @@ public class PdfReaderController implements IPdfObjectPanelEventListener, IRupsE
      * @param pageNumber the page number that needs to be selected
      */
     public void gotoPage(int pageNumber) {
-        pageNumber--;
+        final int rowIndex = pageNumber - 1;
 
         if (pages == null
-                || pages.getSelectedRow() == pageNumber) {
+                || pages.getSelectedRow() == rowIndex) {
             return;
         }
 
-        if (pageNumber < pages.getRowCount()) {
-            pages.setRowSelectionInterval(pageNumber, pageNumber);
+        if (rowIndex < pages.getRowCount()) {
+            pages.setRowSelectionInterval(rowIndex, rowIndex);
         }
     }
 

@@ -84,7 +84,7 @@ public final class OutlineTree extends JTree implements TreeSelectionListener, I
     /**
      * Method that can be used recursively to load the outline hierarchy into the tree.
      */
-    private void loadOutline(TreeNodeFactory factory, OutlineTreeNode parent, PdfObjectTreeNode child) {
+    private static void loadOutline(TreeNodeFactory factory, OutlineTreeNode parent, PdfObjectTreeNode child) {
         OutlineTreeNode childnode = new OutlineTreeNode(child);
         parent.add(childnode);
         PdfObjectTreeNode first = factory.getChildNode(child, PdfName.First);

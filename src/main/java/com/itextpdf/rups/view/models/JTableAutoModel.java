@@ -68,6 +68,7 @@ public class JTableAutoModel extends AbstractTableModel {
      * @return int the number of columns
      * @see javax.swing.table.TableModel#getColumnCount()
      */
+    @Override
     public int getColumnCount() {
         return table.getColumnCount();
     }
@@ -76,6 +77,7 @@ public class JTableAutoModel extends AbstractTableModel {
      * @return int the number of rows
      * @see javax.swing.table.TableModel#getRowCount()
      */
+    @Override
     public int getRowCount() {
         return table.getRowCount();
     }
@@ -85,6 +87,7 @@ public class JTableAutoModel extends AbstractTableModel {
      * @return the name of the column
      * @see javax.swing.table.AbstractTableModel#getColumnName(int)
      */
+    @Override
     public String getColumnName(int columnIndex) {
         return table.getColumnName(columnIndex);
     }
@@ -95,6 +98,7 @@ public class JTableAutoModel extends AbstractTableModel {
      * @return Object    an object corresponding with a cell in the table
      * @see javax.swing.table.TableModel#getValueAt(int, int)
      */
+    @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         return table.getValueAt(rowIndex, columnIndex);
     }

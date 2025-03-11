@@ -224,34 +224,20 @@ public enum RupsConfiguration {
      * @param newDefaultFolder folder to use
      */
     public void setHomeFolder(String newDefaultFolder) {
-        final String defaultHome = System.getProperty(HOME_FOLDER_KEY);
-        if (newDefaultFolder == null || DEFAULT_HOME_VALUE.equals(newDefaultFolder)) {
-            newDefaultFolder = defaultHome;
-        } else {
-            File valueDirectory = new File(newDefaultFolder);
-            if (!valueDirectory.exists() || !valueDirectory.isDirectory()) {
-                newDefaultFolder = defaultHome;
-            }
-        }
-
-        this.temporaryProperties.setProperty(HOME_FOLDER_KEY, newDefaultFolder);
+        this.temporaryProperties.setProperty(HOME_FOLDER_KEY, sanitizeHomeFolder(newDefaultFolder));
     }
 
     public void setUserLocale(Locale locale) {
-        if (locale == null) {
-            locale = Locale.getDefault();
-        }
-
-        this.temporaryProperties.setProperty(LOCALE_KEY, locale.toLanguageTag());
+        this.temporaryProperties.setProperty(LOCALE_KEY, defaultIfNull(locale).toLanguageTag());
     }
 
     /**
      * Saves any unsaved changes. To cancel changes, see {@link RupsConfiguration#cancelTemporaryChanges()}.
      */
     public void saveConfiguration() {
-        this.temporaryProperties.forEach((key, value) -> {
-            this.systemPreferences.put((String) key, (String) value);
-        });
+        this.temporaryProperties.forEach((Object key, Object value) ->
+            this.systemPreferences.put((String) key, (String) value)
+        );
 
         this.temporaryProperties.clear();
     }
@@ -267,9 +253,9 @@ public enum RupsConfiguration {
      * Resets the settings in Preferences, not the local Properties object to the default.
      */
     public void resetToDefaultProperties() {
-        this.defaultProperties.forEach((Object key, Object value) -> {
-            this.systemPreferences.put((String) key, (String) value);
-        });
+        this.defaultProperties.forEach((Object key, Object value) ->
+            this.systemPreferences.put((String) key, (String) value)
+        );
 
         this.temporaryProperties.clear();
     }
@@ -297,9 +283,9 @@ public enum RupsConfiguration {
      * @param properties Properties holding new values for Preferences
      */
     public void restore(Properties properties) {
-        properties.forEach((key, value) -> {
-            this.systemPreferences.put((String) key, (String) value);
-        });
+        properties.forEach((Object key, Object value) ->
+            this.systemPreferences.put((String) key, (String) value)
+        );
     }
 
     /**
@@ -312,18 +298,14 @@ public enum RupsConfiguration {
     }
 
     private Properties loadDefaultProperties() {
-        final InputStream resourceAsStream = RupsConfiguration.class.getResourceAsStream(DEFAULT_CONFIG_PATH);
         final Properties properties = new Properties();
-
-        if (resourceAsStream != null) {
-            try {
+        try (final InputStream resourceAsStream = RupsConfiguration.class.getResourceAsStream(DEFAULT_CONFIG_PATH)) {
+            if (resourceAsStream != null) {
                 properties.load(resourceAsStream);
-                resourceAsStream.close();
-            } catch (IOException e) {
-                LoggerHelper.error(Language.ERROR_LOADING_DEFAULT_SETTINGS.getString(), e, RupsConfiguration.class);
             }
+        } catch (IOException e) {
+            LoggerHelper.error(Language.ERROR_LOADING_DEFAULT_SETTINGS.getString(), e, RupsConfiguration.class);
         }
-
         return properties;
     }
 
@@ -356,5 +338,23 @@ public enum RupsConfiguration {
 
     private String getValueFromSystemPreferences(String key) {
         return this.systemPreferences.get(key, this.defaultProperties.getProperty(key));
+    }
+
+    private static Locale defaultIfNull(Locale locale) {
+        if (locale == null) {
+            return Locale.getDefault();
+        }
+        return locale;
+    }
+
+    private static String sanitizeHomeFolder(String path) {
+        if (path == null || DEFAULT_HOME_VALUE.equals(path)) {
+            return System.getProperty(HOME_FOLDER_KEY);
+        }
+        final File file = new File(path);
+        if (!file.isDirectory()) {
+            return System.getProperty(HOME_FOLDER_KEY);
+        }
+        return path;
     }
 }

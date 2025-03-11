@@ -51,7 +51,10 @@ import java.awt.Component;
 /**
  * Adds copy and clear functionality to the console screen.
  */
-public class ConsoleContextMenu {
+public final class ConsoleContextMenu {
+    private ConsoleContextMenu() {
+        // static class
+    }
 
     public static JPopupMenu getPopupMenu(final Component component) {
         final JPopupMenu popup = new JPopupMenu();

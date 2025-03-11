@@ -50,7 +50,7 @@ import java.io.OutputStream;
 /**
  * A Class that is used for displaying debug messages to a JTextPane.
  */
-public class DebugView {
+public final class DebugView {
 
     /**
      * Single DebugView instance.
@@ -87,10 +87,6 @@ public class DebugView {
         return textArea;
     }
 
-    private void updateTextPane(final String msg) {
-        SwingUtilities.invokeLater(new UpdateTextPaneTask(msg));
-    }
-
     static class UpdateTextPaneTask implements Runnable {
         private final String msg;
 
@@ -120,17 +116,21 @@ public class DebugView {
     static class DebugOutputStream extends OutputStream {
         @Override
         public void write(final int b) {
-            DebugView.getInstance().updateTextPane(String.valueOf((char) b));
+            updateTextPane(String.valueOf((char) b));
         }
 
         @Override
         public void write(byte[] b, int off, int len) {
-            DebugView.getInstance().updateTextPane(new String(b, off, len));
+            updateTextPane(new String(b, off, len));
         }
 
         @Override
         public void write(byte[] b) {
             write(b, 0, b.length);
+        }
+
+        private static void updateTextPane(String msg) {
+            SwingUtilities.invokeLater(new UpdateTextPaneTask(msg));
         }
     }
 }

@@ -239,7 +239,8 @@ public final class PdfObjectPanel implements IRupsEventListener {
         }
     }
 
-    private class JTableButtonMouseListener extends MouseAdapter {
+    private final class JTableButtonMouseListener extends MouseAdapter {
+        @Override
         public void mouseClicked(MouseEvent e) {
             final int selectedColumn = table.getSelectedColumn();
 
@@ -265,7 +266,7 @@ public final class PdfObjectPanel implements IRupsEventListener {
     /**
      * Notify PdfReader Controller about changes in DictionaryModel
      */
-    private class DictionaryModelListener implements TableModelListener {
+    private final class DictionaryModelListener implements TableModelListener {
         @Override
         public void tableChanged(TableModelEvent e) {
             final int row = e.getFirstRow();
@@ -283,6 +284,8 @@ public final class PdfObjectPanel implements IRupsEventListener {
                 case TableModelEvent.INSERT:
                     fireEvent(c -> c.handleDictChildAdded(value, target, key, row));
                     break;
+                default:
+                    throw new IllegalArgumentException("Unexpected event type: " + e.getType());
             }
         }
     }
@@ -290,7 +293,7 @@ public final class PdfObjectPanel implements IRupsEventListener {
     /**
      * Notify PdfReader Controller about changes in ArrayModel
      */
-    private class ArrayModelListener implements TableModelListener {
+    private final class ArrayModelListener implements TableModelListener {
         @Override
         public void tableChanged(TableModelEvent e) {
             final int row = e.getFirstRow();
@@ -300,6 +303,7 @@ public final class PdfObjectPanel implements IRupsEventListener {
             final PdfObject value = ((PdfArray) target.getPdfObject()).get(row, false);
             switch (e.getType()) {
                 case TableModelEvent.UPDATE:
+                    // noop
                     break;
                 case TableModelEvent.DELETE:
                     fireEvent(c -> c.handleArrayChildDeleted(target, row));
@@ -307,6 +311,8 @@ public final class PdfObjectPanel implements IRupsEventListener {
                 case TableModelEvent.INSERT:
                     fireEvent(c -> c.handleArrayChildAdded(value, target, row));
                     break;
+                default:
+                    throw new IllegalArgumentException("Unexpected event type: " + e.getType());
             }
         }
     }

@@ -52,7 +52,11 @@ import java.util.List;
  * iText RUPS is a tool that allows you to inspect the internal structure
  * of a PDF file.
  */
-public class RupsLauncher {
+public final class RupsLauncher {
+    private RupsLauncher() {
+        // static class
+    }
+
     /**
      * Main method. Starts the RUPS application.
      *

@@ -96,6 +96,7 @@ import javax.swing.event.TreeSelectionListener;
  * instance.
  */
 public class RupsInstanceController implements TreeSelectionListener, PageSelectionListener, IRupsEventListener {
+    private static final String PDF_FILE_SUFFIX = ".pdf";
 
     private final JPanel ownerPanel;
 
@@ -218,9 +219,8 @@ public class RupsInstanceController implements TreeSelectionListener, PageSelect
         OutputStream fos = null;
         File localFile = file;
         try {
-            final String pdfSuffix = ".pdf";
-            if (!localFile.getName().endsWith(pdfSuffix)) {
-                localFile = new File(localFile.getPath() + pdfSuffix);
+            if (!localFile.getName().endsWith(PDF_FILE_SUFFIX)) {
+                localFile = new File(localFile.getPath() + PDF_FILE_SUFFIX);
             }
 
             if (localFile.exists()) {

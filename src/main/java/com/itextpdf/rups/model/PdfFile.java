@@ -243,12 +243,6 @@ public final class PdfFile implements IPdfFile {
      *
      * @return {@code true} on success; {@code false} if invalid password
      */
-    /*
-     * "Either log or rethrow this exception." warning is ignored, as the whole
-     * contract of the method is to return false on a "bad password" (i.e. this
-     * is not an exceptional case here).
-     */
-    @SuppressWarnings("java:S1166")
     private boolean openDocumentReadWrite(byte[] password) throws IOException {
         try {
             final ReaderProperties readerProperties = new ReaderProperties().setPassword(password);
@@ -284,12 +278,6 @@ public final class PdfFile implements IPdfFile {
      *
      * @return {@code true} on success; {@code false} if invalid password
      */
-    /*
-     * "Either log or rethrow this exception." warning is ignored, as the whole
-     * contract of the method is to return false on a "bad password" (i.e. this
-     * is not an exceptional case here).
-     */
-    @SuppressWarnings("java:S1166")
     private boolean openDocumentReadOnly(byte[] password) throws IOException {
         try {
             final ReaderProperties readerProperties = new ReaderProperties();

@@ -84,8 +84,7 @@ public final class OidReference {
         // Doing the other non-recognized parts separately, so that we report
         // it only once
         while (tokenizer.hasMoreTokens()) {
-            result.append('/');
-            result.append(tokenizer.nextToken());
+            result.append('/').append(tokenizer.nextToken());
         }
         return result.toString();
     }

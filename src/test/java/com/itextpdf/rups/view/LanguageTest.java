@@ -52,43 +52,43 @@ import java.util.Locale;
 
 @Tag("UnitTest")
 public class LanguageTest extends ExtendedITextTest {
-    private final Language key = Language.ERROR;
-    private final Locale dutchLocale = Locale.forLanguageTag("nl-NL");
-    private final String expectedEnUS = "Error";
-    private final String expectedNlNL = "Fout";
+    private static final Language TEST_KEY = Language.ERROR;
+    private static final Locale DUTCH_LOCALE = Locale.forLanguageTag("nl-NL");
+    private static final String EXPECTED_EN_US = "Error";
+    private static final String EXPECTED_NL_NL = "Fout";
 
     @Test
     public void englishUSLocaleTest() {
         RupsConfiguration.INSTANCE.setUserLocale(Locale.US);
-        String actual = key.getString();
-        Assertions.assertEquals(expectedEnUS, actual);
+        String actual = TEST_KEY.getString();
+        Assertions.assertEquals(EXPECTED_EN_US, actual);
     }
 
     @Test
     public void defaultLocaleTest() {
         RupsConfiguration.INSTANCE.setUserLocale(Locale.getDefault());
-        String actual = key.getString();
-        Assertions.assertEquals(expectedEnUS, actual);
+        String actual = TEST_KEY.getString();
+        Assertions.assertEquals(EXPECTED_EN_US, actual);
     }
 
     @Test
     public void changeLocale() {
         Locale userLocale = RupsConfiguration.INSTANCE.getUserLocale();
-        String enActual = key.getString();
+        String enActual = TEST_KEY.getString();
         Assertions.assertNotNull(enActual);
-        RupsConfiguration.INSTANCE.setUserLocale(dutchLocale);
+        RupsConfiguration.INSTANCE.setUserLocale(DUTCH_LOCALE);
         RupsConfiguration.INSTANCE.saveConfiguration();
-        String nlActual = key.getString();
+        String nlActual = TEST_KEY.getString();
         RupsConfiguration.INSTANCE.setUserLocale(userLocale);
         RupsConfiguration.INSTANCE.saveConfiguration();
-        Assertions.assertEquals(expectedNlNL, nlActual);
+        Assertions.assertEquals(EXPECTED_NL_NL, nlActual);
     }
 
     @Test
     public void notExistingLocaleTest() {
         RupsConfiguration.INSTANCE.setUserLocale(new Locale("gibberish"));
         String actual = Language.ERROR.getString();
-        Assertions.assertEquals(expectedEnUS, actual);
+        Assertions.assertEquals(EXPECTED_EN_US, actual);
     }
 
     @Test
@@ -102,7 +102,7 @@ public class LanguageTest extends ExtendedITextTest {
     public void nullLocaleTest() {
         RupsConfiguration.INSTANCE.setUserLocale(null);
         String actual = Language.ERROR.getString();
-        Assertions.assertEquals(expectedEnUS, actual);
+        Assertions.assertEquals(EXPECTED_EN_US, actual);
     }
 
     @Test

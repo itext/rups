@@ -63,6 +63,10 @@ import javax.swing.table.TableModel;
  * A JTable that shows the indirect objects of a PDF xref table.
  */
 public final class XRefTable extends JTable implements JTableAutoModelInterface, IRupsEventListener {
+    private static final int NUMBER_COLUMN_INDEX = 0;
+    private static final int OBJECT_COLUMN_INDEX = 1;
+
+    private static final int NUMBER_COLUMN_PREFERRED_WIDTH = 5;
 
     /**
      * The factory that can produce all the indirect objects.
@@ -109,9 +113,9 @@ public final class XRefTable extends JTable implements JTableAutoModelInterface,
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         switch (columnIndex) {
-            case 0:
+            case NUMBER_COLUMN_INDEX:
                 return getObjectReferenceByRow(rowIndex);
-            case 1:
+            case OBJECT_COLUMN_INDEX:
                 return getObjectDescriptionByRow(rowIndex);
             default:
                 return null;
@@ -149,9 +153,9 @@ public final class XRefTable extends JTable implements JTableAutoModelInterface,
     @Override
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
-            case 0:
+            case NUMBER_COLUMN_INDEX:
                 return Language.XREF_NUMBER.getString();
-            case 1:
+            case OBJECT_COLUMN_INDEX:
                 return Language.XREF_OBJECT.getString();
             default:
                 return null;
@@ -166,7 +170,7 @@ public final class XRefTable extends JTable implements JTableAutoModelInterface,
     public void selectRowByReference(int ref) {
         final int row = objects.getIndexByRef(ref);
         setRowSelectionInterval(row, row);
-        scrollRectToVisible(getCellRect(row, 1, true));
+        scrollRectToVisible(getCellRect(row, OBJECT_COLUMN_INDEX, true));
         valueChanged(null);
     }
 
@@ -192,8 +196,8 @@ public final class XRefTable extends JTable implements JTableAutoModelInterface,
     @Override
     public void handleOpenDocument(ObjectLoader loader) {
         objects = loader.getObjects();
-        final TableColumn col = getColumnModel().getColumn(0);
-        col.setPreferredWidth(5);
+        final TableColumn col = getColumnModel().getColumn(NUMBER_COLUMN_INDEX);
+        col.setPreferredWidth(NUMBER_COLUMN_PREFERRED_WIDTH);
         fireTableDataChanged();
     }
 
