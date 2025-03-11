@@ -51,6 +51,7 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -247,18 +248,7 @@ public final class PreferencesWindow {
         buttons.add(save);
 
         JButton cancel = new JButton(Language.DIALOG_CANCEL.getString());
-        cancel.addActionListener(e -> {
-            if (RupsConfiguration.INSTANCE.hasUnsavedChanges()) {
-                int choice = JOptionPane.showConfirmDialog(jDialog,
-                        Language.SAVE_UNSAVED_CHANGES.getString());
-                if (choice == JOptionPane.OK_OPTION) {
-                    RupsConfiguration.INSTANCE.cancelTemporaryChanges();
-                    this.jDialog.dispose();
-                }
-            } else {
-                this.jDialog.dispose();
-            }
-        });
+        cancel.addActionListener(this::handleCancel);
         buttons.add(cancel);
 
         JButton reset = new JButton(Language.PREFERENCES_RESET_TO_DEFAULTS.getString());
@@ -292,5 +282,20 @@ public final class PreferencesWindow {
     public void show(Component component) {
         jDialog.setLocationRelativeTo(component);
         jDialog.setVisible(true);
+    }
+
+    private void handleCancel(ActionEvent e) {
+        // Warn user of unsaved changes via dialog
+        if (RupsConfiguration.INSTANCE.hasUnsavedChanges()) {
+            final int choice = JOptionPane.showConfirmDialog(
+                    jDialog, Language.SAVE_UNSAVED_CHANGES.getString()
+            );
+            if (choice != JOptionPane.OK_OPTION) {
+                return;
+            }
+        }
+        RupsConfiguration.INSTANCE.cancelTemporaryChanges();
+        resetView();
+        jDialog.dispose();
     }
 }
