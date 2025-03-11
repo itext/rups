@@ -109,8 +109,7 @@ public class StructureTreeNode extends IconTreeNode {
                 buf.append(PdfObjectTreeNode.getCaption(dict.get(PdfName.S, false)));
             }
             if (dict.get(PdfName.T, false) != null) {
-                buf.append(" -> ");
-                buf.append(PdfObjectTreeNode.getCaption(dict.get(PdfName.T, false)));
+                buf.append(" -> ").append(PdfObjectTreeNode.getCaption(dict.get(PdfName.T, false)));
             }
             final PdfString actualText = dict.getAsString(PdfName.ActualText);
             if (actualText != null) {

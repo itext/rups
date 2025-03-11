@@ -52,12 +52,12 @@ import java.io.IOException;
 /**
  * TextArea that visualizes the XFA XML file.
  */
-public class XfaTextArea extends JScrollPane {
+public final class XfaTextArea extends JScrollPane {
 
     /**
      * The text area with the content stream.
      */
-    protected JTextArea text;
+    private final JTextArea text;
 
     /**
      * Constructs a XFATextArea.

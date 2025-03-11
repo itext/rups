@@ -52,7 +52,7 @@ import javax.swing.JPanel;
  * A subclass of JPanel to allow for a tie between a tab ({@link com.itextpdf.rups.view.RupsTabbedPane RupsTabbedPane})
  * and its related {@link com.itextpdf.rups.controller.RupsInstanceController RupsInstanceController}.
  */
-public class RupsPanel extends JPanel {
+public final class RupsPanel extends JPanel {
 
     private RupsInstanceController rupsInstanceController;
 

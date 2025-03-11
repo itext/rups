@@ -84,7 +84,7 @@ public final class ContentStreamStyleConstants {
     /**
      * Syntax highlight attributes for operators.
      */
-    static final Map<String, AttributeSet> ATTRIBUTE_MAP = initAttributes();
+    private static final Map<String, AttributeSet> ATTRIBUTE_MAP = initAttributes();
 
     /**
      * Default attribute set.
@@ -139,7 +139,7 @@ public final class ContentStreamStyleConstants {
      * Initialize the syntax highlighting attributes.
      * This could be read from a configuration file, but is hard coded for now
      */
-    static Map<String, AttributeSet> initAttributes() {
+    private static Map<String, AttributeSet> initAttributes() {
         final Map<String, AttributeSet> attributeMap = new HashMap<>();
 
         addPathOps(attributeMap);

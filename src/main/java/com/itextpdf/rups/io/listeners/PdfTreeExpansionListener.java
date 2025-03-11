@@ -54,6 +54,9 @@ import javax.swing.tree.TreePath;
  * Listener that checks if the expanded node has one child. If it has one child it should expand it.
  */
 public final class PdfTreeExpansionListener implements TreeExpansionListener {
+    public PdfTreeExpansionListener() {
+        // noop
+    }
 
     @Override
     public void treeExpanded(TreeExpansionEvent event) {

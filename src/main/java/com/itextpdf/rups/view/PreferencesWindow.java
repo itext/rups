@@ -144,7 +144,7 @@ public final class PreferencesWindow {
         pathLabel.setLabelFor(this.pathField);
 
         JButton pathChooser = new JButton(Language.PREFERENCES_SELECT_NEW_DEFAULT_FOLDER.getString());
-        pathChooser.addActionListener(e -> {
+        pathChooser.addActionListener((ActionEvent e) -> {
             JFileChooser fileChooser = new JFileChooser(RupsConfiguration.INSTANCE.getHomeFolder());
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             int choice = fileChooser.showOpenDialog(jDialog);
@@ -161,8 +161,8 @@ public final class PreferencesWindow {
         fieldsPanel.add(pathChooser);
 
         this.openDuplicateFiles = new JCheckBox("", RupsConfiguration.INSTANCE.canOpenDuplicateFiles());
-        this.openDuplicateFiles.addActionListener(
-                e -> RupsConfiguration.INSTANCE.setOpenDuplicateFiles(((JCheckBox) e.getSource()).isSelected())
+        this.openDuplicateFiles.addActionListener((ActionEvent e) ->
+            RupsConfiguration.INSTANCE.setOpenDuplicateFiles(((JCheckBox) e.getSource()).isSelected())
         );
         JLabel openDuplicateFilesLabel = new JLabel(Language.PREFERENCES_ALLOW_DUPLICATE_FILES.getString());
         openDuplicateFilesLabel.setLabelFor(this.openDuplicateFiles);
@@ -207,7 +207,7 @@ public final class PreferencesWindow {
         this.localeBox.addItem("nl-NL");
         this.localeBox.addItem("en-US");
         this.localeBox.setSelectedItem(RupsConfiguration.INSTANCE.getUserLocale().toLanguageTag());
-        this.localeBox.addActionListener(e -> {
+        this.localeBox.addActionListener((ActionEvent e) -> {
             Object selectedItem = localeBox.getSelectedItem();
             String selectedString = (String) selectedItem;
             RupsConfiguration.INSTANCE.setUserLocale(Locale.forLanguageTag(selectedString));
@@ -240,11 +240,7 @@ public final class PreferencesWindow {
         JPanel buttons = new JPanel();
 
         JButton save = new JButton(Language.SAVE.getString());
-        save.addActionListener(e -> {
-            RupsConfiguration.INSTANCE.saveConfiguration();
-            resetView();
-            this.jDialog.dispose();
-        });
+        save.addActionListener(this::handleSave);
         buttons.add(save);
 
         JButton cancel = new JButton(Language.DIALOG_CANCEL.getString());
@@ -253,7 +249,7 @@ public final class PreferencesWindow {
 
         JButton reset = new JButton(Language.PREFERENCES_RESET_TO_DEFAULTS.getString());
 
-        reset.addActionListener(e -> {
+        reset.addActionListener((ActionEvent e) -> {
             int choice = JOptionPane.showConfirmDialog(jDialog,
                     Language.PREFERENCES_RESET_TO_DEFAULTS_CONFIRM.getString());
             if (choice == JOptionPane.OK_OPTION) {
@@ -282,6 +278,12 @@ public final class PreferencesWindow {
     public void show(Component component) {
         jDialog.setLocationRelativeTo(component);
         jDialog.setVisible(true);
+    }
+
+    private void handleSave(ActionEvent e) {
+        RupsConfiguration.INSTANCE.saveConfiguration();
+        resetView();
+        jDialog.dispose();
     }
 
     private void handleCancel(ActionEvent e) {

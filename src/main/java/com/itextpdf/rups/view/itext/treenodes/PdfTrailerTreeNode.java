@@ -49,7 +49,7 @@ import com.itextpdf.rups.view.Language;
  * A special treenode that will be used for the trailer dictionary
  * of a PDF file.
  */
-public class PdfTrailerTreeNode extends PdfObjectTreeNode {
+public final class PdfTrailerTreeNode extends PdfObjectTreeNode {
 
     private static final String PDF_ICON = "pdf.png";
 

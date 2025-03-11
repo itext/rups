@@ -44,6 +44,7 @@ package com.itextpdf.rups.view.itext;
 
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.mock.NoopProgressDialog;
+import com.itextpdf.rups.model.IPdfFile;
 import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
@@ -61,15 +62,13 @@ import org.junit.jupiter.api.Test;
 
 @Tag("IntegrationTest")
 class StructureTreeTest extends ExtendedITextTest {
-
-
-    private static final String sourceFolder = "./src/test/resources/com/itextpdf/rups/controller/";
+    private static final String SOURCE_DIR = "./src/test/resources/com/itextpdf/rups/controller/";
 
     @Test
     void extractMcidContentInStructureTreeTest()
             throws IOException, ExecutionException, InterruptedException {
         final PdfFile pdfFile = PdfFile.open(
-                new File(sourceFolder + "hello_world_tagged.pdf")
+                new File(SOURCE_DIR + "hello_world_tagged.pdf")
         );
 
         StructureTreeNode rootNode = getStructureTreeRootNode(pdfFile);
@@ -83,7 +82,7 @@ class StructureTreeTest extends ExtendedITextTest {
     void extractMcidContentInStructureTreeWithActualTextTest()
             throws IOException, ExecutionException, InterruptedException {
         final PdfFile pdfFile = PdfFile.open(
-                new File(sourceFolder + "hello_world_tagged_actualtext.pdf")
+                new File(SOURCE_DIR + "hello_world_tagged_actualtext.pdf")
         );
 
         StructureTreeNode rootNode = getStructureTreeRootNode(pdfFile);
@@ -93,7 +92,7 @@ class StructureTreeTest extends ExtendedITextTest {
         Assertions.assertEquals("0 [Olleh ]", nodeLabel);
     }
 
-    private static StructureTreeNode getStructureTreeRootNode(PdfFile pdfFile)
+    private static StructureTreeNode getStructureTreeRootNode(IPdfFile pdfFile)
             throws ExecutionException, InterruptedException {
 
         PdfReaderController controller = new PdfReaderController(null, null);

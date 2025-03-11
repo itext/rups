@@ -57,17 +57,14 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import javax.swing.WindowConstants;
 
 /**
  * @author Michael Demey
  */
 public class InspectObjectAction extends AbstractRupsAction {
-
-    private Component invoker;
-
     public InspectObjectAction(String name, Component invoker) {
-        super(name);
-        this.invoker = invoker;
+        super(name, invoker);
     }
 
     @Override
@@ -82,7 +79,7 @@ public class InspectObjectAction extends AbstractRupsAction {
         frame.setResizable(true);
 
         frame.setVisible(true);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
         final PdfObjectTreeNode node =
                 (PdfObjectTreeNode) ((PdfTree) invoker).getSelectionPath().getLastPathComponent();

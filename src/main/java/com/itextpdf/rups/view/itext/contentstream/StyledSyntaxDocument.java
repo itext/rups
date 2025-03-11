@@ -73,7 +73,7 @@ public class StyledSyntaxDocument extends DefaultStyledDocument implements IMixe
     private static final String INDENTATION_PREFIX = "    ";
     private static final int INLINE_IMAGE_EXPECTED_TOKEN_COUNT = 2;
 
-    private final transient IndentManager indentManager;
+    private final IndentManager indentManager;
 
     /**
      * Highlight operands according to their operator.

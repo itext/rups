@@ -64,6 +64,7 @@ import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.OcspResponseC
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 
 /**
@@ -83,7 +84,7 @@ public class TreeNodeFactory {
     /**
      * An list containing the nodes of every indirect object.
      */
-    private final List<PdfObjectTreeNode> nodes = new ArrayList<>();
+    private final List<PdfObjectTreeNode> nodes;
 
     /**
      * Creates a factory that can produce TreeNode objects
@@ -93,9 +94,10 @@ public class TreeNodeFactory {
      */
     public TreeNodeFactory(IndirectObjectFactory objects) {
         this.objects = objects;
+        this.nodes = new ArrayList<>(objects.size());
         for (int i = 0; i < objects.size(); i++) {
             final int ref = objects.getRefByIndex(i);
-            nodes.add(PdfObjectTreeNode.getInstance(PdfNull.PDF_NULL, ref));
+            this.nodes.add(PdfObjectTreeNode.getInstance(PdfNull.PDF_NULL, ref));
         }
     }
 
@@ -167,6 +169,8 @@ public class TreeNodeFactory {
                     expandNode(leaf);
                 }
                 break;
+            default:
+                // Other types would be leaves
         }
 
         // Additional handling for ASN.1 stuff
@@ -182,7 +186,6 @@ public class TreeNodeFactory {
      *
      * @return a specific child of dictionary node
      */
-    @SuppressWarnings("unchecked")
     public PdfObjectTreeNode getChildNode(PdfObjectTreeNode node, PdfName key) {
         PdfObjectTreeNode child = node.getDictionaryChildNode(key);
         if (child != null && child.isDictionaryNode(key)) {
@@ -196,6 +199,12 @@ public class TreeNodeFactory {
         return null;
     }
 
+    public void addNewIndirectObject(PdfObject object) {
+        objects.addNewIndirectObject(object);
+        nodes.add(PdfObjectTreeNode.getInstance(object, object.getIndirectReference().getObjNumber()));
+        LoggerHelper.info(Language.LOG_TREE_NODE_CREATED.getString(), getClass());
+    }
+
     /**
      * Tries adding a child node to a parent node without
      * throwing an exception. Normally, if the child node is already
@@ -206,18 +215,12 @@ public class TreeNodeFactory {
      * @param parent the parent node
      * @param child  a child node
      */
-    private void addNodes(PdfObjectTreeNode parent, PdfObjectTreeNode child) {
+    private static void addNodes(PdfObjectTreeNode parent, MutableTreeNode child) {
         try {
             parent.add(child);
         } catch (IllegalArgumentException iae) {
             parent.setRecursive(true);
         }
-    }
-
-    public void addNewIndirectObject(PdfObject object) {
-        objects.addNewIndirectObject(object);
-        nodes.add(PdfObjectTreeNode.getInstance(object, object.getIndirectReference().getObjNumber()));
-        LoggerHelper.info(Language.LOG_TREE_NODE_CREATED.getString(), getClass());
     }
 
     /**

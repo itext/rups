@@ -68,6 +68,8 @@ import javax.swing.table.TableModel;
  * page dictionary and the page numbers (with label information if present).
  */
 public final class PagesTable extends JTable implements JTableAutoModelInterface, IRupsEventListener {
+    private static final int OBJECT_COLUMN_INDEX = 0;
+    private static final int PAGE_COLUMN_INDEX = 1;
 
     /**
      * A list with page nodes.
@@ -117,9 +119,9 @@ public final class PagesTable extends JTable implements JTableAutoModelInterface
             return null;
         }
         switch (columnIndex) {
-            case 0:
+            case OBJECT_COLUMN_INDEX:
                 return String.format(Language.PAGES_TABLE_OBJECT.getString(), list.get(rowIndex).getNumber());
-            case 1:
+            case PAGE_COLUMN_INDEX:
                 return list.get(rowIndex);
             default:
                 return null;
@@ -132,9 +134,9 @@ public final class PagesTable extends JTable implements JTableAutoModelInterface
     @Override
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
-            case 0:
+            case OBJECT_COLUMN_INDEX:
                 return Language.OBJECT.getString();
-            case 1:
+            case PAGE_COLUMN_INDEX:
                 return Language.PAGE.getString();
             default:
                 return null;
@@ -186,9 +188,7 @@ public final class PagesTable extends JTable implements JTableAutoModelInterface
             i++;
             stringBuilder.append(String.format(Language.PAGE_NUMBER.getString(), i));
             if (pageLabels != null) {
-                stringBuilder.append(" ( ");
-                stringBuilder.append(pageLabels[i - 1]);
-                stringBuilder.append(" )");
+                stringBuilder.append(" ( ").append(pageLabels[i - 1]).append(" )");
             }
             child.setUserObject(stringBuilder.toString());
             list.add(child);

@@ -58,7 +58,7 @@ public class FormTreeNode extends IconTreeNode {
     /**
      * The corresponding tree node in the PdfTree.
      */
-    protected PdfObjectTreeNode object_node;
+    protected PdfObjectTreeNode objectNode;
 
     /**
      * Creates the root node of the FormTree.
@@ -74,7 +74,7 @@ public class FormTreeNode extends IconTreeNode {
      */
     public FormTreeNode(PdfObjectTreeNode node) {
         super(FORM_ICON);
-        this.object_node = node;
+        this.objectNode = node;
         if (node.isDictionary()) {
             PdfDictionary dict = (PdfDictionary) node.getPdfObject();
             PdfObject fieldname = dict.get(PdfName.T, false);
@@ -93,6 +93,6 @@ public class FormTreeNode extends IconTreeNode {
      * @return a PdfObjectTreeNode in the PdfTree
      */
     public PdfObjectTreeNode getCorrespondingPdfObjectNode() {
-        return object_node;
+        return objectNode;
     }
 }

@@ -386,7 +386,7 @@ public class StyledSyntaxDocumentTest {
         // and insert some garbage chars in between just for fun
         int start = theText.indexOf(") (");
         MutableAttributeSet mattr = new SimpleAttributeSet();
-        mattr.addAttribute(ContentStreamStyleConstants.HEX_EDIT, true);
+        mattr.addAttribute(ContentStreamStyleConstants.HEX_EDIT, Boolean.TRUE);
         doc.replace(start, 3, "!.\n\t", mattr);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -429,7 +429,7 @@ public class StyledSyntaxDocumentTest {
         String theText = doc.getText(0, doc.getLength());
         int start = theText.indexOf("6f00");
         MutableAttributeSet mattr = new SimpleAttributeSet();
-        mattr.addAttribute(ContentStreamStyleConstants.HEX_EDIT, true);
+        mattr.addAttribute(ContentStreamStyleConstants.HEX_EDIT, Boolean.TRUE);
         doc.replace(start, 2, "757575", mattr);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -447,7 +447,7 @@ public class StyledSyntaxDocumentTest {
         String theText = doc.getText(0, doc.getLength());
         int start = theText.indexOf("6f00");
         MutableAttributeSet mattr = new SimpleAttributeSet();
-        mattr.addAttribute(ContentStreamStyleConstants.HEX_EDIT, true);
+        mattr.addAttribute(ContentStreamStyleConstants.HEX_EDIT, Boolean.TRUE);
         doc.insertString(start, "6f6f6f", mattr);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -465,7 +465,7 @@ public class StyledSyntaxDocumentTest {
         String theText = doc.getText(0, doc.getLength());
         int start = theText.indexOf("6f00");
         MutableAttributeSet mattr = new SimpleAttributeSet();
-        mattr.addAttribute(ContentStreamStyleConstants.HEX_EDIT, true);
+        mattr.addAttribute(ContentStreamStyleConstants.HEX_EDIT, Boolean.TRUE);
         doc.insertString(start, "6fzzzqqq6f!!!6f", mattr);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -483,7 +483,7 @@ public class StyledSyntaxDocumentTest {
         String theText = doc.getText(0, doc.getLength());
         int start = theText.indexOf("21}) Tj");
         MutableAttributeSet mattr = new SimpleAttributeSet();
-        mattr.addAttribute(ContentStreamStyleConstants.HEX_EDIT, true);
+        mattr.addAttribute(ContentStreamStyleConstants.HEX_EDIT, Boolean.TRUE);
         doc.insertString(start + 2, "31212131", mattr);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

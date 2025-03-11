@@ -51,7 +51,9 @@ import java.awt.Component;
  * Renders the tree cells with the correct icon.
  */
 public class IconTreeCellRenderer extends DefaultTreeCellRenderer {
-
+    public IconTreeCellRenderer() {
+        // noop
+    }
 
     @Override
     public Component getTreeCellRendererComponent(JTree tree, Object value,

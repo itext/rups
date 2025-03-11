@@ -44,7 +44,6 @@ package com.itextpdf.rups.view.itext.contentstream;
 
 import com.itextpdf.commons.exceptions.ITextException;
 import com.itextpdf.io.font.PdfEncodings;
-import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.view.Language;
 
 import java.util.Locale;

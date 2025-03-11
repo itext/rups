@@ -55,8 +55,6 @@ import org.dom4j.Node;
 import org.dom4j.ProcessingInstruction;
 import org.dom4j.Text;
 
-import java.util.List;
-
 public class XdpTreeNode extends IconTreeNode {
 
     private static final String ATTRIBUTE_ICON = "attribute.png";
@@ -70,7 +68,6 @@ public class XdpTreeNode extends IconTreeNode {
      *
      * @param node the XML node
      */
-    @SuppressWarnings("unchecked")
     public XdpTreeNode(Node node) {
         super(null, node);
         if (node instanceof Element) {
@@ -101,7 +98,7 @@ public class XdpTreeNode extends IconTreeNode {
         icon = IconFetcher.getIcon(TAG_ICON);
     }
 
-    private void addChildNodes(List<? extends Node> list) {
+    private void addChildNodes(Iterable<? extends Node> list) {
         for (Node node : list) {
             if (!(node instanceof Namespace || node instanceof Comment)) {
                 this.add(new XdpTreeNode(node));

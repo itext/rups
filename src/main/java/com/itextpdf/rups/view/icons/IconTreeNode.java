@@ -98,4 +98,13 @@ public class IconTreeNode extends DefaultMutableTreeNode {
     public Color getTextColor() {
         return textColor;
     }
+
+    @Override
+    public final void setUserObject(Object userObject) {
+        /*
+         * This override is here just to make it final, so that it would be
+         * safe to use in constructors.
+         */
+        super.setUserObject(userObject);
+    }
 }

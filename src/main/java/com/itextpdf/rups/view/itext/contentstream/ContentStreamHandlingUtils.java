@@ -63,7 +63,7 @@ final class ContentStreamHandlingUtils {
      */
     private static final String PERMITTED_SYMBOLS = "<>()\\/?.!{}[]-_@$€#%&*^+=`~,;:|'\" \n\t";
 
-    private static final double PERMITTED_NONTEXT_PROPORTION = 0.1f;
+    private static final double PERMITTED_NONTEXT_PROPORTION = 0.1F;
 
     private static final char[] HEX_DIGITS = "0123456789abcdef".toCharArray();
 
@@ -73,8 +73,7 @@ final class ContentStreamHandlingUtils {
 
     static void hexlify(byte[] bytes, StringBuilder sb) {
         for (final byte b : bytes) {
-            sb.append(HEX_DIGITS[(b >> 4) & 0xf]);
-            sb.append(HEX_DIGITS[b & 0xf]);
+            sb.append(HEX_DIGITS[(b >> 4) & 0xF]).append(HEX_DIGITS[b & 0xF]);
         }
     }
 

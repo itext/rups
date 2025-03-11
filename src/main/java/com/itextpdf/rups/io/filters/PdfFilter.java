@@ -53,11 +53,16 @@ import javax.swing.filechooser.FileFilter;
  * Filters PDF files in a {@link JFileChooser}.
  */
 public class PdfFilter extends FileFilter {
+    private static final String PDF_FILE_SUFFIX = ".pdf";
 
     /**
      * A public instance of the PdfFilter.
      */
     public static final PdfFilter INSTANCE = new PdfFilter();
+
+    public PdfFilter() {
+        // noop
+    }
 
     /**
      * @param f File
@@ -67,9 +72,8 @@ public class PdfFilter extends FileFilter {
      * @see FileFilter#accept(java.io.File)
      */
     public boolean accept(File f) {
-        final String suffix = ".pdf";
         return f != null && (f.isDirectory() || f.getName().toLowerCase(RupsConfiguration.INSTANCE.getUserLocale())
-                .endsWith(suffix));
+                .endsWith(PDF_FILE_SUFFIX));
     }
 
     /**

@@ -44,6 +44,7 @@ package com.itextpdf.rups.model;
 
 import com.itextpdf.rups.view.Language;
 
+import java.awt.Dimension;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JProgressBar;
@@ -55,11 +56,15 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.WindowEvent;
+import javax.swing.WindowConstants;
 
 /**
  * An informational dialog window showing the progress of a certain action.
  */
 public final class ProgressDialog extends JDialog implements IProgressDialog {
+    private static final Dimension DIALOG_SIZE = new Dimension(300, 100);
+    private static final Insets LAYOUT_INSETS = new Insets(5, 5, 5, 5);
+
     /**
      * label showing the message describing what's in progress.
      */
@@ -86,8 +91,8 @@ public final class ProgressDialog extends JDialog implements IProgressDialog {
     public ProgressDialog(Component parent, String msg, Frame frame) {
         super(frame);
         this.setTitle(Language.DIALOG_PROGRESS.getString());
-        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        setSize(300, 100);
+        setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        setSize(DIALOG_SIZE);
         this.setLocationRelativeTo(parent);
 
         setLayout(new GridBagLayout());
@@ -98,7 +103,7 @@ public final class ProgressDialog extends JDialog implements IProgressDialog {
         getContentPane().add(INFO, constraints);
         constraints.gridheight = 1;
         constraints.gridx = 1;
-        constraints.insets = new Insets(5, 5, 5, 5);
+        constraints.insets = LAYOUT_INSETS;
         message = new JLabel(msg);
         getContentPane().add(message, constraints);
         constraints.gridy = 1;

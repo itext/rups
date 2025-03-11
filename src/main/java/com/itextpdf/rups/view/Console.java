@@ -129,7 +129,7 @@ public final class Console implements IRupsEventListener {
             try {
                 final Document doc = textArea.getDocument();
                 if (doc.getLength() + msg.length() > MAX_TEXT_AREA_SIZE) {
-                    Console.this.clearWithBuffer(Language.ERROR_TOO_MANY_OUTPUT.getString());
+                    clearWithBuffer(Language.ERROR_TOO_MANY_OUTPUT.getString());
                 }
                 doc.insertString(doc.getLength(), msg, styleContext.getStyle(type));
                 textArea.setCaretPosition(textArea.getDocument().getLength());
@@ -174,7 +174,7 @@ public final class Console implements IRupsEventListener {
         return textArea;
     }
 
-    static class ConsoleOutputStream extends OutputStream {
+    static final class ConsoleOutputStream extends OutputStream {
 
         private final String type;
 
@@ -201,7 +201,7 @@ public final class Console implements IRupsEventListener {
     /**
      * The style context defining the styles of each type of PrintStream.
      */
-    static class ConsoleStyleContext extends StyleContext {
+    static final class ConsoleStyleContext extends StyleContext {
 
         /**
          * The name of the Style used for Info messages

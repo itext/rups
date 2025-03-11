@@ -147,7 +147,7 @@ public class ObjectLoader extends SwingWorker<Void, Void> {
     protected void done() {
         try {
             eventListener.handleOpenDocument(this);
-        } catch (Exception ex) {
+        } catch (RuntimeException ex) {
             progress.showErrorDialog(ex);
             LoggerHelper.error(ex.getLocalizedMessage(), ex, getClass());
         }

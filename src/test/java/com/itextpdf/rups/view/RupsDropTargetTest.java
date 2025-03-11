@@ -109,8 +109,7 @@ public class RupsDropTargetTest extends ITextTest {
         StringBuilder builder = new StringBuilder();
 
         for ( File file : this.fileList ) {
-            builder.append(file.toURL());
-            builder.append(" ");
+            builder.append(file.toURI().toURL()).append(' ');
         }
 
         Transferable transferable = new MockedTransferable(DataFlavor.stringFlavor, builder.toString());
@@ -122,8 +121,7 @@ public class RupsDropTargetTest extends ITextTest {
     @Test
     public void test() {
         MockedTransferable mockedTransferable = new MockedTransferable(DataFlavor.javaFileListFlavor, fileList);
-        DropTarget dropTarget = new DropTarget();
-        this.dropTarget.drop(new MockedDropTargetDropEvent(mockedTransferable, dropTarget));
+        this.dropTarget.drop(new MockedDropTargetDropEvent(mockedTransferable, new DropTarget()));
         Assertions.assertEquals(fileList.size(), this.rupsController.getOpenedCount());
     }
 }

@@ -52,12 +52,16 @@ import java.util.HashMap;
 /**
  * Class that fetches the icons in com.itextpdf.rups.view.icons.
  */
-public class IconFetcher {
+public final class IconFetcher {
 
     /**
      * Cache with icons.
      */
     private static final HashMap<String, Icon> cache = new HashMap<>();
+
+    private IconFetcher() {
+        // static class
+    }
 
     /**
      * Gets an Icon with a specific name.
@@ -74,7 +78,7 @@ public class IconFetcher {
             try {
                 icon = new ImageIcon(IconFetcher.class.getResource(filename));
                 cache.put(filename, icon);
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 LoggerHelper.error(
                         String.format(Language.ERROR_CANNOT_FIND_FILE.getString(), filename), e, IconFetcher.class
                 );

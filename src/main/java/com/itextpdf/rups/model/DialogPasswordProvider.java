@@ -90,12 +90,6 @@ public class DialogPasswordProvider implements IPasswordProvider {
         return true;
     }
 
-    /*
-     * Ignoring the "Return an empty array instead of null" warning. Here null
-     * means, that the user cancelled password input operation. So it is
-     * different from an empty password.
-     */
-    @SuppressWarnings("java:S1168")
     @Override
     public byte[] get(File originalFile) {
         // originalFile is ignored, since we are using a GUI
@@ -117,6 +111,7 @@ public class DialogPasswordProvider implements IPasswordProvider {
         final Object selectedValue = pane.getValue();
         // If user didn't click OK in the dialog
         if (!(selectedValue instanceof Integer) || (Integer) selectedValue != JOptionPane.OK_OPTION) {
+            // null <=> password dialog was cancelled
             return null;
         }
         return preparePasswordForOpen(new String(passwordField.getPassword()));

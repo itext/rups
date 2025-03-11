@@ -77,7 +77,6 @@ public class XfaTreeNode extends FormTreeNode implements OutputStreamResource {
      * @param os the OutputStream to which the XML is written.
      * @throws IOException usual exception when there's a problem writing to an OutputStream
      */
-    @SuppressWarnings("unchecked")
     public void writeTo(OutputStream os) throws IOException {
         final Enumeration<TreeNode> children = this.children();
         FormTreeNode node;

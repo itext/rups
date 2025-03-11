@@ -51,11 +51,11 @@ import java.nio.charset.StandardCharsets;
 /**
  * Everything writing to this OutputStream will be shown in a JTextArea.
  */
-public class TextAreaOutputStream extends OutputStream {
+public final class TextAreaOutputStream extends OutputStream {
     /**
      * The text area to which we want to write.
      */
-    protected JTextArea text;
+    private final JTextArea text;
 
     /**
      * Constructs a TextAreaOutputStream.

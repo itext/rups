@@ -44,12 +44,14 @@ package com.itextpdf.rups.view.itext.contentstream;
 
 import com.itextpdf.kernel.pdf.PdfObject;
 
+import java.io.Serializable;
 import java.util.Set;
 
 /**
  * A class that keeps track of the current indentation level in a content stream.
  */
-public class IndentManager {
+@SuppressWarnings("java:S2057")
+public class IndentManager implements Serializable {
     private static final Set<String> INDENTING_OPERATORS = Set.of("BT", "q", "BMC", "BDC", "BX", "m", "re");
     private static final Set<String> UNINDENTING_OPERATORS = Set.of("ET", "Q", "EMC", "EX", "b", "B", "f", "f*", "F",
             "B*", "b*", "n", "s", "S");
@@ -74,11 +76,19 @@ public class IndentManager {
      * @param operator The operator to check
      */
     public void indentIfNecessary(PdfObject operator) {
-        String operatorString = operator.toString();
-        if (!INDENTING_OPERATORS.contains(operatorString)) {
+        indentIfNecessary(operator.toString());
+    }
+
+    /**
+     * Increase the indentation level if the operator is one that increases the indentation level.
+     *
+     * @param operator The operator to check
+     */
+    public void indentIfNecessary(String operator) {
+        if (!INDENTING_OPERATORS.contains(operator)) {
             return;
         }
-        if (SUBPATH_CREATION_OPERATORS.contains(operatorString)) {
+        if (SUBPATH_CREATION_OPERATORS.contains(operator)) {
             if (!isIndentingPath) {
                 // Only indent subpath creation operators if we're not already indenting a path
                 indentLevel++;
@@ -97,10 +107,19 @@ public class IndentManager {
      * @param operator The operator to check
      */
     public void unindentIfNecessary(PdfObject operator) {
-        String operatorString = operator.toString();
-        if (indentLevel > 0 && UNINDENTING_OPERATORS.contains(operatorString)) {
+        unindentIfNecessary(operator.toString());
+    }
+
+    /**
+     * Decrease the indentation level if the operator is one that decreases the indentation level,
+     * and the current indentation level is greater than 0.
+     *
+     * @param operator The operator to check
+     */
+    public void unindentIfNecessary(String operator) {
+        if (indentLevel > 0 && UNINDENTING_OPERATORS.contains(operator)) {
             indentLevel--;
-            if (PATH_PAINTING_OPERATORS.contains(operatorString)) {
+            if (PATH_PAINTING_OPERATORS.contains(operator)) {
                 isIndentingPath = false;
             }
         }
