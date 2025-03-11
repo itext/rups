@@ -331,7 +331,7 @@ public class RupsInstanceController implements TreeSelectionListener, PageSelect
         loader = new ObjectLoader(
                 this, pdfFile, pdfFile.getOriginalFile().getName(), dialog
         );
-        loader.start();
+        loader.execute();
     }
 
     // tree selection

@@ -43,7 +43,8 @@
 package com.itextpdf.rups.view.itext;
 
 import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.model.IProgressDialog;
+import com.itextpdf.rups.mock.NoopProgressDialog;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.view.itext.treenodes.StructureTreeNode;
@@ -52,6 +53,7 @@ import com.itextpdf.test.ExtendedITextTest;
 import java.io.File;
 import java.io.IOException;
 
+import java.util.concurrent.ExecutionException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -64,7 +66,8 @@ class StructureTreeTest extends ExtendedITextTest {
     private static final String sourceFolder = "./src/test/resources/com/itextpdf/rups/controller/";
 
     @Test
-    void extractMcidContentInStructureTreeTest() throws IOException {
+    void extractMcidContentInStructureTreeTest()
+            throws IOException, ExecutionException, InterruptedException {
         final PdfFile pdfFile = PdfFile.open(
                 new File(sourceFolder + "hello_world_tagged.pdf")
         );
@@ -77,7 +80,8 @@ class StructureTreeTest extends ExtendedITextTest {
     }
 
     @Test
-    void extractMcidContentInStructureTreeWithActualTextTest() throws IOException {
+    void extractMcidContentInStructureTreeWithActualTextTest()
+            throws IOException, ExecutionException, InterruptedException {
         final PdfFile pdfFile = PdfFile.open(
                 new File(sourceFolder + "hello_world_tagged_actualtext.pdf")
         );
@@ -89,14 +93,17 @@ class StructureTreeTest extends ExtendedITextTest {
         Assertions.assertEquals("0 [Olleh ]", nodeLabel);
     }
 
-    private static StructureTreeNode getStructureTreeRootNode(PdfFile pdfFile) {
+    private static StructureTreeNode getStructureTreeRootNode(PdfFile pdfFile)
+            throws ExecutionException, InterruptedException {
 
         PdfReaderController controller = new PdfReaderController(null, null);
+        // Using a noop listener here to prevent threading issues
         ObjectLoader loader = new ObjectLoader(
-                controller, pdfFile, "Test loader", new DummyProgressDialog()
+                new IRupsEventListener() {}, pdfFile, "Test loader", new NoopProgressDialog()
         );
         // preload everything
-        loader.doTask();
+        loader.execute();
+        loader.get();
 
         // initialise the main PDF object tree view
         controller.handleOpenDocument(loader);
@@ -106,33 +113,5 @@ class StructureTreeTest extends ExtendedITextTest {
         tree.setLoader(loader);
         tree.setModel(tree.recalculateTreeModel());
         return (StructureTreeNode) tree.getModel().getRoot();
-    }
-
-    private static final class DummyProgressDialog implements IProgressDialog {
-
-        @Override
-        public void setMessage(String msg) {
-
-        }
-
-        @Override
-        public void setValue(int value) {
-
-        }
-
-        @Override
-        public void setTotal(int n) {
-
-        }
-
-        @Override
-        public void showErrorDialog(Exception ex) {
-
-        }
-
-        @Override
-        public void setVisible(boolean visible) {
-
-        }
     }
 }
