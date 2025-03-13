@@ -47,7 +47,11 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.mock.NoopProgressDialog;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.model.IndirectObjectFactory;
+import com.itextpdf.rups.model.ObjectLoader;
+import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.XfaTreeNode;
@@ -60,7 +64,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 
 @Tag("UnitTest")
-class FormTreeTest extends ExtendedITextTest {
+final class FormTreeTest extends ExtendedITextTest {
     private static final String SOURCE_DIR = "./src/test/resources/com/itextpdf/rups/view/itext/";
 
     @Test
@@ -89,6 +93,29 @@ class FormTreeTest extends ExtendedITextTest {
             XfaTreeNode xfaTreeNode = new XfaTreeNode(xfaObjTreeNode);
 
             FormTree.loadXfa(factory, xfaTreeNode, xfaObjTreeNode);
+        });
+    }
+
+    @Test
+    void testHandleOpenDocument() {
+        Assertions.assertDoesNotThrow(() -> {
+            // Preload everything
+            final PdfFile pdfFile = PdfFile.open(
+                    new File(SOURCE_DIR + "cmp_purchase_order_filled.pdf")
+            );
+
+            // Using a noop listener here to prevent threading issues
+            final ObjectLoader loader = new ObjectLoader(
+                    new IRupsEventListener() {
+                    }, pdfFile, "Test loader", new NoopProgressDialog()
+            );
+            loader.execute();
+            loader.get();
+
+            // There is a FormTree inside the controller, which will also
+            // handle the event
+            final PdfReaderController controller = new PdfReaderController(null, null);
+            controller.handleOpenDocument(loader);
         });
     }
 }

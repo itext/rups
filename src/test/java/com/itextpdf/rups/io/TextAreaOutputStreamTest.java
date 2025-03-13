@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2024 Apryse Group NV
+    Copyright (c) 1998-2025 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -40,53 +40,28 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.model;
+package com.itextpdf.rups.io;
 
-import com.itextpdf.kernel.pdf.PdfArray;
-import com.itextpdf.kernel.pdf.PdfBoolean;
-import com.itextpdf.kernel.pdf.PdfDictionary;
-import com.itextpdf.kernel.pdf.PdfDocument;
-import com.itextpdf.kernel.pdf.PdfIndirectReference;
-import com.itextpdf.kernel.pdf.PdfName;
-import com.itextpdf.kernel.pdf.PdfNumber;
-import com.itextpdf.kernel.pdf.PdfString;
-import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.test.ExtendedITextTest;
-
-import java.io.ByteArrayOutputStream;
-import java.util.Arrays;
-
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import javax.swing.JTextArea;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @Tag("UnitTest")
-class PdfSyntaxUtilsTest extends ExtendedITextTest {
-
+class TextAreaOutputStreamTest {
     @Test
-    void testSimpleString() {
-        Assertions.assertEquals("(hello world)", PdfSyntaxUtils.getSyntaxString(new PdfString("hello world")));
-    }
-
-    @Test
-    void testSimpleDictionary() {
-        PdfDictionary pdfDictionary = new PdfDictionary();
-        pdfDictionary.put(PdfName.ON, PdfBoolean.TRUE);
-        Assertions.assertEquals("<< /ON true >>", PdfSyntaxUtils.getSyntaxString(pdfDictionary));
-    }
-
-    @Test
-    void testSimpleArray() {
-        PdfArray array = new PdfArray(Arrays.asList(new PdfNumber(1), new PdfString("hello")));
-        Assertions.assertEquals("[ 1 (hello) ]", PdfSyntaxUtils.getSyntaxString(array));
-    }
-
-    @Test
-    void testIndirectRef() {
-        final PdfDocument doc = new PdfDocument(new PdfWriter(new ByteArrayOutputStream()));
-        final PdfIndirectReference ref = new PdfString("test")
-                .makeIndirect(doc)
-                .getIndirectReference();
-        Assertions.assertEquals(ref.getObjNumber() + " 0 R", PdfSyntaxUtils.getSyntaxString(ref));
+    void write() throws IOException {
+        final JTextArea textArea = new JTextArea("Initial Text");
+        try (final TextAreaOutputStream stream = new TextAreaOutputStream(textArea)) {
+            Assertions.assertEquals("", textArea.getText());
+            stream.write('\n');
+            Assertions.assertEquals("\n", textArea.getText());
+            stream.write("тест".getBytes(StandardCharsets.UTF_8), 2, 4);
+            Assertions.assertEquals("\nес", textArea.getText());
+            stream.write("ТЕСТ".getBytes(StandardCharsets.UTF_8));
+            Assertions.assertEquals("\nесТЕСТ", textArea.getText());
+        }
     }
 }
