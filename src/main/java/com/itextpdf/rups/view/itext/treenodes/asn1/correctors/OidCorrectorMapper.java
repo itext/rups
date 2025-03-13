@@ -64,6 +64,7 @@ import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.oc
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.ocsp.OcspNonceCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.ocsp.OcspPreferredSignatureAlgorithmsCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.ocsp.OcspServiceLocatorCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.ArchiveRevInfoCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.AuthorityInfoAccessCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.AuthorityKeyIdentifierCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.BasicConstraintsCorrector;
@@ -72,6 +73,8 @@ import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.Cr
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.ExtKeyUsageCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.KeyUsageCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.SubjectKeyIdentifierCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.TimeStampCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.UbiquityRightsCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.policies.CpsPointerCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.policies.UserNoticeCorrector;
 
@@ -188,6 +191,10 @@ public final class OidCorrectorMapper {
             ),
             // X.509 Extensions
             Map.entry(
+                    ArchiveRevInfoCorrector.OID,
+                    ArchiveRevInfoCorrector.INSTANCE
+            ),
+            Map.entry(
                     AuthorityInfoAccessCorrector.OID,
                     AuthorityInfoAccessCorrector.INSTANCE
             ),
@@ -218,6 +225,14 @@ public final class OidCorrectorMapper {
             Map.entry(
                     SubjectKeyIdentifierCorrector.OID,
                     SubjectKeyIdentifierCorrector.INSTANCE
+            ),
+            Map.entry(
+                    TimeStampCorrector.OID,
+                    TimeStampCorrector.INSTANCE
+            ),
+            Map.entry(
+                    UbiquityRightsCorrector.OID,
+                    UbiquityRightsCorrector.INSTANCE
             ),
             // X.509 Certificate Policies
             Map.entry(
