@@ -105,7 +105,7 @@ final class AlgorithmIdentifierCorrectorTest {
             Asn1TestUtil.assertNodeMatches(
                     0,
                     "algorithm: 2.16.840.1.101.3.4.2.3 (/joint-iso-itu-t/country/us/organization"
-                            + "/gov/csor/nistAlgorithms/hashAlgs/sha512)",
+                            + "/gov/csor/nistAlgorithms/hashAlgs/id-sha512)",
                     parameters.getChildAt(0)
             );
             Asn1TestUtil.assertNodeMatches(0, "parameters: NULL", parameters.getChildAt(1));
@@ -117,7 +117,7 @@ final class AlgorithmIdentifierCorrectorTest {
                 new DERSequence(new ASN1Encodable[] {
                         new ASN1ObjectIdentifier("1.2.840.113549.1.1.8"),           // mgf1
                         new DERSequence(new ASN1Encodable[] {
-                                new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.3"), // sha512
+                                new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.3"), // id-sha512
                                 DERNull.INSTANCE,
                         }),
                 })

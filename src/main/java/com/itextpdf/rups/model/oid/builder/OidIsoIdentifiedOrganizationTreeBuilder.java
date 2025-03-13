@@ -83,7 +83,8 @@ final class OidIsoIdentifiedOrganizationTreeBuilder {
           )),
           entry("14", createOIWTree()),
           entry("36", createTeleTrustTree()),
-          entry("101", createThawteTree())
+          entry("101", createThawteTree()),
+          entry("132", createCerticomTree())
         ));
         // @formatter:on
     }
@@ -483,6 +484,57 @@ final class OidIsoIdentifiedOrganizationTreeBuilder {
           entry("113", "id-Ed448"),
           entry("114", "id-EdDSA25519-ph"),
           entry("115", "id-EdDSA448-ph")
+        ));
+        // @formatter:on
+    }
+
+    /**
+     * Tree: 1.3.132.*
+     *
+     * @see <a href="https://www.secg.org/SEC2-Ver-1.0.pdf">
+     * SEC 2: Recommended Elliptic Curve Domain Parameters, Version 1.0
+     * </a>
+     *
+     * @see <a href="https://www.secg.org/sec2-v2.pdf">
+     * SEC 2: Recommended Elliptic Curve Domain Parameters, Version 2.0
+     * </a>
+     */
+    private static OidTreeNode createCerticomTree() {
+        // @formatter:off
+        return new OidTreeNode("certicom", Map.ofEntries(
+          entry("0", "curve", Map.ofEntries(
+            entry("1", "sect163k1"),
+            entry("2", "sect163r1"),
+            entry("3", "sect239k1"),
+            entry("4", "sect113r1"),
+            entry("5", "sect113r2"),
+            entry("6", "secp112r1"),
+            entry("7", "secp112r2"),
+            entry("8", "secp160r1"),
+            entry("9", "secp160k1"),
+            entry("10", "secp256k1"),
+            entry("15", "sect163r2"),
+            entry("16", "sect283k1"),
+            entry("17", "sect283r1"),
+            entry("22", "sect131r1"),
+            entry("23", "sect131r2"),
+            entry("24", "sect193r1"),
+            entry("25", "sect193r2"),
+            entry("26", "sect233k1"),
+            entry("27", "sect233r1"),
+            entry("28", "secp128r1"),
+            entry("29", "secp128r2"),
+            entry("30", "secp160r2"),
+            entry("31", "secp192k1"),
+            entry("32", "secp224k1"),
+            entry("33", "secp224r1"),
+            entry("34", "secp384r1"),
+            entry("35", "secp521r1"),
+            entry("36", "sect409k1"),
+            entry("37", "sect409r1"),
+            entry("38", "sect571k1"),
+            entry("39", "sect571r1")
+          ))
         ));
         // @formatter:on
     }

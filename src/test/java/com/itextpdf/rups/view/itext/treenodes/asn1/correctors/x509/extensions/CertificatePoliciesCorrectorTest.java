@@ -132,7 +132,7 @@ final class CertificatePoliciesCorrectorTest {
             Asn1TestUtil.assertNodeMatches(
                     0,
                     "policyIdentifier: 2.23.140.1.1 (/joint-iso-itu-t/international-organizations"
-                            + "/ca-browser-forum/certificate-policies/ev-guidelines)",
+                            + "/ca-browser-forum/certificate-policies/extended-validation)",
                     second.getChildAt(0)
             );
             Asn1TestUtil.assertNodeMatches(1, "policyQualifiers", second.getChildAt(1));
@@ -161,7 +161,7 @@ final class CertificatePoliciesCorrectorTest {
                                 new ASN1ObjectIdentifier("2.23.140.1.2.1")  // domain-validated
                         ),
                         new DERSequence(new ASN1Encodable[] {
-                                new ASN1ObjectIdentifier("2.23.140.1.1"),   // ev-guidelines
+                                new ASN1ObjectIdentifier("2.23.140.1.1"),   // extended-validation
                                 new DERSequence(
                                         new DERSequence(new ASN1Encodable[] {
                                                 new ASN1ObjectIdentifier("1.3.6.1.5.5.7.2.1"),  // id-qt-cps

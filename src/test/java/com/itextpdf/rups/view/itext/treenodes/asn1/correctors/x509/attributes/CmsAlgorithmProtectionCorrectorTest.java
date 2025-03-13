@@ -77,7 +77,7 @@ final class CmsAlgorithmProtectionCorrectorTest {
         final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
                         new DERSequence(
-                                new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.1")  // sha256
+                                new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.1")  // id-sha256
                         ),
                         new DERTaggedObject(false, 2, new DERSequence(new ASN1Encodable[] {
                                 new ASN1ObjectIdentifier("1.2.840.113549.2.9"),     // hmacWithSHA256
@@ -91,7 +91,7 @@ final class CmsAlgorithmProtectionCorrectorTest {
             final AbstractAsn1TreeNode digestAlgorithm = node.getChildAt(0);
             Asn1TestUtil.assertNodeMatches(1, "digestAlgorithm", digestAlgorithm);
             Asn1TestUtil.assertNodeMatches(0, "algorithm: 2.16.840.1.101.3.4.2.1 (/joint-iso-itu-t/country/us"
-                    + "/organization/gov/csor/nistAlgorithms/hashAlgs/sha256)", digestAlgorithm.getChildAt(0));
+                    + "/organization/gov/csor/nistAlgorithms/hashAlgs/id-sha256)", digestAlgorithm.getChildAt(0));
         }
         {
             final AbstractAsn1TreeNode macAlgorithm = node.getChildAt(1);
@@ -157,7 +157,7 @@ final class CmsAlgorithmProtectionCorrectorTest {
             Asn1TestUtil.assertNodeMatches(
                     0,
                     "algorithm: 2.16.840.1.101.3.4.2.1 (/joint-iso-itu-t/country/us"
-                            + "/organization/gov/csor/nistAlgorithms/hashAlgs/sha256)",
+                            + "/organization/gov/csor/nistAlgorithms/hashAlgs/id-sha256)",
                     digestAlgorithm.getChildAt(0)
             );
         }
@@ -178,7 +178,7 @@ final class CmsAlgorithmProtectionCorrectorTest {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
                         new DERSequence(
-                                new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.1")  // sha256
+                                new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.1")  // id-sha256
                         ),
                         new DERTaggedObject(false, 1, new DERSequence(new ASN1Encodable[] {
                                 new ASN1ObjectIdentifier("1.2.840.113549.1.1.11"),  // sha256WithRSAEncryption

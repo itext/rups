@@ -123,7 +123,7 @@ final class PolicyInformationCorrectorTest {
     void correct_InvalidPolicyQualifiersSequenceEntry() {
         final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
-                        new ASN1ObjectIdentifier("2.23.140.1.1"),   // ev-guidelines
+                        new ASN1ObjectIdentifier("2.23.140.1.1"),   // extended-validation
                         new DERSequence(
                                 new ASN1Integer(1)
                         ),
@@ -134,7 +134,7 @@ final class PolicyInformationCorrectorTest {
         Asn1TestUtil.assertNodeMatches(
                 0,
                 "policyIdentifier: 2.23.140.1.1 (/joint-iso-itu-t/international-organizations"
-                        + "/ca-browser-forum/certificate-policies/ev-guidelines)",
+                        + "/ca-browser-forum/certificate-policies/extended-validation)",
                 node.getChildAt(0)
         );
         Asn1TestUtil.assertNodeMatches(1, "policyQualifiers", node.getChildAt(1));
@@ -145,7 +145,7 @@ final class PolicyInformationCorrectorTest {
     void correct_EmptyPolicyQualifierInfoSequence() {
         final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
-                        new ASN1ObjectIdentifier("2.23.140.1.1"),   // ev-guidelines
+                        new ASN1ObjectIdentifier("2.23.140.1.1"),   // extended-validation
                         new DERSequence(
                                 new DERSequence()
                         ),
@@ -156,7 +156,7 @@ final class PolicyInformationCorrectorTest {
         Asn1TestUtil.assertNodeMatches(
                 0,
                 "policyIdentifier: 2.23.140.1.1 (/joint-iso-itu-t/international-organizations"
-                        + "/ca-browser-forum/certificate-policies/ev-guidelines)",
+                        + "/ca-browser-forum/certificate-policies/extended-validation)",
                 node.getChildAt(0)
         );
         Asn1TestUtil.assertNodeMatches(1, "policyQualifiers", node.getChildAt(1));
@@ -167,7 +167,7 @@ final class PolicyInformationCorrectorTest {
     void correct_InvalidPolicyQualifierIdType() {
         final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
-                        new ASN1ObjectIdentifier("2.23.140.1.1"),   // ev-guidelines
+                        new ASN1ObjectIdentifier("2.23.140.1.1"),   // extended-validation
                         new DERSequence(
                                 new DERSequence(
                                         new ASN1Integer(1)
@@ -180,7 +180,7 @@ final class PolicyInformationCorrectorTest {
         Asn1TestUtil.assertNodeMatches(
                 0,
                 "policyIdentifier: 2.23.140.1.1 (/joint-iso-itu-t/international-organizations"
-                        + "/ca-browser-forum/certificate-policies/ev-guidelines)",
+                        + "/ca-browser-forum/certificate-policies/extended-validation)",
                 node.getChildAt(0)
         );
         {
@@ -199,7 +199,7 @@ final class PolicyInformationCorrectorTest {
         Asn1TestUtil.assertNodeMatches(
                 0,
                 "policyIdentifier: 2.23.140.1.1 (/joint-iso-itu-t/international-organizations"
-                        + "/ca-browser-forum/certificate-policies/ev-guidelines)",
+                        + "/ca-browser-forum/certificate-policies/extended-validation)",
                 node.getChildAt(0)
         );
         {
@@ -226,7 +226,7 @@ final class PolicyInformationCorrectorTest {
     private AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
-                        new ASN1ObjectIdentifier("2.23.140.1.1"),   // ev-guidelines
+                        new ASN1ObjectIdentifier("2.23.140.1.1"),   // extended-validation
                         new DERSequence(
                                 new DERSequence(new ASN1Encodable[] {
                                         new ASN1ObjectIdentifier("1.3.6.1.5.5.7.2.1"),  // id-qt-cps

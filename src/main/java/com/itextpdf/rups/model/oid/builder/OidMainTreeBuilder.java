@@ -64,7 +64,9 @@ public final class OidMainTreeBuilder {
                 entry("0", "itu-t"),
                 entry("1", "iso", Map.ofEntries(
                         entry("0", "standard"),
-                        entry("1", "registration-authority"),
+                        entry("1", "registration-authority", Map.ofEntries(
+                                entry("2", "document-type")
+                        )),
                         entry("2", OidIsoMemberBodyTreeBuilder.build()),
                         entry("3", OidIsoIdentifiedOrganizationTreeBuilder.build())
                 )),

@@ -102,7 +102,7 @@ final class OidIsoMemberBodyTreeBuilder {
      */
     private static OidTreeNode createAnsiX962Tree() {
         // @formatter:off
-        return new OidTreeNode("ansi-x962", Map.ofEntries(
+        return new OidTreeNode("ansi-X9-62", Map.ofEntries(
           entry("0", "modules"),
           entry("1", "fieldType", Map.ofEntries(
             entry("1", "prime-field"),
@@ -117,39 +117,7 @@ final class OidIsoMemberBodyTreeBuilder {
           entry("2", "keyType", Map.ofEntries(
             entry("1", "ecPublicKey")
           )),
-          entry("3", "curves", Map.ofEntries(
-            entry("0", "characteristicTwo", Map.ofEntries(
-              entry("1", "c2pnb163v1"),
-              entry("2", "c2pnb163v2"),
-              entry("3", "c2pnb163v3"),
-              entry("4", "c2pnb176w1"),
-              entry("5", "c2tnb191v1"),
-              entry("6", "c2tnb191v2"),
-              entry("7", "c2tnb191v3"),
-              entry("8", "c2onb191v4"),
-              entry("9", "c2onb191v5"),
-              entry("10", "c2pnb208w1"),
-              entry("11", "c2tnb239v1"),
-              entry("12", "c2tnb239v2"),
-              entry("13", "c2tnb239v3"),
-              entry("14", "c2onb239v4"),
-              entry("15", "c2onb239v5"),
-              entry("16", "c2pnb272W1"),
-              entry("17", "c2pnb304W1"),
-              entry("18", "c2tnb359v1"),
-              entry("19", "c2pnb368w1"),
-              entry("20", "c2tnb431r1")
-            )),
-            entry("1", "prime", Map.ofEntries(
-              entry("1", "prime192v1"),
-              entry("2", "prime192v2"),
-              entry("3", "prime192v3"),
-              entry("4", "prime239v1"),
-              entry("5", "prime239v2"),
-              entry("6", "prime239v3"),
-              entry("7", "prime256v1")
-            ))
-          )),
+          entry("3", createCurvesTree()),
           entry("4", "signatures", Map.ofEntries(
             entry("1", "ecdsa-with-SHA1"),
             entry("2", "ecdsa-with-Recommended"),
@@ -161,6 +129,49 @@ final class OidIsoMemberBodyTreeBuilder {
             ))
           )),
           entry("5", "module")
+        ));
+        // @formatter:on
+    }
+
+    /**
+     * Tree: 1.2.840.10045.3.*
+     *
+     * @see <a href="https://www.ietf.org/rfc/rfc3279.txt">RFC 3279</a>
+     */
+    private static OidTreeNode createCurvesTree() {
+        // @formatter:off
+        return new OidTreeNode("curves", Map.ofEntries(
+          entry("0", "characteristicTwo", Map.ofEntries(
+            entry("1", "c2pnb163v1"),
+            entry("2", "c2pnb163v2"),
+            entry("3", "c2pnb163v3"),
+            entry("4", "c2pnb176w1"),
+            entry("5", "c2tnb191v1"),
+            entry("6", "c2tnb191v2"),
+            entry("7", "c2tnb191v3"),
+            entry("8", "c2onb191v4"),
+            entry("9", "c2onb191v5"),
+            entry("10", "c2pnb208w1"),
+            entry("11", "c2tnb239v1"),
+            entry("12", "c2tnb239v2"),
+            entry("13", "c2tnb239v3"),
+            entry("14", "c2onb239v4"),
+            entry("15", "c2onb239v5"),
+            entry("16", "c2pnb272W1"),
+            entry("17", "c2pnb304W1"),
+            entry("18", "c2tnb359v1"),
+            entry("19", "c2pnb368w1"),
+            entry("20", "c2tnb431r1")
+          )),
+          entry("1", "prime", Map.ofEntries(
+            entry("1", "prime192v1"),
+            entry("2", "prime192v2"),
+            entry("3", "prime192v3"),
+            entry("4", "prime239v1"),
+            entry("5", "prime239v2"),
+            entry("6", "prime239v3"),
+            entry("7", "prime256v1")
+          ))
         ));
         // @formatter:on
     }
@@ -650,16 +661,34 @@ final class OidIsoMemberBodyTreeBuilder {
 
     /**
      * Tree: 1.2.840.113583.*
+     *
+     * @see <a href="https://www.adobe.com/devnet-docs/acrobatetk/tools/DigSigDC/oids.html">
+     * Acrobat Desktop Digital Signatures - OIDs and Certificates
+     * </a>
      */
     private static OidTreeNode createAdobeTree() {
         // @formatter:off
         return new OidTreeNode("adbe", Map.ofEntries(
           entry("1", "acrobat", Map.ofEntries(
             entry("1", "security", Map.ofEntries(
-              entry("8", "revocationInfoArchival")
+              entry("1", "password"),
+              entry("2", "defaultsigningcredential"),
+              entry("3", "defaultencryptioncredential"),
+              entry("4", "passwordtimeout"),
+              entry("5", "authenticdocumentstrust"),
+              entry("6", "dynamiccontenttrust"),
+              entry("7", "ubiquity", Map.ofEntries(
+                entry("1", "ubiquitysubrights")
+              )),
+              entry("8", "revinfoarchival"),
+              entry("9", "x509Ext", Map.ofEntries(
+                entry("1", "time-stamp"),
+                entry("2", "archiverevinfo")
+              )),
+              entry("10", "ppklitecredential")
             )),
             entry("2", "cps", Map.ofEntries(
-              entry("1", "authenticDocuments"),
+              entry("1", "authenticdocuments"),
               entry("2", "test"),
               entry("3", "ubiquity"),
               entry("4", "adhoc"),
@@ -668,11 +697,11 @@ final class OidIsoMemberBodyTreeBuilder {
               entry("7", "qeseal")
             )),
             entry("7", "ubiquity", Map.ofEntries(
-              entry("1", "ubiquitySubRights")
+              entry("1", "ubiquitysubrights")
             )),
-            entry("9", "x509-extensions", Map.ofEntries(
+            entry("9", "x509Ext", Map.ofEntries(
               entry("1", "time-stamp"),
-              entry("2", "archiveRevInfo")
+              entry("2", "archiverevinfo")
             ))
           ))
         ));

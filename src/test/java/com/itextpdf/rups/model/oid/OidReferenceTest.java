@@ -64,7 +64,7 @@ final class OidReferenceTest {
         );
         // If only a part is not recognized, then only it should remain numbers
         Assertions.assertEquals(
-                "/iso/member-body/us/ansi-x962/curves/prime/prime256v1/13",
+                "/iso/member-body/us/ansi-X9-62/curves/prime/prime256v1/13",
                 OidReference.getDisplayString("1.2.840.10045.3.1.7.13")
         );
     }
@@ -134,35 +134,39 @@ final class OidReferenceTest {
     }
 
     @Test
-    void getDisplayString_NistAlgorithms() {
+    void getDisplayString_NistHashAlgs() {
         Assertions.assertEquals(
-                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/hashAlgs/sha256",
+                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/hashAlgs/id-sha256",
                 OidReference.getDisplayString("2.16.840.1.101.3.4.2.1")
         );
         Assertions.assertEquals(
-                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/hashAlgs/sha384",
+                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/hashAlgs/id-sha384",
                 OidReference.getDisplayString("2.16.840.1.101.3.4.2.2")
         );
         Assertions.assertEquals(
-                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/hashAlgs/sha512",
+                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/hashAlgs/id-sha512",
                 OidReference.getDisplayString("2.16.840.1.101.3.4.2.3")
         );
         Assertions.assertEquals(
-                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/hashAlgs/sha3-256",
+                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/hashAlgs/id-sha3-256",
                 OidReference.getDisplayString("2.16.840.1.101.3.4.2.8")
         );
         Assertions.assertEquals(
-                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/hashAlgs/sha3-384",
+                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/hashAlgs/id-sha3-384",
                 OidReference.getDisplayString("2.16.840.1.101.3.4.2.9")
         );
         Assertions.assertEquals(
-                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/hashAlgs/sha3-512",
+                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/hashAlgs/id-sha3-512",
                 OidReference.getDisplayString("2.16.840.1.101.3.4.2.10")
         );
         Assertions.assertEquals(
-                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/hashAlgs/shake256",
+                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/hashAlgs/id-shake256",
                 OidReference.getDisplayString("2.16.840.1.101.3.4.2.12")
         );
+    }
+
+    @Test
+    void getDisplayString_NistSigAlgs() {
         Assertions.assertEquals(
                 "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/sigAlgs"
                         + "/id-ecdsa-with-sha3-256",
@@ -182,6 +186,45 @@ final class OidReferenceTest {
                 "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/sigAlgs"
                         + "/id-rsassa-pkcs1-v1-5-with-sha3-256",
                 OidReference.getDisplayString("2.16.840.1.101.3.4.3.14")
+        );
+        Assertions.assertEquals(
+                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/sigAlgs"
+                        + "/id-ml-dsa-44",
+                OidReference.getDisplayString("2.16.840.1.101.3.4.3.17")
+        );
+        Assertions.assertEquals(
+                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/sigAlgs"
+                        + "/id-slh-dsa-sha2-128s",
+                OidReference.getDisplayString("2.16.840.1.101.3.4.3.20")
+        );
+        Assertions.assertEquals(
+                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/sigAlgs"
+                        + "/id-hash-ml-dsa-44-with-sha512",
+                OidReference.getDisplayString("2.16.840.1.101.3.4.3.32")
+        );
+        Assertions.assertEquals(
+                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/sigAlgs"
+                        + "/id-hash-slh-dsa-sha2-128s-with-sha256",
+                OidReference.getDisplayString("2.16.840.1.101.3.4.3.35")
+        );
+    }
+
+    @Test
+    void getDisplayString_NistKems() {
+        Assertions.assertEquals(
+                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/kems"
+                        + "/id-alg-ml-kem-512",
+                OidReference.getDisplayString("2.16.840.1.101.3.4.4.1")
+        );
+        Assertions.assertEquals(
+                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/kems"
+                        + "/id-alg-ml-kem-768",
+                OidReference.getDisplayString("2.16.840.1.101.3.4.4.2")
+        );
+        Assertions.assertEquals(
+                "/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/kems"
+                        + "/id-alg-ml-kem-1024",
+                OidReference.getDisplayString("2.16.840.1.101.3.4.4.3")
         );
     }
 
@@ -292,20 +335,29 @@ final class OidReferenceTest {
     @Test
     void getDisplayString_CurveRelated() {
         Assertions.assertEquals(
-                "/iso/member-body/us/ansi-x962/keyType/ecPublicKey",
+                "/iso/member-body/us/ansi-X9-62/keyType/ecPublicKey",
                 OidReference.getDisplayString("1.2.840.10045.2.1")
         );
         Assertions.assertEquals(
-                "/iso/member-body/us/ansi-x962/curves/prime/prime256v1",
+                "/iso/member-body/us/ansi-X9-62/curves/prime/prime192v1",
+                OidReference.getDisplayString("1.2.840.10045.3.1.1")
+        );
+        Assertions.assertEquals(
+                "/iso/member-body/us/ansi-X9-62/curves/prime/prime256v1",
                 OidReference.getDisplayString("1.2.840.10045.3.1.7")
         );
         Assertions.assertEquals(
-                "/iso/member-body/us/ansi-x962/signatures/ecdsa-with-SHA2/ecdsa-with-SHA256",
+                "/iso/member-body/us/ansi-X9-62/signatures/ecdsa-with-SHA2/ecdsa-with-SHA256",
                 OidReference.getDisplayString("1.2.840.10045.4.3.2")
         );
         Assertions.assertEquals(
-                "/iso/member-body/us/ansi-x962/signatures/ecdsa-with-SHA2/ecdsa-with-SHA384",
+                "/iso/member-body/us/ansi-X9-62/signatures/ecdsa-with-SHA2/ecdsa-with-SHA384",
                 OidReference.getDisplayString("1.2.840.10045.4.3.3")
+        );
+        Assertions.assertEquals(
+                "/iso/identified-organization/teletrust/algorithm/signatureAlgorithm/ecSign"
+                        + "/ecStdCurvesAndGeneration/ellipticCurve/versionOne/brainpoolP384r1",
+                OidReference.getDisplayString("1.3.36.3.3.2.8.1.1.11")
         );
         Assertions.assertEquals(
                 "/iso/identified-organization/thawte/id-Ed25519",
@@ -316,22 +368,81 @@ final class OidReferenceTest {
                 OidReference.getDisplayString("1.3.101.113")
         );
         Assertions.assertEquals(
-                "/iso/identified-organization/teletrust/algorithm/signatureAlgorithm/ecSign"
-                        + "/ecStdCurvesAndGeneration/ellipticCurve/versionOne/brainpoolP384r1",
-                OidReference.getDisplayString("1.3.36.3.3.2.8.1.1.11")
+                "/iso/identified-organization/certicom/curve/sect163k1",
+                OidReference.getDisplayString("1.3.132.0.1")
+        );
+        Assertions.assertEquals(
+                "/iso/identified-organization/certicom/curve/sect283k1",
+                OidReference.getDisplayString("1.3.132.0.16")
+        );
+        Assertions.assertEquals(
+                "/iso/identified-organization/certicom/curve/sect283r1",
+                OidReference.getDisplayString("1.3.132.0.17")
+        );
+        Assertions.assertEquals(
+                "/iso/identified-organization/certicom/curve/sect233k1",
+                OidReference.getDisplayString("1.3.132.0.26")
+        );
+        Assertions.assertEquals(
+                "/iso/identified-organization/certicom/curve/sect233r1",
+                OidReference.getDisplayString("1.3.132.0.27")
+        );
+        Assertions.assertEquals(
+                "/iso/identified-organization/certicom/curve/secp224r1",
+                OidReference.getDisplayString("1.3.132.0.33")
+        );
+        Assertions.assertEquals(
+                "/iso/identified-organization/certicom/curve/secp384r1",
+                OidReference.getDisplayString("1.3.132.0.34")
+        );
+        Assertions.assertEquals(
+                "/iso/identified-organization/certicom/curve/secp521r1",
+                OidReference.getDisplayString("1.3.132.0.35")
+        );
+        Assertions.assertEquals(
+                "/iso/identified-organization/certicom/curve/sect409k1",
+                OidReference.getDisplayString("1.3.132.0.36")
+        );
+        Assertions.assertEquals(
+                "/iso/identified-organization/certicom/curve/sect409r1",
+                OidReference.getDisplayString("1.3.132.0.37")
+        );
+        Assertions.assertEquals(
+                "/iso/identified-organization/certicom/curve/sect571k1",
+                OidReference.getDisplayString("1.3.132.0.38")
+        );
+        Assertions.assertEquals(
+                "/iso/identified-organization/certicom/curve/sect571r1",
+                OidReference.getDisplayString("1.3.132.0.39")
         );
     }
 
     @Test
     void getDisplayString_Adobe() {
         Assertions.assertEquals(
-                "/iso/member-body/us/adbe/acrobat/security/revocationInfoArchival",
+                "/iso/member-body/us/adbe/acrobat/security/authenticdocumentstrust",
+                OidReference.getDisplayString("1.2.840.113583.1.1.5")
+        );
+        Assertions.assertEquals(
+                "/iso/member-body/us/adbe/acrobat/security/revinfoarchival",
                 OidReference.getDisplayString("1.2.840.113583.1.1.8")
+        );
+        Assertions.assertEquals(
+                "/iso/member-body/us/adbe/acrobat/security/x509Ext/time-stamp",
+                OidReference.getDisplayString("1.2.840.113583.1.1.9.1")
+        );
+        Assertions.assertEquals(
+                "/iso/member-body/us/adbe/acrobat/security/x509Ext/archiverevinfo",
+                OidReference.getDisplayString("1.2.840.113583.1.1.9.2")
         );
     }
 
     @Test
     void getDisplayString_Misc() {
+        Assertions.assertEquals(
+                "/iso/registration-authority/document-type",
+                OidReference.getDisplayString("1.1.2")
+        );
         Assertions.assertEquals(
                 "/iso/member-body/us/x9-57/x9algorithm/dsa",
                 OidReference.getDisplayString("1.2.840.10040.4.1")
