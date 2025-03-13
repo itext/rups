@@ -47,8 +47,8 @@
   </mailingLists>
 
   <scm>
-    <connection>ssh://git@git.itextsupport.com:7999/i7j/rups.git</connection>
-    <url>https://git.itextsupport.com/projects/I7J/repos/rups</url>
+    <connection>ssh://git@github.com:itext/rups.git</connection>
+    <url>https://github.com/itext/rups</url>
   </scm>
 
   <properties>
