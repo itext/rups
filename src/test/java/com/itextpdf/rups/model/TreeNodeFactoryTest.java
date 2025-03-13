@@ -559,6 +559,20 @@ final class TreeNodeFactoryTest {
         doSVCertTest(PdfName.Tx, null, null, new PdfString(new byte[] {0x30, 0x00}), null);
     }
 
+    @Test
+    void addNewIndirectObject() {
+        final PdfDocument doc = new PdfDocument(new PdfWriter(new ByteArrayOutputStream()));
+        final TreeNodeFactory factory = new TreeNodeFactory(createIndirectObjectFactory(doc));
+        final PdfString object = new PdfString("TEST");
+        factory.addNewIndirectObject(object);
+        final PdfIndirectReference ref = object.getIndirectReference();
+        Assertions.assertNotNull(ref);
+        Assertions.assertSame(doc, ref.getDocument());
+        final PdfObjectTreeNode node = factory.getNode(ref.getObjNumber());
+        Assertions.assertNotNull(node);
+        Assertions.assertSame(object, node.getPdfObject());
+    }
+
     private static void doSigTest(PdfName ft, PdfName type, PdfObject contents, String expectedLeafNodeName) {
         final PdfDocument doc = new PdfDocument(new PdfWriter(new ByteArrayOutputStream()));
         final PdfDictionary sigDict = createSigDict(doc, type, contents);
