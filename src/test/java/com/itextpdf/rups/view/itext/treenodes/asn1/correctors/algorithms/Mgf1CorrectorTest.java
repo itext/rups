@@ -73,7 +73,7 @@ final class Mgf1CorrectorTest {
     @Test
     void correct_InvalidRoot() {
         final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
-                new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.3")  // sha512
+                new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.3")  // id-sha512
         );
         Mgf1Corrector.INSTANCE.correct(node);
         Assertions.assertNull(node.getRfcFieldName());
@@ -97,7 +97,7 @@ final class Mgf1CorrectorTest {
         // All nodes should still be named
         final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
-                        new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.3"), // sha512
+                        new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.3"), // id-sha512
                 })
         );
         Mgf1Corrector.INSTANCE.correct(node);
@@ -105,7 +105,7 @@ final class Mgf1CorrectorTest {
         Asn1TestUtil.assertNodeMatches(
                 0,
                 "algorithm: 2.16.840.1.101.3.4.2.3 "
-                        + "(/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/hashAlgs/sha512)",
+                        + "(/joint-iso-itu-t/country/us/organization/gov/csor/nistAlgorithms/hashAlgs/id-sha512)",
                 node.getChildAt(0)
         );
     }
@@ -125,7 +125,7 @@ final class Mgf1CorrectorTest {
         Asn1TestUtil.assertNodeMatches(
                 0,
                 "algorithm: 2.16.840.1.101.3.4.2.3 (/joint-iso-itu-t/country/us/organization/gov"
-                        + "/csor/nistAlgorithms/hashAlgs/sha512)",
+                        + "/csor/nistAlgorithms/hashAlgs/id-sha512)",
                 node.getChildAt(0)
         );
         Asn1TestUtil.assertNodeMatches(0, "parameters: NULL", node.getChildAt(1));
@@ -134,7 +134,7 @@ final class Mgf1CorrectorTest {
     private AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
-                        new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.3"), // sha512
+                        new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.3"), // id-sha512
                         DERNull.INSTANCE,
                 })
         );

@@ -100,44 +100,7 @@ public final class OidJointIsoItuTTreeBuilder {
             ))
           )),
           entry("23", "international-organizations", Map.ofEntries(
-            entry("140", "ca-browser-forum", Map.ofEntries(
-              entry("1", "certificate-policies", Map.ofEntries(
-                entry("1", "ev-guidelines"),
-                entry("2", "baseline-requirements", Map.ofEntries(
-                  entry("1", "domain-validated"),
-                  entry("2", "organization-validated"),
-                  entry("3", "individual-validated")
-                )),
-                entry("3", "extended-validation-codesigning"),
-                entry("4", "code-signing-requirements", Map.ofEntries(
-                  entry("1", "code-signing"),
-                  entry("2", "timestamping")
-                )),
-                entry("5", "smime", Map.ofEntries(
-                  entry("1", "mailbox-validated", Map.ofEntries(
-                    entry("1", "legacy"),
-                    entry("2", "multipurpose"),
-                    entry("3", "strict")
-                  )),
-                  entry("2", "organization-validated", Map.ofEntries(
-                    entry("1", "legacy"),
-                    entry("2", "multipurpose"),
-                    entry("3", "strict")
-                  )),
-                  entry("3", "sponsor-validated", Map.ofEntries(
-                    entry("1", "legacy"),
-                    entry("2", "multipurpose"),
-                    entry("3", "strict")
-                  )),
-                  entry("4", "individual-validated", Map.ofEntries(
-                    entry("1", "legacy"),
-                    entry("2", "multipurpose"),
-                    entry("3", "strict")
-                  ))
-                )),
-                entry("31", "onion-EV")
-              ))
-            ))
+            entry("140", createCaBrowserForumTree())
           ))
         ));
         // @formatter:on
@@ -390,6 +353,10 @@ public final class OidJointIsoItuTTreeBuilder {
 
     /**
      * Tree: 2.16.840.1.101.3.*
+     *
+     * @see <a href="https://csrc.nist.gov/projects/computer-security-objects-register">
+     * Computer Security Objects Register
+     * </a>
      */
     private static OidTreeNode createCsorTree() {
         // @formatter:off
@@ -400,7 +367,8 @@ public final class OidJointIsoItuTTreeBuilder {
             )),
             entry("1", createAesTree()),
             entry("2", createHashAlgsTree()),
-            entry("3", createSigAlgsTree())
+            entry("3", createSigAlgsTree()),
+            entry("4", createKemsTree())
           ))
         ));
         // @formatter:on
@@ -408,83 +376,99 @@ public final class OidJointIsoItuTTreeBuilder {
 
     /**
      * Tree: 2.16.840.1.101.3.4.1.*
+     *
+     * @see <a href="https://csrc.nist.gov/projects/computer-security-objects-register/algorithm-registration#AES">
+     * AES Registered Objects
+     * </a>
      */
     private static OidTreeNode createAesTree() {
         // @formatter:off
         return new OidTreeNode("aes", Map.ofEntries(
-          entry("1", "aes128-ECB"),
-          entry("2", "aes128-CBC-PAD"),
-          entry("3", "aes128-OFB"),
-          entry("4", "aes128-CFB"),
-          entry("5", "aes128-wrap"),
-          entry("6", "aes128-GCM"),
-          entry("7", "aes128-CCM"),
-          entry("8", "aes128-wrap-pad"),
-          entry("9", "aes128-GMAC"),
-          entry("21", "aes192-ECB"),
-          entry("22", "aes192-CBC-PAD"),
-          entry("23", "aes192-OFB"),
-          entry("24", "aes192-CFB"),
-          entry("25", "aes192-wrap"),
+          entry("1", "id-aes128-ECB"),
+          entry("2", "id-aes128-CBC"),
+          entry("3", "id-aes128-OFB"),
+          entry("4", "id-aes128-CFB"),
+          entry("5", "id-aes128-wrap"),
+          entry("6", "id-aes128-GCM"),
+          entry("7", "id-aes128-CCM"),
+          entry("8", "id-aes128-wrap-pad"),
+          entry("9", "id-aes128-GMAC"),
+          entry("21", "id-aes192-ECB"),
+          entry("22", "id-aes192-CBC"),
+          entry("23", "id-aes192-OFB"),
+          entry("24", "id-aes192-CFB"),
+          entry("25", "id-aes192-wrap"),
           entry("26", "id-aes192-GCM"),
           entry("27", "id-aes192-CCM"),
-          entry("28", "aes192-wrap-pad"),
-          entry("29", "aes192-GMAC"),
-          entry("41", "aes256-ECB"),
-          entry("42", "aes256-CBC-PAD"),
-          entry("43", "aes256-OFB"),
-          entry("44", "aes256-CFB"),
+          entry("28", "id-aes192-wrap-pad"),
+          entry("29", "id-aes192-GMAC"),
+          entry("41", "id-aes256-ECB"),
+          entry("42", "id-aes256-CBC"),
+          entry("43", "id-aes256-OFB"),
+          entry("44", "id-aes256-CFB"),
           entry("45", "id-aes256-wrap"),
-          entry("46", "aes256-GCM"),
-          entry("47", "aes256-CCM"),
-          entry("48", "aes256-wrap-pad"),
-          entry("49", "aes256-GMAC")
+          entry("46", "id-aes256-GCM"),
+          entry("47", "id-aes256-CCM"),
+          entry("48", "id-aes256-wrap-pad"),
+          entry("49", "id-aes256-GMAC")
         ));
         // @formatter:on
     }
 
     /**
      * Tree: 2.16.840.1.101.3.4.2.*
+     *
+     * @see <a href="https://csrc.nist.gov/projects/computer-security-objects-register/algorithm-registration#Hash">
+     * Secure Hash Algorithms Registered Objects
+     * </a>
+     *
+     * @see <a href="https://csrc.nist.gov/projects/computer-security-objects-register/algorithm-registration#HMAC">
+     * Keyed-Hash Message Authentication Code (HMAC) Algorithms Registered Objects
+     * </a>
      */
     private static OidTreeNode createHashAlgsTree() {
         // @formatter:off
         return new OidTreeNode("hashAlgs", Map.ofEntries(
-          entry("1", "sha256"),
-          entry("2", "sha384"),
-          entry("3", "sha512"),
-          entry("4", "sha224"),
-          entry("5", "sha512-224"),
-          entry("6", "sha512-256"),
-          entry("7", "sha3-224"),
-          entry("8", "sha3-256"),
-          entry("9", "sha3-384"),
-          entry("10", "sha3-512"),
-          entry("11", "shake128"),
-          entry("12", "shake256"),
-          entry("13", "hmacWithSHA3-224"),
-          entry("14", "hmacWithSHA3-256"),
-          entry("15", "hmacWithSHA3-384"),
-          entry("16", "hmacWithSHA3-512"),
-          entry("17", "shake128-len"),
-          entry("18", "shake256-len"),
-          entry("19", "id-KMAC128"),
-          entry("20", "id-KMAC256"),
-          entry("21", "id-KMACXOF128"),
-          entry("22", "id-KACXOF256")
+          entry("1", "id-sha256"),
+          entry("2", "id-sha384"),
+          entry("3", "id-sha512"),
+          entry("4", "id-sha224"),
+          entry("5", "id-sha512-224"),
+          entry("6", "id-sha512-256"),
+          entry("7", "id-sha3-224"),
+          entry("8", "id-sha3-256"),
+          entry("9", "id-sha3-384"),
+          entry("10", "id-sha3-512"),
+          entry("11", "id-shake128"),
+          entry("12", "id-shake256"),
+          entry("13", "id-hmacWithSHA3-224"),
+          entry("14", "id-hmacWithSHA3-256"),
+          entry("15", "id-hmacWithSHA3-384"),
+          entry("16", "id-hmacWithSHA3-512"),
+          entry("17", "id-shake128-len"),
+          entry("18", "id-shake256-len"),
+          entry("19", "id-KMACWithSHAKE128"),
+          entry("20", "id-KMACWithSHAKE256"),
+          entry("21", "id-KMAC128"),
+          entry("22", "id-KMAC256")
         ));
         // @formatter:on
     }
 
     /**
      * Tree: 2.16.840.1.101.3.4.3.*
+     *
+     * @see <a href="https://csrc.nist.gov/projects/computer-security-objects-register/algorithm-registration#DSA">
+     * Digital Signature Algorithms Registered Objects
+     * </a>
      */
     private static OidTreeNode createSigAlgsTree() {
         // @formatter:off
         return new OidTreeNode("sigAlgs", Map.ofEntries(
-          entry("1", "dsa-with-sha224"),
-          entry("2", "dsa-with-sha256"),
-          entry("3", "dsa-with-sha384"),
-          entry("4", "dsa-with-sha512"),
+          entry("1", "id-dsa-with-sha224"),
+          entry("2", "id-dsa-with-sha256"),
+          entry("3", "id-dsa-with-sha384"),
+          entry("4", "id-dsa-with-sha512"),
           entry("5", "id-dsa-with-sha3-224"),
           entry("6", "id-dsa-with-sha3-256"),
           entry("7", "id-dsa-with-sha3-384"),
@@ -496,7 +480,112 @@ public final class OidJointIsoItuTTreeBuilder {
           entry("13", "id-rsassa-pkcs1-v1-5-with-sha3-224"),
           entry("14", "id-rsassa-pkcs1-v1-5-with-sha3-256"),
           entry("15", "id-rsassa-pkcs1-v1-5-with-sha3-384"),
-          entry("16", "id-rsassa-pkcs1-v1-5-with-sha3-512")
+          entry("16", "id-rsassa-pkcs1-v1-5-with-sha3-512"),
+          entry("17", "id-ml-dsa-44"),
+          entry("18", "id-ml-dsa-65"),
+          entry("19", "id-ml-dsa-87"),
+          entry("20", "id-slh-dsa-sha2-128s"),
+          entry("21", "id-slh-dsa-sha2-128f"),
+          entry("22", "id-slh-dsa-sha2-192s"),
+          entry("23", "id-slh-dsa-sha2-192f"),
+          entry("24", "id-slh-dsa-sha2-256s"),
+          entry("25", "id-slh-dsa-sha2-256f"),
+          entry("26", "id-slh-dsa-shake-128s"),
+          entry("27", "id-slh-dsa-shake-128f"),
+          entry("28", "id-slh-dsa-shake-192s"),
+          entry("29", "id-slh-dsa-shake-192f"),
+          entry("30", "id-slh-dsa-shake-256s"),
+          entry("31", "id-slh-dsa-shake-256f"),
+          entry("32", "id-hash-ml-dsa-44-with-sha512"),
+          entry("33", "id-hash-ml-dsa-65-with-sha512"),
+          entry("34", "id-hash-ml-dsa-87-with-sha512"),
+          entry("35", "id-hash-slh-dsa-sha2-128s-with-sha256"),
+          entry("36", "id-hash-slh-dsa-sha2-128f-with-sha256"),
+          entry("37", "id-hash-slh-dsa-sha2-192s-with-sha512"),
+          entry("38", "id-hash-slh-dsa-sha2-192f-with-sha512"),
+          entry("39", "id-hash-slh-dsa-sha2-256s-with-sha512"),
+          entry("40", "id-hash-slh-dsa-sha2-256f-with-sha512"),
+          entry("41", "id-hash-slh-dsa-shake-128s-with-shake128"),
+          entry("42", "id-hash-slh-dsa-shake-128f-with-shake128"),
+          entry("43", "id-hash-slh-dsa-shake-192s-with-shake256"),
+          entry("44", "id-hash-slh-dsa-shake-192f-with-shake256"),
+          entry("45", "id-hash-slh-dsa-shake-256s-with-shake256"),
+          entry("46", "id-hash-slh-dsa-shake-256f-with-shake256")
+        ));
+        // @formatter:on
+    }
+
+    /**
+     * Tree: 2.16.840.1.101.3.4.4.*
+     *
+     * @see <a href="https://csrc.nist.gov/projects/computer-security-objects-register/algorithm-registration#KEM">
+     * Key-Establishment Mechanism Registered Objects
+     * </a>
+     */
+    private static OidTreeNode createKemsTree() {
+        // @formatter:off
+        return new OidTreeNode("kems", Map.ofEntries(
+          entry("1", "id-alg-ml-kem-512"),
+          entry("2", "id-alg-ml-kem-768"),
+          entry("3", "id-alg-ml-kem-1024")
+        ));
+        // @formatter:on
+    }
+
+    /**
+     * Tree: 2.23.140.*
+     *
+     * @see <a href="https://cabforum.org/resources/object-registry/">
+     * Object Registry of the CA/Browser Forum
+     * </a>
+     */
+    private static OidTreeNode createCaBrowserForumTree() {
+        // @formatter:off
+        return new OidTreeNode("ca-browser-forum", Map.ofEntries(
+          entry("1", "certificate-policies", Map.ofEntries(
+            entry("1", "extended-validation"),
+            entry("2", "baseline-requirements", Map.ofEntries(
+              entry("1", "domain-validated"),
+              entry("2", "organization-validated"),
+              entry("3", "individual-validated")
+            )),
+            entry("3", "extended-validation-codesigning"),
+            entry("4", "codesigning-requirements", Map.ofEntries(
+              entry("1", "codesigning"),
+              entry("2", "timestamping")
+            )),
+            entry("5", "smime", Map.ofEntries(
+              entry("1", "mailbox-validated", Map.ofEntries(
+                entry("1", "legacy"),
+                entry("2", "multipurpose"),
+                entry("3", "strict")
+              )),
+              entry("2", "organization-validated", Map.ofEntries(
+                entry("1", "legacy"),
+                entry("2", "multipurpose"),
+                entry("3", "strict")
+              )),
+              entry("3", "sponsor-validated", Map.ofEntries(
+                entry("1", "legacy"),
+                entry("2", "multipurpose"),
+                entry("3", "strict")
+              )),
+              entry("4", "individual-validated", Map.ofEntries(
+                entry("1", "legacy"),
+                entry("2", "multipurpose"),
+                entry("3", "strict")
+              ))
+            )),
+            entry("31", "onion-EV")
+          )),
+          entry("2", "certificate-extensions", Map.ofEntries(
+            entry("1", "test-certificate")
+          )),
+          entry("3", "certificate-extensions", Map.ofEntries(
+            entry("1", "cabforganization-identifier")
+          )),
+          entry("41", "cabf-caSigningNonce"),
+          entry("42", "cabf-applicantSigningNonce")
         ));
         // @formatter:on
     }

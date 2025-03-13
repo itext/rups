@@ -414,7 +414,7 @@ final class TimeStampTokenInfoCorrectorTest {
                 Asn1TestUtil.assertNodeMatches(
                         0,
                         "algorithm: 2.16.840.1.101.3.4.2.1 (/joint-iso-itu-t/country/us"
-                                + "/organization/gov/csor/nistAlgorithms/hashAlgs/sha256)",
+                                + "/organization/gov/csor/nistAlgorithms/hashAlgs/id-sha256)",
                         hashAlgorithm.getChildAt(0)
                 );
                 Asn1TestUtil.assertNodeMatches(0, "parameters: NULL", hashAlgorithm.getChildAt(1));
@@ -455,7 +455,7 @@ final class TimeStampTokenInfoCorrectorTest {
                         new ASN1ObjectIdentifier("1.3.6.1.4.1.38064.1.3.6.1"),
                         new DERSequence(new ASN1Encodable[] {
                                 new DERSequence(new ASN1Encodable[] {
-                                        new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.1"), // sha256
+                                        new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.1"), // id-sha256
                                         DERNull.INSTANCE,
                                 }),
                                 new DEROctetString(new byte[] {0x11, 0x22, 0x33, 0x44}),

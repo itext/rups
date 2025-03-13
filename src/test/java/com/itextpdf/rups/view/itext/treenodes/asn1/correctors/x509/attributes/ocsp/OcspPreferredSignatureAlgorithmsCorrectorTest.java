@@ -173,13 +173,13 @@ final class OcspPreferredSignatureAlgorithmsCorrectorTest {
                 Asn1TestUtil.assertNodeMatches(
                         0,
                         "[0] EXPLICIT OBJECT IDENTIFIER: 1.2.840.10045.2.1 (/iso/member-body/us"
-                                + "/ansi-x962/keyType/ecPublicKey)",
+                                + "/ansi-X9-62/keyType/ecPublicKey)",
                         pubKeyAlgIdentifier.getChildAt(0)
                 );
                 Asn1TestUtil.assertNodeMatches(
                         0,
                         "parameters: 1.2.840.10045.3.1.7 (/iso/member-body/us"
-                                + "/ansi-x962/curves/prime/prime256v1)",
+                                + "/ansi-X9-62/curves/prime/prime256v1)",
                         pubKeyAlgIdentifier.getChildAt(1)
                 );
             }
@@ -195,7 +195,7 @@ final class OcspPreferredSignatureAlgorithmsCorrectorTest {
                 final AbstractAsn1TreeNode sigIdentifier = firstPsa.getChildAt(0);
                 Asn1TestUtil.assertNodeMatches(1, "sigIdentifier", sigIdentifier);
                 Asn1TestUtil.assertNodeMatches(0,
-                        "algorithm: 1.2.840.10045.4.3.4 (/iso/member-body/us/ansi-x962/signatures"
+                        "algorithm: 1.2.840.10045.4.3.4 (/iso/member-body/us/ansi-X9-62/signatures"
                                 + "/ecdsa-with-SHA2/ecdsa-with-SHA512)", sigIdentifier.getChildAt(0));
             }
         }
@@ -206,7 +206,7 @@ final class OcspPreferredSignatureAlgorithmsCorrectorTest {
                 final AbstractAsn1TreeNode sigIdentifier = secondPsa.getChildAt(0);
                 Asn1TestUtil.assertNodeMatches(1, "sigIdentifier", sigIdentifier);
                 Asn1TestUtil.assertNodeMatches(
-                        0, "algorithm: 1.2.840.10045.4.3.2 (/iso/member-body/us/ansi-x962/signatures"
+                        0, "algorithm: 1.2.840.10045.4.3.2 (/iso/member-body/us/ansi-X9-62/signatures"
                                 + "/ecdsa-with-SHA2/ecdsa-with-SHA256)",
                         sigIdentifier.getChildAt(0)
                 );
@@ -216,13 +216,13 @@ final class OcspPreferredSignatureAlgorithmsCorrectorTest {
                 Asn1TestUtil.assertNodeMatches(2, "pubKeyAlgIdentifier", pubKeyAlgIdentifier);
                 Asn1TestUtil.assertNodeMatches(
                         0,
-                        "capabilityID: 1.2.840.10045.2.1 (/iso/member-body/us/ansi-x962/keyType"
+                        "capabilityID: 1.2.840.10045.2.1 (/iso/member-body/us/ansi-X9-62/keyType"
                                 + "/ecPublicKey)",
                         pubKeyAlgIdentifier.getChildAt(0)
                 );
                 Asn1TestUtil.assertNodeMatches(
                         0,
-                        "parameters: 1.2.840.10045.3.1.7 (/iso/member-body/us/ansi-x962/curves"
+                        "parameters: 1.2.840.10045.3.1.7 (/iso/member-body/us/ansi-X9-62/curves"
                                 + "/prime/prime256v1)",
                         pubKeyAlgIdentifier.getChildAt(1)
                 );

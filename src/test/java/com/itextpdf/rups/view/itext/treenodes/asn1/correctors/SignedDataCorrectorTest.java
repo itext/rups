@@ -715,7 +715,7 @@ final class SignedDataCorrectorTest {
                 Asn1TestUtil.assertNodeMatches(
                         0,
                         "algorithm: 2.16.840.1.101.3.4.2.1 (/joint-iso-itu-t/country/us"
-                                + "/organization/gov/csor/nistAlgorithms/hashAlgs/sha256)",
+                                + "/organization/gov/csor/nistAlgorithms/hashAlgs/id-sha256)",
                         digestAlgorithm.getChildAt(0)
                 );
                 Asn1TestUtil.assertNodeMatches(0, "parameters: NULL", digestAlgorithm.getChildAt(1));
@@ -795,7 +795,7 @@ final class SignedDataCorrectorTest {
             Asn1TestUtil.assertNodeMatches(
                     0,
                     "algorithm: 2.16.840.1.101.3.4.2.1 (/joint-iso-itu-t/country/us"
-                            + "/organization/gov/csor/nistAlgorithms/hashAlgs/sha256)",
+                            + "/organization/gov/csor/nistAlgorithms/hashAlgs/id-sha256)",
                     digestAlgorithm.getChildAt(0)
             );
             Asn1TestUtil.assertNodeMatches(0, "parameters: NULL", digestAlgorithm.getChildAt(1));
@@ -862,7 +862,7 @@ final class SignedDataCorrectorTest {
                         new ASN1Integer(1),
                         new DERSet(
                                 new DERSequence(new ASN1Encodable[] {
-                                        new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.1"), // sha256
+                                        new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.1"), // id-sha256
                                         DERNull.INSTANCE,
                                 })
                         ),
@@ -903,7 +903,7 @@ final class SignedDataCorrectorTest {
                                                 new ASN1Integer(42),
                                         }),
                                         new DERSequence(new ASN1Encodable[] {
-                                                new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.1"), // sha256
+                                                new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.1"), // id-sha256
                                                 DERNull.INSTANCE,
                                         }),
                                         new DERTaggedObject(false, 0, new DERSet(

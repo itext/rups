@@ -188,7 +188,7 @@ final class SigningCertificateV2CorrectorTest {
                     Asn1TestUtil.assertNodeMatches(
                             0,
                             "algorithm: 2.16.840.1.101.3.4.2.1 (/joint-iso-itu-t/country/us"
-                                    + "/organization/gov/csor/nistAlgorithms/hashAlgs/sha256)",
+                                    + "/organization/gov/csor/nistAlgorithms/hashAlgs/id-sha256)",
                             hashAlgorithm.getChildAt(0)
                     );
                 }
@@ -228,7 +228,7 @@ final class SigningCertificateV2CorrectorTest {
                         new DERSequence(
                                 new DERSequence(new ASN1Encodable[] {
                                         new DERSequence(
-                                                new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.1")  // sha256
+                                                new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.1")  // id-sha256
                                         ),
                                         new DEROctetString(new byte[] {0x11, 0x22, 0x33}),
                                         new DERSequence(new ASN1Encodable[] {
