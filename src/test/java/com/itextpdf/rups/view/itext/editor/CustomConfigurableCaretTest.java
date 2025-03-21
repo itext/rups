@@ -40,20 +40,31 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.contextmenu;
+package com.itextpdf.rups.view.itext.editor;
 
-import com.itextpdf.rups.view.itext.StreamTextEditorPane;
+import java.awt.event.FocusEvent;
+import org.fife.ui.rtextarea.ConfigurableCaret;
+import org.fife.ui.rtextarea.RTextArea;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
-import java.awt.event.ActionEvent;
+@Tag("UnitTest")
+class CustomConfigurableCaretTest {
+    @Test
+    void focusGained() {
+        final ConfigurableCaret caret = new CustomConfigurableCaret();
+        final RTextArea textArea = new RTextArea();
+        textArea.setCaret(caret);
+        Assertions.assertFalse(caret.isVisible());
 
-public class SaveToPdfStreamJTextPaneAction extends AbstractRupsAction {
-
-    public SaveToPdfStreamJTextPaneAction(String name, StreamTextEditorPane invoker) {
-        super(name, invoker);
-    }
-
-    public void actionPerformed(ActionEvent event) {
-        final StreamTextEditorPane pane = (StreamTextEditorPane) invoker;
-        pane.saveToTarget();
+        // Making sure visibility changes for read-only text areas
+        textArea.setEditable(false);
+        textArea.setEnabled(false);
+        caret.focusGained(new FocusEvent(textArea, FocusEvent.FOCUS_GAINED));
+        Assertions.assertFalse(caret.isVisible());
+        textArea.setEnabled(true);
+        caret.focusGained(new FocusEvent(textArea, FocusEvent.FOCUS_GAINED));
+        Assertions.assertTrue(caret.isVisible());
     }
 }

@@ -73,7 +73,7 @@ import com.itextpdf.rups.view.itext.PdfObjectPanel;
 import com.itextpdf.rups.view.itext.PdfTree;
 import com.itextpdf.rups.view.itext.PlainText;
 import com.itextpdf.rups.view.itext.StructureTree;
-import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
+import com.itextpdf.rups.view.itext.StreamTextEditorPane;
 import com.itextpdf.rups.view.itext.XRefTable;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
@@ -135,7 +135,7 @@ public class PdfReaderController implements IPdfObjectPanelEventListener, IRupsE
     /**
      * A panel that will show a stream.
      */
-    protected SyntaxHighlightedStreamPane streamPane;
+    protected StreamTextEditorPane streamPane;
 
     /**
      * The factory producing tree nodes.
@@ -205,7 +205,7 @@ public class PdfReaderController implements IPdfObjectPanelEventListener, IRupsE
 
         objectPanel = new PdfObjectPanel();
         objectPanel.addEventListener(this);
-        streamPane = new SyntaxHighlightedStreamPane(this);
+        streamPane = new StreamTextEditorPane(this);
         JScrollPane debug = new JScrollPane(DebugView.getInstance().getTextArea());
         editorTabs = new JTabbedPane();
         editorTabs.addTab(Language.STREAM.getString(), null, streamPane, Language.STREAM.getString());
@@ -261,7 +261,7 @@ public class PdfReaderController implements IPdfObjectPanelEventListener, IRupsE
      *
      * @return a SyntaxHighlightedStreamPane
      */
-    public SyntaxHighlightedStreamPane getStreamPane() {
+    public StreamTextEditorPane getStreamPane() {
         return streamPane;
     }
 
