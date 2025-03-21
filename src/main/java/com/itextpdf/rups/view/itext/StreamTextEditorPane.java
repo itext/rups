@@ -56,6 +56,7 @@ import com.itextpdf.rups.model.contentstream.PdfContentStreamParser;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.contextmenu.StreamPanelContextMenu;
+import com.itextpdf.rups.view.itext.editor.CustomConfigurableCaret;
 import com.itextpdf.rups.view.itext.editor.Latin1Filter;
 import com.itextpdf.rups.view.itext.editor.PdfFoldParser;
 import com.itextpdf.rups.view.itext.editor.PdfParser;
@@ -403,6 +404,12 @@ public final class StreamTextEditorPane extends RTextScrollPane implements IRups
          * by default we will just assume a PDF content stream.
          */
         setContentType(textArea, SYNTAX_STYLE_PDF);
+        /*
+         * Pretty important to install our custom caret. The default one is
+         * invisible, when the text area is not visible, which is very odd and
+         * inconvenient. The custom one fixes that.
+         */
+        textArea.setCaret(new CustomConfigurableCaret());
         textArea.addParser(new PdfParser());
         // This will allow to fold code blocks (like BT/ET blocks)
         textArea.setCodeFoldingEnabled(true);
