@@ -45,7 +45,7 @@ package com.itextpdf.rups.view.contextmenu;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.FrameIconUtil;
 import com.itextpdf.rups.view.itext.PdfTree;
-import com.itextpdf.rups.view.itext.StreamTextEditorPane;
+import com.itextpdf.rups.view.itext.stream.StreamTextEditorPane;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
 import javax.swing.AbstractAction;

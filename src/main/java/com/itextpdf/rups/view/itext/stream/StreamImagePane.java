@@ -40,20 +40,34 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.contextmenu;
+package com.itextpdf.rups.view.itext.stream;
 
-import com.itextpdf.rups.view.itext.stream.StreamTextEditorPane;
+import java.awt.Image;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 
-import java.awt.event.ActionEvent;
+/**
+ * Simple pane, which shows an image that can be interacted with via a context
+ * menu.
+ */
+public final class StreamImagePane extends JScrollPane {
+    private final JLabel label;
 
-public class SaveToPdfStreamJTextPaneAction extends AbstractRupsAction {
-
-    public SaveToPdfStreamJTextPaneAction(String name, StreamTextEditorPane invoker) {
-        super(name, invoker);
+    public StreamImagePane() {
+        this.label = new JLabel();
+        this.label.setVerticalAlignment(SwingConstants.TOP);
+        this.label.setHorizontalAlignment(SwingConstants.LEFT);
+        setViewportView(this.label);
     }
 
-    public void actionPerformed(ActionEvent event) {
-        final StreamTextEditorPane pane = (StreamTextEditorPane) invoker;
-        pane.saveToTarget();
+    public void setImage(Image image) {
+        Icon icon = null;
+        if (image != null) {
+            icon = new ImageIcon(image);
+        }
+        label.setIcon(icon);
     }
 }

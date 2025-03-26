@@ -40,7 +40,7 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext.editor;
+package com.itextpdf.rups.view.itext.stream.editor;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -57,7 +57,7 @@ import org.fife.ui.rsyntaxtextarea.TokenTypes;
 
 /**
  * Special {@link TokenPainter} implementation for working with
- * {@link PdfTokenMaker}.
+ * {@link AbstractPainterAwareTokenMaker}.
  *
  * <p>
  * As of now, base logic of the this painter is the same as

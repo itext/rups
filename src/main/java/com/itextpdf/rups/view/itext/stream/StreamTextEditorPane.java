@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2024 Apryse Group NV
+    Copyright (c) 1998-2025 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -40,7 +40,7 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext;
+package com.itextpdf.rups.view.itext.stream;
 
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
@@ -54,39 +54,21 @@ import com.itextpdf.rups.model.contentstream.ParseTreeNode;
 import com.itextpdf.rups.model.contentstream.ParseTreeNodeType;
 import com.itextpdf.rups.model.contentstream.PdfContentStreamParser;
 import com.itextpdf.rups.view.Language;
-import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.contextmenu.StreamPanelContextMenu;
-import com.itextpdf.rups.view.itext.editor.CustomConfigurableCaret;
-import com.itextpdf.rups.view.itext.editor.Latin1Filter;
-import com.itextpdf.rups.view.itext.editor.PdfFoldParser;
-import com.itextpdf.rups.view.itext.editor.PdfParser;
-import com.itextpdf.rups.view.itext.editor.PdfTokenMaker;
-import com.itextpdf.rups.view.itext.editor.PdfTokenPainterFactory;
+import com.itextpdf.rups.view.itext.stream.editor.PdfSyntaxTextArea;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
+import java.awt.BorderLayout;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
-import javax.swing.JComponent;
-import javax.swing.KeyStroke;
+import javax.swing.JPanel;
 import javax.swing.tree.TreeNode;
-import org.fife.ui.rsyntaxtextarea.AbstractTokenMakerFactory;
-import org.fife.ui.rsyntaxtextarea.DefaultTokenPainterFactory;
-import org.fife.ui.rsyntaxtextarea.RSyntaxDocument;
-import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.ErrorStrip;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
-import org.fife.ui.rsyntaxtextarea.TokenMakerFactory;
-import org.fife.ui.rsyntaxtextarea.folding.FoldParserManager;
 import org.fife.ui.rtextarea.ExpandedFoldRenderStrategy;
 import org.fife.ui.rtextarea.RTextScrollPane;
 
-public final class StreamTextEditorPane extends RTextScrollPane implements IRupsEventListener {
-    /**
-     * MIME type for a PDF content stream.
-     */
-    private static final String SYNTAX_STYLE_PDF = "application/pdf";
-
+public final class StreamTextEditorPane extends JPanel implements IRupsEventListener {
     /**
      * Char buffer with a single LF character.
      */
@@ -95,12 +77,11 @@ public final class StreamTextEditorPane extends RTextScrollPane implements IRups
      * Max text line width after which it will be forcefully split.
      */
     private static final int MAX_LINE_LENGTH = 2048;
-    private static final int MAX_NUMBER_OF_EDITS = 8192;
 
     private static final Method GET_INPUT_STREAM_METHOD;
 
+    private final RTextScrollPane textScrollPane;
     private final StreamPanelContextMenu popupMenu;
-    private final BeepingUndoManager undoManager;
 
     //Todo: Remove that field after proper application structure will be implemented.
     private final PdfReaderController controller;
@@ -108,14 +89,6 @@ public final class StreamTextEditorPane extends RTextScrollPane implements IRups
     private boolean editable = false;
 
     static {
-        /*
-         * Registering PDF content type, so that we could use PDF syntax
-         * highlighting in RSyntaxTextArea.
-         */
-        final AbstractTokenMakerFactory tokenMakerFactory =
-                (AbstractTokenMakerFactory) TokenMakerFactory.getDefaultInstance();
-        tokenMakerFactory.putMapping(SYNTAX_STYLE_PDF, PdfTokenMaker.class.getName());
-        FoldParserManager.get().addFoldParserMapping(SYNTAX_STYLE_PDF, new PdfFoldParser());
         /*
          * There doesn't seem to be a good way to detect, whether you can call
          * setData on a PdfStream or not in advance. It cannot be called if a
@@ -136,37 +109,29 @@ public final class StreamTextEditorPane extends RTextScrollPane implements IRups
      * @param controller the pdf reader controller
      */
     public StreamTextEditorPane(PdfReaderController controller) {
-        super(createTextArea());
+        super(new BorderLayout());
         this.controller = controller;
+
+        final PdfSyntaxTextArea textArea = new PdfSyntaxTextArea();
+        this.textScrollPane = new RTextScrollPane(textArea);
         // This will make sure, that the arrow for folding code blocks are
         // always visible
-        getGutter().setExpandedFoldRenderStrategy(ExpandedFoldRenderStrategy.ALWAYS);
+        this.textScrollPane.getGutter().setExpandedFoldRenderStrategy(
+                ExpandedFoldRenderStrategy.ALWAYS
+        );
+        add(this.textScrollPane);
+
+        final ErrorStrip errorStrip = new ErrorStrip(textArea);
+        add(errorStrip, BorderLayout.LINE_END);
 
         popupMenu = new StreamPanelContextMenu(getTextArea(), this);
-        getTextArea().setComponentPopupMenu(popupMenu);
-        getTextArea().addMouseListener(new ContextMenuMouseListener(popupMenu, getTextArea()));
-
-        undoManager = new BeepingUndoManager();
-        getDocument().addUndoableEditListener(undoManager);
-        getTextArea().registerKeyboardAction(
-                e -> undoManager.undo(),
-                KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK),
-                JComponent.WHEN_FOCUSED
-        );
-        getTextArea().registerKeyboardAction(
-                e -> undoManager.redo(),
-                KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK),
-                JComponent.WHEN_FOCUSED
-        );
+        // TODO: Augment existing menu with our own options
+//        getTextArea().setComponentPopupMenu(popupMenu);
+//        getTextArea().addMouseListener(new ContextMenuMouseListener(popupMenu, getTextArea()));
     }
 
-    @Override
-    public RSyntaxTextArea getTextArea() {
-        return (RSyntaxTextArea) super.getTextArea();
-    }
-
-    public RSyntaxDocument getDocument() {
-        return getDocument(getTextArea());
+    public PdfSyntaxTextArea getTextArea() {
+        return (PdfSyntaxTextArea) textScrollPane.getTextArea();
     }
 
     /**
@@ -175,7 +140,7 @@ public final class StreamTextEditorPane extends RTextScrollPane implements IRups
      * @param target the node of which the content stream needs to be rendered
      */
     public void render(PdfObjectTreeNode target) {
-        setUndoEnabled(false);
+        getTextArea().discardAllEdits();
         this.target = target;
         final PdfStream stream = getTargetStream();
         if (stream == null) {
@@ -206,11 +171,11 @@ public final class StreamTextEditorPane extends RTextScrollPane implements IRups
         try {
             if (isFont(stream) || isImage(stream)) {
                 textToSet = getText(stream, false);
-                styleToSet = SyntaxConstants.SYNTAX_STYLE_NONE;
+                styleToSet = PdfSyntaxTextArea.SYNTAX_STYLE_BINARY;
                 editableToSet = false;
             } else {
                 textToSet = prepareContentStreamText(getText(stream, true));
-                styleToSet = SYNTAX_STYLE_PDF;
+                styleToSet = PdfSyntaxTextArea.SYNTAX_STYLE_PDF;
                 editableToSet = true;
             }
             setTextEditableRoutine(true);
@@ -220,11 +185,11 @@ public final class StreamTextEditorPane extends RTextScrollPane implements IRups
             styleToSet = SyntaxConstants.SYNTAX_STYLE_NONE;
             editableToSet = false;
         }
-        setContentType(styleToSet);
+        getTextArea().setSyntaxEditingStyle(styleToSet);
         getTextArea().setText(textToSet);
         getTextArea().setCaretPosition(0);
+        getTextArea().discardAllEdits();
         setTextEditableRoutine(editableToSet);
-        setUndoEnabled(true);
         getTextArea().setVisible(true);
 
         repaint();
@@ -310,22 +275,9 @@ public final class StreamTextEditorPane extends RTextScrollPane implements IRups
 
     private void clearPane() {
         target = null;
-        setUndoEnabled(false);
         getTextArea().setText("");
+        getTextArea().discardAllEdits();
         setTextEditableRoutine(false);
-    }
-
-    private void setContentType(String style) {
-        setContentType(getTextArea(), style);
-    }
-
-    private void setUndoEnabled(boolean enabled) {
-        if (enabled) {
-            undoManager.setLimit(MAX_NUMBER_OF_EDITS);
-        } else {
-            undoManager.discardAllEdits();
-            undoManager.setLimit(0);
-        }
     }
 
     /**
@@ -384,62 +336,8 @@ public final class StreamTextEditorPane extends RTextScrollPane implements IRups
         return tree.getFullText();
     }
 
-    private static RSyntaxTextArea createTextArea() {
-        final RSyntaxTextArea textArea = new RSyntaxTextArea();
-        /*
-         * First we will set up our custom painter with our Latin-1 filter
-         * "hack". The way it works is that with the filter applied, any
-         * character greater than U+00FF will be replaced with a UTF-8 byte
-         * representation. As in the internal char array can actually be
-         * interpreted as a byte array, which wastes twice as much space...
-         *
-         * To make it easier to work with possible binary content of a PDF
-         * stream we will use a custom token painter. It will paint non-ASCII
-         * character as their hex-codes instead of their Latin-1 mapped
-         * glyphs.
-         *
-         * Both the filter and painter should be replaced with default, when
-         * we display a non-content stream. For example, for XML-based
-         * metadata we should just use the regular XML editor available. But
-         * by default we will just assume a PDF content stream.
-         */
-        setContentType(textArea, SYNTAX_STYLE_PDF);
-        /*
-         * Pretty important to install our custom caret. The default one is
-         * invisible, when the text area is not visible, which is very odd and
-         * inconvenient. The custom one fixes that.
-         */
-        textArea.setCaret(new CustomConfigurableCaret());
-        textArea.addParser(new PdfParser());
-        // This will allow to fold code blocks (like BT/ET blocks)
-        textArea.setCodeFoldingEnabled(true);
-        // This will automatically add tabulations, when you enter a new line
-        // after a "q" operator, for example
-        textArea.setAutoIndentEnabled(true);
-        // This will mark identical names and operators, when cursor is on
-        // them after a short delay
-        textArea.setMarkOccurrences(true);
-        textArea.setMarkOccurrencesDelay(500);
-        return textArea;
-    }
-
-    private static void setContentType(RSyntaxTextArea textArea, String style) {
-        if (SYNTAX_STYLE_PDF.equals(style)) {
-            getDocument(textArea).setDocumentFilter(new Latin1Filter());
-            textArea.setTokenPainterFactory(new PdfTokenPainterFactory());
-        } else {
-            getDocument(textArea).setDocumentFilter(null);
-            textArea.setTokenPainterFactory(new DefaultTokenPainterFactory());
-        }
-        textArea.setSyntaxEditingStyle(style);
-    }
-
     private static String getText(PdfStream stream, boolean decoded) {
         return new String(stream.getBytes(decoded), StandardCharsets.ISO_8859_1);
-    }
-
-    private static RSyntaxDocument getDocument(RSyntaxTextArea textArea) {
-        return (RSyntaxDocument) textArea.getDocument();
     }
 
     private static boolean isImage(PdfStream stream) {

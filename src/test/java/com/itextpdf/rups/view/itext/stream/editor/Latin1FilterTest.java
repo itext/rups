@@ -40,7 +40,7 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext.editor;
+package com.itextpdf.rups.view.itext.stream.editor;
 
 import com.itextpdf.kernel.exceptions.PdfException;
 
