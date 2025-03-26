@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2024 Apryse Group NV
+    Copyright (c) 1998-2025 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -40,7 +40,7 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext.editor;
+package com.itextpdf.rups.view.itext.stream.editor;
 
 import com.itextpdf.rups.model.contentstream.ParseTreeNode;
 import com.itextpdf.rups.model.contentstream.ParseTreeNodeType;
@@ -50,25 +50,9 @@ import com.itextpdf.rups.model.contentstream.PdfOperators;
 import java.util.Iterator;
 import javax.swing.text.Segment;
 import org.fife.ui.rsyntaxtextarea.Token;
-import org.fife.ui.rsyntaxtextarea.TokenMakerBase;
 
 /**
  * RSyntaxTextArea token maker, which handles PDF content streams.
- *
- * <p>
- * This class really wants to just implement TokenMaker, as {@code firstToken},
- * {@code currentToken}, {@code previousToken} and {@code tokenFactory} from
- * {@link org.fife.ui.rsyntaxtextarea.TokenMakerBase} are of no use here. But
- * just implementing the interface would force us to copy a lot of code from
- * the library, and, for some reason {@code DefaultOccurrenceMarker} is marked
- * as package-private, so we would need to reimplement that as well.
- * </p>
- *
- * <p>
- * So, at the moment, these fields from TokenMakerBase should be ignored. For
- * token manipulation, {@code firstPdfToken} and {@code lastPdfToken} should
- * be used instead.
- * </p>
  *
  * <p>
  * This class is expected to be used with a text area, which has a
@@ -76,7 +60,7 @@ import org.fife.ui.rsyntaxtextarea.TokenMakerBase;
  * represent a byte stream as a string.
  * </p>
  */
-public final class PdfTokenMaker extends TokenMakerBase {
+public final class PdfTokenMaker extends AbstractPainterAwareTokenMaker {
     /**
      * Special internal token type marker to signify, that previous line ended
      * within a hexadecimal string, which was yet to be closed.
@@ -87,31 +71,6 @@ public final class PdfTokenMaker extends TokenMakerBase {
      * Content stream parser used for token parsing.
      */
     private final PdfContentStreamParser pdfContentStreamParser = new PdfContentStreamParser();
-
-    /**
-     * First token in the output token list. Should be used instead of
-     * {@code firstToken}.
-     */
-    private PdfToken firstPdfToken = null;
-    /**
-     * Last token in the output token list. Should be used instead of
-     * {@code lastToken}.
-     */
-    private PdfToken lastPdfToken = null;
-
-    @Override
-    public void addNullToken() {
-        final PdfToken token = new PdfToken();
-        token.setLanguageIndex(getLanguageIndex());
-        addToken(token);
-    }
-
-    @Override
-    public void addToken(char[] array, int start, int end, int tokenType, int startOffset, boolean hyperlink) {
-        final PdfToken token = new PdfToken(array, start, end, startOffset, tokenType, getLanguageIndex());
-        token.setHyperlink(hyperlink);
-        addToken(token);
-    }
 
     @Override
     public boolean getMarkOccurrencesOfTokenType(int type) {
@@ -136,13 +95,6 @@ public final class PdfTokenMaker extends TokenMakerBase {
         }
         // TODO: Re-implement automatic indentation
         return false;
-    }
-
-    @Override
-    protected void resetTokenList() {
-        firstPdfToken = null;
-        lastPdfToken = null;
-        super.resetTokenList();
     }
 
     @Override
@@ -186,21 +138,7 @@ public final class PdfTokenMaker extends TokenMakerBase {
         }
 
         handleMultiline(text, node, startOffset);
-        return firstPdfToken;
-    }
-
-    /**
-     * Appends a PdfToken to the output token list.
-     *
-     * @param token Token to append.
-     */
-    private void addToken(PdfToken token) {
-        if (firstPdfToken == null) {
-            firstPdfToken = token;
-        } else {
-            lastPdfToken.setNextToken(token);
-        }
-        lastPdfToken = token;
+        return firstRupsToken;
     }
 
     /**

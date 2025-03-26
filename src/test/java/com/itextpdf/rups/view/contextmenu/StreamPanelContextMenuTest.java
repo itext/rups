@@ -43,7 +43,7 @@
 package com.itextpdf.rups.view.contextmenu;
 
 import com.itextpdf.rups.view.Language;
-import com.itextpdf.rups.view.itext.StreamTextEditorPane;
+import com.itextpdf.rups.view.itext.stream.StreamTextEditorPane;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;

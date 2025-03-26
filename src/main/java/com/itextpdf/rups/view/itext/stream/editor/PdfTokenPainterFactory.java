@@ -40,34 +40,21 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext;
+package com.itextpdf.rups.view.itext.stream.editor;
 
-import java.awt.Toolkit;
-import javax.swing.undo.CannotRedoException;
-import javax.swing.undo.CannotUndoException;
-import javax.swing.undo.UndoManager;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.TokenPainter;
+import org.fife.ui.rsyntaxtextarea.TokenPainterFactory;
 
 /**
- * A variation of an {@link UndoManager}, which will issue a beep instead of
- * throwing {@link CannotUndoException} and {@link CannotRedoException}
- * exceptions.
+ * Returns the {@link PdfTokenPainter} to use for a text area.
  */
-public final class BeepingUndoManager extends UndoManager {
+public final class PdfTokenPainterFactory implements TokenPainterFactory {
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void redo() {
-        try {
-            super.redo();
-        } catch (CannotRedoException ignored) {
-            Toolkit.getDefaultToolkit().beep();
-        }
-    }
-
-    @Override
-    public void undo() {
-        try {
-            super.undo();
-        } catch (CannotUndoException ignored) {
-            Toolkit.getDefaultToolkit().beep();
-        }
+    public TokenPainter getTokenPainter(RSyntaxTextArea textArea) {
+        return new PdfTokenPainter(textArea);
     }
 }

@@ -40,36 +40,23 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext.editor;
+package com.itextpdf.rups.view.itext.stream.editor;
 
-import java.awt.event.FocusEvent;
-import org.fife.ui.rtextarea.ConfigurableCaret;
+import javax.swing.text.Segment;
+import org.fife.ui.rsyntaxtextarea.Token;
+import org.fife.ui.rsyntaxtextarea.TokenTypes;
 
-/**
- * Our custom {@link ConfigurableCaret}, which remains visible, if the text
- * area is not editable.
- */
-public final class CustomConfigurableCaret extends ConfigurableCaret {
-    private static final int DEFAULT_BLINK_RATE = 500;
-
-    public CustomConfigurableCaret() {
-        /*
-         * The situation is a bit odd. Usually a caret is created via the UI
-         * class, and then the blink rate is set manually in that class after
-         * creation based on some component properties.
-         *
-         * But what it also means is that if you replace the caret in a text
-         * area afterward, it will not blink, even though it is the default
-         * behavior. So for simplicity we will set it here.
-         */
-        setBlinkRate(DEFAULT_BLINK_RATE);
+public final class BinaryTokenMaker extends AbstractPainterAwareTokenMaker {
+    @Override
+    public boolean getMarkOccurrencesOfTokenType(int type) {
+        return false;
     }
 
     @Override
-    public void focusGained(FocusEvent e) {
-        super.focusGained(e);
-        if (getComponent().isEnabled()) {
-            setVisible(true);
-        }
+    public Token getTokenList(Segment text, int initialTokenType, int startOffset) {
+        resetTokenList();
+        addToken(text, text.offset, text.offset + text.count, TokenTypes.IDENTIFIER, startOffset);
+        addNullToken();
+        return firstRupsToken;
     }
 }
