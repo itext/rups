@@ -43,7 +43,7 @@
 package com.itextpdf.rups.view.contextmenu;
 
 import com.itextpdf.rups.view.Language;
-import com.itextpdf.rups.view.itext.StreamTextEditorPane;
+import com.itextpdf.rups.view.itext.stream.StreamTextEditorPane;
 
 import javax.swing.Action;
 import javax.swing.JComponent;

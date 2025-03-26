@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2024 Apryse Group NV
+    Copyright (c) 1998-2025 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -40,7 +40,7 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext.editor;
+package com.itextpdf.rups.view.itext.stream.editor;
 
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.contentstream.ParseTreeNode;

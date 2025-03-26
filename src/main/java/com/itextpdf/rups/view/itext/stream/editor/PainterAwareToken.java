@@ -40,7 +40,7 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext.editor;
+package com.itextpdf.rups.view.itext.stream.editor;
 
 import java.awt.Rectangle;
 import java.lang.reflect.Method;
@@ -60,7 +60,7 @@ import org.fife.ui.rsyntaxtextarea.TokenPainter;
  * in {@link TokenImpl}.
  * </p>
  */
-public final class PdfToken extends TokenImpl {
+public final class PainterAwareToken extends TokenImpl {
     /*
      * For some reason caret positioning logic in RSyntaxTextArea does not
      * take the painter into the account. It calls methods within the Token
@@ -90,18 +90,18 @@ public final class PdfToken extends TokenImpl {
         }
     }
 
-    public PdfToken() {
+    public PainterAwareToken() {
     }
 
-    public PdfToken(Segment line, int beg, int end, int startOffset, int type, int languageIndex) {
+    public PainterAwareToken(Segment line, int beg, int end, int startOffset, int type, int languageIndex) {
         super(line, beg, end, startOffset, type, languageIndex);
     }
 
-    public PdfToken(char[] line, int beg, int end, int startOffset, int type, int languageIndex) {
+    public PainterAwareToken(char[] line, int beg, int end, int startOffset, int type, int languageIndex) {
         super(line, beg, end, startOffset, type, languageIndex);
     }
 
-    public PdfToken(Token t2) {
+    public PainterAwareToken(Token t2) {
         super(t2);
     }
 
