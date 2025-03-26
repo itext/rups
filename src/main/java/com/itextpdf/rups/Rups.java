@@ -62,6 +62,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -94,6 +95,13 @@ public final class Rups {
      */
     public static void startNewApplication(final List<File> files) {
         SwingUtilities.invokeLater(() -> {
+            /*
+             * While we get the locale explicitly for our localized strings,
+             * some of the 3rd party Swings components use the default locale
+             * for string (ex. RSyntaxTextArea). So we need to change the
+             * default locale for everything to look consistent.
+             */
+            Locale.setDefault(RupsConfiguration.INSTANCE.getUserLocale());
             setLookandFeel();
             final IRupsController rupsController = initApplication(new JFrame());
             setOpenFileHandler(
