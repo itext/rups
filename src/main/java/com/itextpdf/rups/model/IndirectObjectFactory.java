@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -90,22 +90,6 @@ public class IndirectObjectFactory {
      */
     protected ArrayList<Boolean> isLoaded = new ArrayList<>();
 
-    private static final String METHOD_NAME = "checkState";
-    private static final String FIELD_NAME = "FORBID_RELEASE";
-    private static Method checkStateMethod;
-    private static Field forbidReleaseField;
-
-    static {
-        try {
-            checkStateMethod = PdfObject.class.getDeclaredMethod(METHOD_NAME, short.class);
-            checkStateMethod.setAccessible(true);
-            forbidReleaseField = PdfObject.class.getDeclaredField(FIELD_NAME);
-            forbidReleaseField.setAccessible(true);
-        } catch (NoSuchFieldException | NoSuchMethodException | SecurityException ignored) {
-            // left intentionally empty
-        }
-    }
-
     /**
      * Creates a list that will contain all the indirect objects
      * in a PDF document.
@@ -181,16 +165,16 @@ public class IndirectObjectFactory {
             final PdfDictionary dict = (PdfDictionary) object;
             if (PdfName.Page.equals(dict.get(PdfName.Type, false))) {
                 objects.add(dict);
-                isLoaded.add(true);
+                isLoaded.add(Boolean.TRUE);
                 return;
             }
         }
         isLoaded.add(object.isNull());
-        if (canRelease(object)) {
+        if (object.isReleaseForbidden()) {
+            objects.add(object);
+        } else {
             object.release();
             objects.add(PdfNull.PDF_NULL);
-        } else {
-            objects.add(object);
         }
     }
 
@@ -263,20 +247,12 @@ public class IndirectObjectFactory {
     public PdfObject loadObjectByReference(int ref) {
         PdfObject object = getObjectByReference(ref);
         final int idx = getIndexByRef(ref);
-        if (object instanceof PdfNull && !isLoaded.get(idx)) {
+        if (object instanceof PdfNull && !Boolean.TRUE.equals(isLoaded.get(idx))) {
             object = document.getPdfObject(ref);
             objects.set(idx, object);
-            isLoaded.set(idx, true);
+            isLoaded.set(idx, Boolean.TRUE);
         }
         return object;
-    }
-
-    private boolean canRelease(PdfObject obj) {
-        try {
-            return !(Boolean) checkStateMethod.invoke(obj, forbidReleaseField.get(obj));
-        } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException any) {
-            return true;
-        }
     }
 
     void addNewIndirectObject(PdfObject object) {

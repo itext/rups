@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -43,7 +43,7 @@
 package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.controller.RupsInstanceController;
-import com.itextpdf.rups.model.PdfFile;
+import com.itextpdf.rups.model.IPdfFile;
 
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
@@ -52,7 +52,7 @@ import javax.swing.JPanel;
  * A subclass of JPanel to allow for a tie between a tab ({@link com.itextpdf.rups.view.RupsTabbedPane RupsTabbedPane})
  * and its related {@link com.itextpdf.rups.controller.RupsInstanceController RupsInstanceController}.
  */
-public class RupsPanel extends JPanel {
+public final class RupsPanel extends JPanel {
 
     private RupsInstanceController rupsInstanceController;
 
@@ -64,7 +64,7 @@ public class RupsPanel extends JPanel {
         this.rupsInstanceController = rupsInstanceController;
     }
 
-    public PdfFile getPdfFile() {
+    public IPdfFile getPdfFile() {
         return this.rupsInstanceController.getPdfFile();
     }
 

@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -45,45 +45,42 @@ package com.itextpdf.rups.io;
 import com.itextpdf.rups.mock.MockedPdfFile;
 import com.itextpdf.rups.mock.MockedRupsController;
 import com.itextpdf.rups.mock.MockedSystemViewer;
-import com.itextpdf.rups.model.PdfFile;
-import com.itextpdf.test.annotations.type.UnitTest;
+import com.itextpdf.rups.model.IPdfFile;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
-
-@Category(UnitTest.class)
-public class OpenInViewerActionTest {
+@Tag("UnitTest.class")
+class OpenInViewerActionTest {
 
     @Test
-    public void normalTest() throws IOException {
-        PdfFile pdfFile = new MockedPdfFile(new byte[] {}, false);
+    void normalTest() {
+        IPdfFile pdfFile = new MockedPdfFile();
 
         MockedRupsController mockedRupsController = new MockedRupsController(pdfFile);
         MockedSystemViewer systemViewerAction = new MockedSystemViewer(true);
         OpenInViewerAction openInViewerAction = new OpenInViewerAction(mockedRupsController, systemViewerAction);
         openInViewerAction.actionPerformed(null);
-        Assert.assertTrue(systemViewerAction.isFileOpened());
+        Assertions.assertTrue(systemViewerAction.isFileOpened());
     }
 
     @Test
-    public void viewingNotSupportedTest() throws IOException {
-        PdfFile pdfFile = new MockedPdfFile(new byte[] {}, false);
+    void viewingNotSupportedTest() {
+        IPdfFile pdfFile = new MockedPdfFile();
 
         MockedRupsController mockedRupsController = new MockedRupsController(pdfFile);
         MockedSystemViewer systemViewerAction = new MockedSystemViewer(false);
         OpenInViewerAction openInViewerAction = new OpenInViewerAction(mockedRupsController, systemViewerAction);
         openInViewerAction.actionPerformed(null);
-        Assert.assertFalse(systemViewerAction.isFileOpened());
+        Assertions.assertFalse(systemViewerAction.isFileOpened());
     }
 
     @Test
-    public void viewingNullFileTest() throws IOException {
+    void viewingNullFileTest() {
         MockedRupsController mockedRupsController = new MockedRupsController(null);
         MockedSystemViewer systemViewerAction = new MockedSystemViewer(true);
         OpenInViewerAction openInViewerAction = new OpenInViewerAction(mockedRupsController, systemViewerAction);
         openInViewerAction.actionPerformed(null);
-        Assert.assertFalse(systemViewerAction.isFileOpened());
+        Assertions.assertFalse(systemViewerAction.isFileOpened());
     }
 }

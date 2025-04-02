@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -57,6 +57,10 @@ import java.util.ArrayList;
  * A TableModel in case we want to show a PDF dictionary in a JTable.
  */
 public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
+    private static final int KEY_COLUMN_INDEX = 0;
+    private static final int VALUE_COLUMN_INDEX = 1;
+    private static final int BUTTON_COLUMN_INDEX = 2;
+    private static final int DATA_COLUMN_COUNT = 2;
 
     private final PdfSyntaxParser parser;
     /**
@@ -71,6 +75,9 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
      * An ArrayList with the dictionary keys.
      */
     protected ArrayList<PdfName> keys = new ArrayList<>();
+
+    private String tempKey = "/";
+    private String tempValue = "";
 
     /**
      * Creates the TableModel.
@@ -89,77 +96,85 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
     /**
      * @see javax.swing.table.TableModel#getColumnCount()
      */
+    @Override
     public int getColumnCount() {
-        return 3;
+        if (isEditable()) {
+            // +1 is for the add/remove buttons column
+            return DATA_COLUMN_COUNT + 1;
+        }
+        return DATA_COLUMN_COUNT;
     }
 
     /**
      * @see javax.swing.table.TableModel#getRowCount()
      */
+    @Override
     public int getRowCount() {
-        return dictionary.size() + 1;
+        if (isEditable()) {
+            // +1 is for the "add new row" row
+            return dictionary.size() + 1;
+        }
+        return dictionary.size();
     }
 
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return columnIndex < 2;
+        return isEditable() && columnIndex < DATA_COLUMN_COUNT;
     }
 
     /**
      * @see javax.swing.table.TableModel#getValueAt(int, int)
      */
+    @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         final int lastRow = keys.size();
 
         if (rowIndex == lastRow) {
-            if (columnIndex == 0) {
+            if (columnIndex == KEY_COLUMN_INDEX) {
                 return tempKey;
             }
-            if (columnIndex == 1) {
+            if (columnIndex == VALUE_COLUMN_INDEX) {
                 return tempValue;
             }
         }
 
         switch (columnIndex) {
-            case 0:
+            case KEY_COLUMN_INDEX:
                 return keys.get(rowIndex);
-            case 1:
+            case VALUE_COLUMN_INDEX:
                 return PdfSyntaxUtils.getSyntaxString(dictionary.get(keys.get(rowIndex), false));
             default:
                 return null;
         }
     }
 
-    private String tempKey = "/", tempValue = "";
-
     @Override
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         final int rowCount = getRowCount();
 
         if (rowIndex == rowCount - 1) {
-            if (columnIndex == 0) {
+            if (columnIndex == KEY_COLUMN_INDEX) {
                 tempKey = (String) aValue;
                 if (!tempKey.startsWith("/")) {
                     tempKey = "/" + tempKey;
                 }
-            } else if (columnIndex == 1) {
+            } else if (columnIndex == VALUE_COLUMN_INDEX) {
                 tempValue = (String) aValue;
             }
         } else {
-            if (!(aValue instanceof String) || "".equalsIgnoreCase(((String) aValue).trim())) {
+            if (!(aValue instanceof String) || ((String) aValue).isBlank()) {
                 LoggerHelper.warn(Language.ERROR_EMPTY_FIELD.getString(), getClass());
                 return;
             }
-            if (columnIndex == 0) {
+            if (columnIndex == KEY_COLUMN_INDEX) {
                 final String key = (String) aValue;
-
-                final PdfName oldName = keys.get(rowIndex);
                 final PdfName newName = getCorrectKey(key);
                 if (newName == null) {
                     return;
                 }
 
+                final PdfName oldName = keys.get(rowIndex);
                 final PdfObject pdfObject = dictionary.get(oldName, false);
                 removeRow(rowIndex);
                 addRow(newName, pdfObject);
@@ -183,11 +198,11 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
     @Override
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
-            case 0:
+            case KEY_COLUMN_INDEX:
                 return Language.DICTIONARY_KEY.getString();
-            case 1:
+            case VALUE_COLUMN_INDEX:
                 return Language.DICTIONARY_VALUE.getString();
-            case 2:
+            case BUTTON_COLUMN_INDEX:
                 return "";
             default:
                 return null;
@@ -196,7 +211,7 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
 
     @Override
     public int getButtonColumn() {
-        return 2;
+        return BUTTON_COLUMN_INDEX;
     }
 
     @Override
@@ -209,8 +224,8 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
 
     @Override
     public void validateTempRow() {
-
-        if ("".equalsIgnoreCase(tempKey.trim()) || "".equalsIgnoreCase(tempValue.trim())) {
+        // We check only the value, as key is guaranteed to be at least "/"
+        if (tempValue.isBlank()) {
             LoggerHelper.warn(Language.ERROR_EMPTY_FIELD.getString(), getClass());
             return;
         }
@@ -249,11 +264,12 @@ public class DictionaryTableModel extends AbstractPdfObjectPanelTableModel {
         fireTableRowsInserted(index, index);
     }
 
-    private PdfName getCorrectKey(String value) {
-        if (!value.startsWith("/")) {
-            value = "/" + value;
+    private PdfName getCorrectKey(String key) {
+        String nameKey = key;
+        if (!nameKey.startsWith("/")) {
+            nameKey = "/" + nameKey;
         }
-        final PdfObject result = parser.parseString(value);
+        final PdfObject result = parser.parseString(nameKey);
 
         if (result instanceof PdfName) {
             return (PdfName) result;

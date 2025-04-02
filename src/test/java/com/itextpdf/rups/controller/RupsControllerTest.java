@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -42,53 +42,49 @@
  */
 package com.itextpdf.rups.controller;
 
-import com.itextpdf.rups.event.CloseDocumentEvent;
-import com.itextpdf.rups.event.OpenFileEvent;
-import com.itextpdf.rups.event.SaveToFileEvent;
 import com.itextpdf.rups.view.RupsTabbedPane;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.awt.Dimension;
 import java.io.File;
-import org.junit.Assert;
-import org.junit.Test;
 
-public class RupsControllerTest {
+class RupsControllerTest {
 
     @Test
-    public void closeTest() {
+    void closeTest() {
         MockRupsTabbedPane rupsTabbedPane = new MockRupsTabbedPane();
-        RupsController rupsController = new RupsController(null, rupsTabbedPane);
+        RupsController rupsController = new RupsController(new Dimension(), rupsTabbedPane);
 
-        rupsController.update(null, new CloseDocumentEvent());
-        Assert.assertTrue(rupsTabbedPane.closed);
-        Assert.assertFalse(rupsTabbedPane.opened);
-        Assert.assertFalse(rupsTabbedPane.saved);
+        rupsController.closeCurrentFile();
+        Assertions.assertTrue(rupsTabbedPane.closed);
+        Assertions.assertFalse(rupsTabbedPane.opened);
+        Assertions.assertFalse(rupsTabbedPane.saved);
     }
 
     @Test
-    public void saveTest() {
+    void saveTest() {
         MockRupsTabbedPane rupsTabbedPane = new MockRupsTabbedPane();
-        RupsController rupsController = new RupsController(null, rupsTabbedPane);
+        RupsController rupsController = new RupsController(new Dimension(), rupsTabbedPane);
 
-        rupsController.update(null, new SaveToFileEvent(new File("")));
-        Assert.assertTrue(rupsTabbedPane.saved);
-        Assert.assertFalse(rupsTabbedPane.opened);
-        Assert.assertFalse(rupsTabbedPane.closed);
+        rupsController.saveCurrentFile(new File(""));
+        Assertions.assertTrue(rupsTabbedPane.saved);
+        Assertions.assertFalse(rupsTabbedPane.opened);
+        Assertions.assertFalse(rupsTabbedPane.closed);
     }
 
     @Test
-    public void openTest() {
+    void openTest() {
         MockRupsTabbedPane rupsTabbedPane = new MockRupsTabbedPane();
-        RupsController rupsController = new RupsController(null, rupsTabbedPane);
+        RupsController rupsController = new RupsController(new Dimension(), rupsTabbedPane);
 
-        rupsController.update(null, new OpenFileEvent(new File("test.pdf")));
-        Assert.assertTrue(rupsTabbedPane.opened);
-        Assert.assertFalse(rupsTabbedPane.saved);
-        Assert.assertFalse(rupsTabbedPane.closed);
+        rupsController.openNewFile(new File("test.pdf"));
+        Assertions.assertTrue(rupsTabbedPane.opened);
+        Assertions.assertFalse(rupsTabbedPane.saved);
+        Assertions.assertFalse(rupsTabbedPane.closed);
     }
 
-
-    class MockRupsTabbedPane extends RupsTabbedPane {
+    private static final class MockRupsTabbedPane extends RupsTabbedPane {
         private boolean closed, saved, opened;
         public MockRupsTabbedPane() {
             super();
@@ -106,7 +102,7 @@ public class RupsControllerTest {
         }
 
         @Override
-        public void openNewFile(File file, Dimension dimension, boolean readonly) {
+        public void openNewFile(File file, Dimension dimension) {
             opened = true;
         }
     }

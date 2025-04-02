@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -44,7 +44,6 @@ package com.itextpdf.rups.view.contextmenu;
 
 import javax.swing.AbstractAction;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
 
 /**
  * Abstract class to provide uniform constructors for Actions.
@@ -52,17 +51,10 @@ import java.awt.event.ActionEvent;
  * @author Michael Demey
  */
 public abstract class AbstractRupsAction extends AbstractAction {
-
     protected Component invoker;
 
-    public AbstractRupsAction(String name) {
-        super(name);
-    }
-
-    public AbstractRupsAction(String name, Component invoker) {
+    protected AbstractRupsAction(String name, Component invoker) {
         super(name);
         this.invoker = invoker;
     }
-
-    public abstract void actionPerformed(ActionEvent e);
 }

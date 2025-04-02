@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -42,20 +42,18 @@
  */
 package com.itextpdf.rups.io;
 
-import javax.swing.JTextArea;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import javax.swing.JTextArea;
 
 /**
  * Everything writing to this OutputStream will be shown in a JTextArea.
  */
-public class TextAreaOutputStream extends OutputStream {
+public final class TextAreaOutputStream extends OutputStream {
     /**
      * The text area to which we want to write.
      */
-    protected JTextArea text;
+    private final JTextArea text;
 
     /**
      * Constructs a TextAreaOutputStream.
@@ -64,14 +62,7 @@ public class TextAreaOutputStream extends OutputStream {
      */
     public TextAreaOutputStream(JTextArea text) {
         this.text = text;
-        clear();
-    }
-
-    /**
-     * Clear the text area.
-     */
-    public void clear() {
-        text.setText("");
+        this.text.setText("");
     }
 
     /**
@@ -79,8 +70,15 @@ public class TextAreaOutputStream extends OutputStream {
      */
     @Override
     public void write(int i) {
-        final byte[] b = {(byte) i};
-        write(b, 0, 1);
+        write(new byte[] {(byte) i}, 0, 1);
+    }
+
+    /**
+     * @see java.io.OutputStream#write(byte[])
+     */
+    @Override
+    public void write(byte[] b) {
+        write(b, 0, b.length);
     }
 
     /**
@@ -88,21 +86,6 @@ public class TextAreaOutputStream extends OutputStream {
      */
     @Override
     public void write(byte[] b, int off, int len) {
-        final String snippet = new String(b, off, len, StandardCharsets.UTF_8);
-        text.append(snippet);
-    }
-
-    /**
-     * @see java.io.OutputStream#write(byte[])
-     */
-    @Override
-    public void write(byte[] b) throws IOException {
-        final ByteArrayInputStream bais = new ByteArrayInputStream(b);
-        final int bufferSize = 1024;
-        final byte[] snippet = new byte[bufferSize];
-        int bytesread;
-        while ((bytesread = bais.read(snippet)) > 0) {
-            write(snippet, 0, bytesread);
-        }
+        text.append(new String(b, off, len, StandardCharsets.UTF_8));
     }
 }

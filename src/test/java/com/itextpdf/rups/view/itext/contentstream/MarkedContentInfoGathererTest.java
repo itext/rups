@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -57,46 +57,45 @@ import com.itextpdf.kernel.pdf.tagging.StandardRoles;
 import com.itextpdf.kernel.pdf.tagutils.TagTreePointer;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
 import com.itextpdf.test.ExtendedITextTest;
-import com.itextpdf.test.annotations.type.IntegrationTest;
 
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Map;
 
-@Category(IntegrationTest.class)
+@Tag("IntegrationTest")
 public class MarkedContentInfoGathererTest extends ExtendedITextTest {
     @Test
-    public void indexOnePageOneContentStreamMcidCountTest() throws Exception {
+    public void indexOnePageOneContentStreamMcidCountTest() throws IOException {
         byte[] pdf = onePageOneContentStream();
         MarkedContentInfoGatherer gatherer = new MarkedContentInfoGatherer();
         try (PdfReader r = new PdfReader(new ByteArrayInputStream(pdf));
              PdfDocument pdfDoc = new PdfDocument(r)) {
             gatherer.processPageContent(pdfDoc.getFirstPage());
         }
-        Assert.assertEquals(2, gatherer.getMarkedContentIndex().size());
+        Assertions.assertEquals(2, gatherer.getMarkedContentIndex().size());
     }
 
     @Test
-    public void indexTwoPageOneContentStreamMcidCountTest() throws Exception {
+    public void indexTwoPageOneContentStreamMcidCountTest() throws IOException {
         byte[] pdf = twoPageDoc();
         MarkedContentInfoGatherer gatherer = new MarkedContentInfoGatherer();
         try (PdfReader r = new PdfReader(new ByteArrayInputStream(pdf));
              PdfDocument pdfDoc = new PdfDocument(r)) {
             for (int i = 1; i <= pdfDoc.getNumberOfPages(); i++) {
                 gatherer.processPageContent(pdfDoc.getPage(i));
-                Assert.assertEquals(2, gatherer.getMarkedContentIndex().size());
+                Assertions.assertEquals(2, gatherer.getMarkedContentIndex().size());
                 gatherer.reset();
             }
         }
     }
 
     @Test
-    public void indexOnePageOneContentStreamMcidMatchTest() throws Exception {
+    public void indexOnePageOneContentStreamMcidMatchTest() throws IOException {
         byte[] pdf = onePageOneContentStream();
         MarkedContentInfoGatherer gatherer = new MarkedContentInfoGatherer();
         try (PdfReader r = new PdfReader(new ByteArrayInputStream(pdf));
@@ -104,12 +103,12 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
             gatherer.processPageContent(pdfDoc.getFirstPage());
         }
         for (Map.Entry<Integer, MarkedContentInfo> e : gatherer.getMarkedContentIndex().entrySet()) {
-            Assert.assertEquals((int) e.getKey(), e.getValue().getMcid());
+            Assertions.assertEquals((int) e.getKey(), e.getValue().getMcid());
         }
     }
 
     @Test
-    public void indexOnePageOneContentStreamIdentifyPageTest() throws Exception {
+    public void indexOnePageOneContentStreamIdentifyPageTest() throws IOException {
         byte[] pdf = onePageOneContentStream();
         MarkedContentInfoGatherer gatherer = new MarkedContentInfoGatherer();
         try (PdfReader r = new PdfReader(new ByteArrayInputStream(pdf));
@@ -119,13 +118,13 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
                     .getFirstContentStream()
                     .getIndirectReference();
             for (MarkedContentInfo i : gatherer.getMarkedContentIndex().values()) {
-                Assert.assertEquals(contentStreamRef, i.getStreamRef());
+                Assertions.assertEquals(contentStreamRef, i.getStreamRef());
             }
         }
     }
 
     @Test
-    public void indexOnePageTwoContentStreamsIdentifyPageTest() throws Exception {
+    public void indexOnePageTwoContentStreamsIdentifyPageTest() throws IOException {
         byte[] pdf = onePageTwoContentStreams();
         MarkedContentInfoGatherer gatherer = new MarkedContentInfoGatherer();
         try (PdfReader r = new PdfReader(new ByteArrayInputStream(pdf));
@@ -139,59 +138,58 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
             for (MarkedContentInfo i : gatherer.getMarkedContentIndex().values()) {
                 actualRefs[i.getMcid()] = i.getStreamRef();
             }
-            Assert.assertArrayEquals(expectedRefs, actualRefs);
+            Assertions.assertArrayEquals(expectedRefs, actualRefs);
         }
     }
 
     @Test
-    public void extractMcTextContentTest() throws Exception {
+    public void extractMcTextContentTest() throws IOException {
         byte[] pdf = onePageOneContentStream();
         MarkedContentInfoGatherer gatherer = new MarkedContentInfoGatherer();
         try (PdfReader r = new PdfReader(new ByteArrayInputStream(pdf));
              PdfDocument pdfDoc = new PdfDocument(r)) {
             gatherer.processPageContent(pdfDoc.getFirstPage());
         }
-        String[] expectedResult = {"Hello ", "World"};
-        String[] extractionResult = new String[2];
-        extractionResult[0] = gatherer.getMarkedContentIndex().get(0).getExtractedText();
-        extractionResult[1] = gatherer.getMarkedContentIndex().get(1).getExtractedText();
-        Assert.assertArrayEquals(expectedResult, extractionResult);
+        final Map<Integer, MarkedContentInfo> index = gatherer.getMarkedContentIndex();
+        Assertions.assertEquals(2, index.size());
+        Assertions.assertEquals("Hello ", index.get(0).getExtractedText());
+        Assertions.assertEquals("World", index.get(1).getExtractedText());
     }
 
     @Test
-    public void extractMcTextContentTest2() throws Exception {
+    public void extractMcTextContentTest2() throws IOException {
         byte[] pdf = onePageTwoContentStreams();
         MarkedContentInfoGatherer gatherer = new MarkedContentInfoGatherer();
         try (PdfReader r = new PdfReader(new ByteArrayInputStream(pdf));
              PdfDocument pdfDoc = new PdfDocument(r)) {
             gatherer.processPageContent(pdfDoc.getFirstPage());
         }
-        String[] expectedResult = {"Hello ", "World", "iText ", "RUPS"};
-        String[] extractionResult = new String[4];
-        for (MarkedContentInfo info : gatherer.getMarkedContentIndex().values()) {
-            extractionResult[info.getMcid()] = info.getExtractedText();
-        }
-        Assert.assertArrayEquals(expectedResult, extractionResult);
+        final Map<Integer, MarkedContentInfo> index = gatherer.getMarkedContentIndex();
+        Assertions.assertEquals(4, index.size());
+        Assertions.assertEquals("Hello ", index.get(0).getExtractedText());
+        Assertions.assertEquals("World", index.get(1).getExtractedText());
+        Assertions.assertEquals("iText ", index.get(2).getExtractedText());
+        Assertions.assertEquals("RUPS", index.get(3).getExtractedText());
     }
 
     @Test
-    public void extractMcTextContentTest3() throws Exception {
+    public void extractMcTextContentTest3() throws IOException {
         byte[] pdf = onePageWithXObj();
         MarkedContentInfoGatherer gatherer = new MarkedContentInfoGatherer();
         try (PdfReader r = new PdfReader(new ByteArrayInputStream(pdf));
                 PdfDocument pdfDoc = new PdfDocument(r)) {
             gatherer.processPageContent(pdfDoc.getFirstPage());
         }
-        String[] expectedResult = {"Hello ", "World", "iText ", "RUPS"};
-        String[] extractionResult = new String[4];
-        for (MarkedContentInfo info : gatherer.getMarkedContentIndex().values()) {
-            extractionResult[info.getMcid()] = info.getExtractedText();
-        }
-        Assert.assertArrayEquals(expectedResult, extractionResult);
+        final Map<Integer, MarkedContentInfo> index = gatherer.getMarkedContentIndex();
+        Assertions.assertEquals(4, index.size());
+        Assertions.assertEquals("Hello ", index.get(0).getExtractedText());
+        Assertions.assertEquals("World", index.get(1).getExtractedText());
+        Assertions.assertEquals("iText ", index.get(2).getExtractedText());
+        Assertions.assertEquals("RUPS", index.get(3).getExtractedText());
     }
 
     @Test
-    public void indexTwoPageDocIdentifyPageTest() throws Exception {
+    public void indexTwoPageDocIdentifyPageTest() throws IOException {
         byte[] pdf = twoPageDoc();
         MarkedContentInfoGatherer gatherer = new MarkedContentInfoGatherer();
         try (PdfReader r = new PdfReader(new ByteArrayInputStream(pdf));
@@ -203,7 +201,7 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
                         .getFirstContentStream()
                         .getIndirectReference();
                 for (Map.Entry<Integer, MarkedContentInfo> e : gatherer.getMarkedContentIndex().entrySet()) {
-                    Assert.assertEquals(contentStreamRef, e.getValue().getStreamRef());
+                    Assertions.assertEquals(contentStreamRef, e.getValue().getStreamRef());
                 }
                 gatherer.reset();
             }
@@ -211,7 +209,7 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
     }
 
     @Test
-    public void indexTwoPageDocIdentifyPageTestMultipleStreams() throws Exception {
+    public void indexTwoPageDocIdentifyPageTestMultipleStreams() throws IOException {
         byte[] pdf = twoPagesTwoContentStreams();
         MarkedContentInfoGatherer gatherer = new MarkedContentInfoGatherer();
         try (PdfReader r = new PdfReader(new ByteArrayInputStream(pdf));
@@ -228,25 +226,23 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
                 for (MarkedContentInfo info : gatherer.getMarkedContentIndex().values()) {
                     actualRefs[info.getMcid()] = info.getStreamRef();
                 }
-                Assert.assertArrayEquals(expectedRefs, actualRefs);
+                Assertions.assertArrayEquals(expectedRefs, actualRefs);
                 gatherer.reset();
             }
         }
     }
 
-    private static byte[] onePageOneContentStream() {
+    private static byte[] onePageOneContentStream() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (PdfWriter w = new PdfWriter(baos); PdfDocument pdfDocument = new PdfDocument(w)) {
             pdfDocument.setTagged();
             addPageWithOneContentStream(pdfDocument, "Hello ", "World");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
         return baos.toByteArray();
     }
 
     @Test
-    public void indexPageWithFormXObjs() throws Exception {
+    public void indexPageWithFormXObjs() throws IOException {
         byte[] pdf = onePageWithXObj();
         MarkedContentInfoGatherer gatherer = new MarkedContentInfoGatherer();
         try (PdfReader r = new PdfReader(new ByteArrayInputStream(pdf));
@@ -266,54 +262,46 @@ public class MarkedContentInfoGathererTest extends ExtendedITextTest {
                 for (MarkedContentInfo info : gatherer.getMarkedContentIndex().values()) {
                     actualRefs[info.getMcid()] = info.getStreamRef();
                 }
-                Assert.assertArrayEquals(expectedRefs, actualRefs);
+                Assertions.assertArrayEquals(expectedRefs, actualRefs);
                 gatherer.reset();
             }
         }
     }
 
-    private static byte[] onePageWithXObj() {
+    private static byte[] onePageWithXObj() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (PdfWriter w = new PdfWriter(baos); PdfDocument pdfDocument = new PdfDocument(w)) {
             pdfDocument.setTagged();
             addPageWithFormXObject(pdfDocument);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
         return baos.toByteArray();
     }
 
-    private static byte[] onePageTwoContentStreams() {
+    private static byte[] onePageTwoContentStreams() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (PdfWriter w = new PdfWriter(baos); PdfDocument pdfDocument = new PdfDocument(w)) {
             pdfDocument.setTagged();
             addPageWithTwoContentStreams(pdfDocument, "Hello ", "World", "iText ", "RUPS");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
         return baos.toByteArray();
     }
 
-    private static byte[] twoPagesTwoContentStreams() {
+    private static byte[] twoPagesTwoContentStreams() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (PdfWriter w = new PdfWriter(baos); PdfDocument pdfDocument = new PdfDocument(w)) {
             pdfDocument.setTagged();
             addPageWithTwoContentStreams(pdfDocument, "Hello ", "World", "iText ", "RUPS");
             addPageWithTwoContentStreams(pdfDocument, "Hello2 ", "World2", "iText2 ", "RUPS2");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
         return baos.toByteArray();
     }
 
-    private static byte[] twoPageDoc() {
+    private static byte[] twoPageDoc() throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (PdfWriter w = new PdfWriter(baos); PdfDocument pdfDocument = new PdfDocument(w)) {
             pdfDocument.setTagged();
             addPageWithOneContentStream(pdfDocument, "Hello ", "World");
             addPageWithOneContentStream(pdfDocument, "Hello2 ", "World2");
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
         return baos.toByteArray();
     }

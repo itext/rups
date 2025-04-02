@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -43,30 +43,36 @@
 package com.itextpdf.rups.io.listeners;
 
 import com.itextpdf.rups.view.itext.PdfTree;
-import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
 import javax.swing.event.TreeExpansionEvent;
 import javax.swing.event.TreeExpansionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 
 /**
  * Listener that checks if the expanded node has one child. If it has one child it should expand it.
  */
-public class PdfTreeExpansionListener implements TreeExpansionListener {
+public final class PdfTreeExpansionListener implements TreeExpansionListener {
+    public PdfTreeExpansionListener() {
+        // noop
+    }
 
+    @Override
     public void treeExpanded(TreeExpansionEvent event) {
-        PdfTree tree = (PdfTree) event.getSource();
-        DefaultMutableTreeNode node = ((DefaultMutableTreeNode) event.getPath().getLastPathComponent());
+        final TreePath originalPath = event.getPath();
+        final DefaultMutableTreeNode node = ((DefaultMutableTreeNode) originalPath.getLastPathComponent());
         if (node.getChildCount() == 1) {
-            TreeNode child = node.getChildAt(0);
-            tree.selectNode((PdfObjectTreeNode) child);
-            tree.expandPath(new TreePath(((DefaultTreeModel) tree.getModel()).getPathToRoot(child)));
+            final TreeNode child = node.getChildAt(0);
+            final TreePath newPath = originalPath.pathByAddingChild(child);
+            final PdfTree tree = (PdfTree) event.getSource();
+            tree.setSelectionPath(newPath);
+            tree.expandPath(newPath);
         }
     }
 
+    @Override
     public void treeCollapsed(TreeExpansionEvent event) {
+        // noop
     }
 }

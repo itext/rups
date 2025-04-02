@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -43,18 +43,18 @@
 package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.RupsConfiguration;
-import com.itextpdf.test.annotations.type.UnitTest;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.io.File;
 import javax.swing.JTabbedPane;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
-@Category(UnitTest.class)
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+@Tag("UnitTest")
 public class RupsTabbedPaneTest {
 
     private static final String EXPECTED_TAB_TITLE = "hello_world.pdf";
@@ -65,7 +65,7 @@ public class RupsTabbedPaneTest {
     private RupsTabbedPane tabbedPane;
     private Dimension dimension;
 
-    @Before
+    @BeforeEach
     public void before() {
         this.tabbedPane = new RupsTabbedPane();
         this.dimension = Toolkit.getDefaultToolkit().getScreenSize();
@@ -74,50 +74,50 @@ public class RupsTabbedPaneTest {
     @Test
     public void initializationTest() {
         JTabbedPane jTabbedPane = (JTabbedPane) this.tabbedPane.getJTabbedPane();
-        Assert.assertEquals(1, jTabbedPane.getTabCount());
-        Assert.assertEquals(Language.DEFAULT_TAB_TITLE.getString(), jTabbedPane.getTitleAt(0));
+        Assertions.assertEquals(1, jTabbedPane.getTabCount());
+        Assertions.assertEquals(Language.DEFAULT_TAB_TITLE.getString(), jTabbedPane.getTitleAt(0));
     }
 
     @Test
     public void openNullFileTest() {
-        this.tabbedPane.openNewFile(null, this.dimension, false);
+        this.tabbedPane.openNewFile(null, this.dimension);
         JTabbedPane jTabbedPane = (JTabbedPane) this.tabbedPane.getJTabbedPane();
-        Assert.assertEquals(1, jTabbedPane.getTabCount());
-        Assert.assertEquals(Language.DEFAULT_TAB_TITLE.getString(), jTabbedPane.getTitleAt(0));
+        Assertions.assertEquals(1, jTabbedPane.getTabCount());
+        Assertions.assertEquals(Language.DEFAULT_TAB_TITLE.getString(), jTabbedPane.getTitleAt(0));
     }
 
     @Test
     public void openNewFileTest() {
         File file = new File(INPUT_1);
-        this.tabbedPane.openNewFile(file, this.dimension, false);
+        this.tabbedPane.openNewFile(file, this.dimension);
         JTabbedPane jTabbedPane = (JTabbedPane) this.tabbedPane.getJTabbedPane();
-        Assert.assertEquals(1, jTabbedPane.getTabCount());
-        Assert.assertEquals(EXPECTED_TAB_TITLE, jTabbedPane.getTitleAt(0));
+        Assertions.assertEquals(1, jTabbedPane.getTabCount());
+        Assertions.assertEquals(EXPECTED_TAB_TITLE, jTabbedPane.getTitleAt(0));
     }
 
     @Test
     public void openTwoFiles() {
         File file = new File(INPUT_1);
-        this.tabbedPane.openNewFile(file, this.dimension, false);
+        this.tabbedPane.openNewFile(file, this.dimension);
         File file2 = new File(INPUT_2);
-        this.tabbedPane.openNewFile(file2, this.dimension, false);
+        this.tabbedPane.openNewFile(file2, this.dimension);
         JTabbedPane jTabbedPane = (JTabbedPane) this.tabbedPane.getJTabbedPane();
-        Assert.assertEquals(2, jTabbedPane.getTabCount());
-        Assert.assertEquals(EXPECTED_TAB_TITLE, jTabbedPane.getTitleAt(0));
-        Assert.assertEquals(EXPECTED_TAB_TITLE_2, jTabbedPane.getTitleAt(1));
+        Assertions.assertEquals(2, jTabbedPane.getTabCount());
+        Assertions.assertEquals(EXPECTED_TAB_TITLE, jTabbedPane.getTitleAt(0));
+        Assertions.assertEquals(EXPECTED_TAB_TITLE_2, jTabbedPane.getTitleAt(1));
     }
 
     @Test
     public void openTwoFilesAndCloseAllTest() {
         File file = new File(INPUT_1);
-        this.tabbedPane.openNewFile(file, this.dimension, false);
+        this.tabbedPane.openNewFile(file, this.dimension);
         File file2 = new File(INPUT_2);
-        this.tabbedPane.openNewFile(file2, this.dimension, false);
+        this.tabbedPane.openNewFile(file2, this.dimension);
         this.tabbedPane.closeCurrentFile();
         this.tabbedPane.closeCurrentFile();
         JTabbedPane jTabbedPane = (JTabbedPane) this.tabbedPane.getJTabbedPane();
-        Assert.assertEquals(1, jTabbedPane.getTabCount());
-        Assert.assertEquals(Language.DEFAULT_TAB_TITLE.getString(), jTabbedPane.getTitleAt(0));
+        Assertions.assertEquals(1, jTabbedPane.getTabCount());
+        Assertions.assertEquals(Language.DEFAULT_TAB_TITLE.getString(), jTabbedPane.getTitleAt(0));
     }
 
     @Test
@@ -127,12 +127,12 @@ public class RupsTabbedPaneTest {
         RupsConfiguration.INSTANCE.saveConfiguration();
 
         File file = new File(INPUT_1);
-        this.tabbedPane.openNewFile(file, this.dimension, false);
+        this.tabbedPane.openNewFile(file, this.dimension);
         boolean isAlreadyOpened = this.tabbedPane.isFileAlreadyOpen(file);
 
         RupsConfiguration.INSTANCE.setOpenDuplicateFiles(originalValue);
         RupsConfiguration.INSTANCE.saveConfiguration();
 
-        Assert.assertTrue(isAlreadyOpened);
+        Assertions.assertTrue(isAlreadyOpened);
     }
 }

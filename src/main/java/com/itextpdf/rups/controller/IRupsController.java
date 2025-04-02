@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -42,7 +42,8 @@
  */
 package com.itextpdf.rups.controller;
 
-import com.itextpdf.rups.model.PdfFile;
+import com.itextpdf.rups.model.IPdfFile;
+import com.itextpdf.rups.model.IRupsEventListener;
 
 import java.awt.Component;
 import java.io.File;
@@ -51,7 +52,7 @@ import java.io.File;
  * The controller in charge of the application. To view the specific tab controllers, look at the RupsInstanceController
  * class.
  */
-public interface IRupsController {
+public interface IRupsController extends IRupsEventListener {
 
     /**
      * Returns the main component of RUPS.
@@ -63,9 +64,17 @@ public interface IRupsController {
     /**
      * Returns the currently loaded File.
      *
-     * @return PdfFile
+     * @return IPdfFile
      */
-    PdfFile getCurrentFile();
+    IPdfFile getCurrentFile();
+
+    /**
+     * Returns whether the default tab is shown. Default tab is the tab shown,
+     * when no files are opened.
+     *
+     * @return {@code true} if default tab is shown; {@code false} otherwise
+     */
+    boolean isDefaultTabShown();
 
     /**
      * Opens a new File in RUPS.
@@ -78,4 +87,16 @@ public interface IRupsController {
      * Closes the currently opened file.
      */
     void closeCurrentFile();
+
+    /**
+     * Saves the currently opened file at the specified location.
+     *
+     * @param newFile Location to save the file to.
+     */
+    void saveCurrentFile(File newFile);
+
+    /**
+     * Closes the current file and tries to open it as an owner again.
+     */
+    void reopenAsOwner();
 }

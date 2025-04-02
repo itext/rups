@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -48,7 +48,6 @@ import org.dom4j.DocumentException;
 import org.dom4j.io.OutputFormat;
 import org.dom4j.io.SAXReader;
 import org.dom4j.io.XMLWriter;
-import org.xml.sax.EntityResolver;
 import org.xml.sax.InputSource;
 
 import java.io.ByteArrayInputStream;
@@ -83,7 +82,10 @@ public class XfaFile implements OutputStreamResource {
         final ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         // TODO DEVSIX-5299 refactor logic to use XML processing from com.itextpdf.kernel.utils.XmlUtils
         final SAXReader reader = new SAXReader();
-        reader.setEntityResolver(new SafeEmptyEntityResolver());
+        // Prevents XXE attacks
+        reader.setEntityResolver((String publicId, String systemId) ->
+                new InputSource(new StringReader(""))
+        );
         xfaDocument = reader.read(bais);
     }
 
@@ -109,12 +111,4 @@ public class XfaFile implements OutputStreamResource {
         final XMLWriter writer = new XMLWriter(os, format);
         writer.write(xfaDocument);
     }
-
-    // Prevents XXE attacks
-    private static class SafeEmptyEntityResolver implements EntityResolver {
-        public InputSource resolveEntity(String publicId, String systemId) {
-            return new InputSource(new StringReader(""));
-        }
-    }
-
 }

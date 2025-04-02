@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -53,7 +53,9 @@ import java.io.StringWriter;
 /**
  * A utility to display a dialog showing Throwable object
  */
-public class ErrorDialogPane {
+public final class ErrorDialogPane {
+    private static final Dimension DIALOG_PREFERRED_SIZE = new Dimension(300, 200);
+
     private ErrorDialogPane() {
         // do not instantiate
     }
@@ -62,7 +64,7 @@ public class ErrorDialogPane {
         final String msg = getTraceString(th);
         final JTextArea textArea = new JTextArea(msg);
         final JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setPreferredSize(new Dimension(300, 200));
+        scrollPane.setPreferredSize(DIALOG_PREFERRED_SIZE);
         JOptionPane.showMessageDialog(parent, scrollPane);
     }
 

@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -48,8 +48,9 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.LoggerHelper;
+import com.itextpdf.rups.model.ObjectLoader;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.contextmenu.SaveImageAction;
@@ -58,6 +59,16 @@ import com.itextpdf.rups.view.itext.contentstream.ContentStreamWriter;
 import com.itextpdf.rups.view.itext.contentstream.StyledSyntaxDocument;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -70,23 +81,12 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
+import javax.swing.tree.TreeNode;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Method;
-import java.nio.charset.StandardCharsets;
-import java.util.Observable;
-import java.util.Observer;
 
-public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer {
+public final class SyntaxHighlightedStreamPane extends JScrollPane implements IRupsEventListener {
 
     private static final int MAX_NUMBER_OF_EDITS = 8192;
 
@@ -97,14 +97,16 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
      */
     private final JSyntaxPane text;
 
-    protected StreamPanelContextMenu popupMenu;
+    private final StreamPanelContextMenu popupMenu;
 
-    protected PdfObjectTreeNode target;
+    private PdfObjectTreeNode target;
 
-    protected UndoManager manager;
+    private final UndoManager manager;
 
     //Todo: Remove that field after proper application structure will be implemented.
     private final PdfReaderController controller;
+
+    private boolean editable = false;
 
     static {
         try {
@@ -122,7 +124,6 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
      * @param controller the pdf reader controller
      */
     public SyntaxHighlightedStreamPane(PdfReaderController controller) {
-        super();
         this.text = new JSyntaxPane();
         ToolTipManager.sharedInstance().registerComponent(text);
         setViewportView(text);
@@ -139,15 +140,6 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
                 KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
         text.registerKeyboardAction(new RedoAction(manager),
                 KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
-    }
-
-    /**
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     */
-    public void update(Observable observable, Object obj) {
-        if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
-            clearPane();
-        }
     }
 
     /**
@@ -198,7 +190,8 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
             try {
                 setTextEditableRoutine(true);
                 byte[] bytes = stream.getBytes(false);
-                text.setText(new String(bytes));
+                // This is binary content, so encoding doesn't really matter
+                text.setText(new String(bytes, StandardCharsets.ISO_8859_1));
                 text.setCaretPosition(0);
             } catch (com.itextpdf.io.exceptions.IOException e) {
                 text.setText("");
@@ -213,10 +206,32 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
     }
 
     public void saveToTarget() {
+        /*
+         * FIXME: With indirect objects with multiple references, this will
+         *        change the tree only in one of them.
+         * FIXME: This doesn't change Length...
+         */
         manager.discardAllEdits();
         manager.setLimit(0);
         if (controller != null && ((PdfDictionary) target.getPdfObject()).containsKey(PdfName.Filter)) {
             controller.deleteTreeNodeDictChild(target, PdfName.Filter);
+        }
+        /*
+         * In the current state, stream node could contain ASN1. data, which
+         * is parsed and added as tree nodes. After editing, it won't be valid,
+         * so we must remove them.
+         */
+        if (controller != null) {
+            int i = 0;
+            while (i < target.getChildCount()) {
+                final TreeNode child = target.getChildAt(i);
+                if (child instanceof PdfObjectTreeNode) {
+                    ++i;
+                } else {
+                    controller.deleteTreeChild(target, i);
+                    // Will assume it being just a shift...
+                }
+            }
         }
         final int sizeEst = text.getText().length();
         final ByteArrayOutputStream baos = new ByteArrayOutputStream(sizeEst);
@@ -232,7 +247,30 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
         manager.setLimit(MAX_NUMBER_OF_EDITS);
     }
 
+    public void setEditable(boolean editable) {
+        this.editable = editable;
+        setTextEditableRoutine(editable);
+    }
+
+    @Override
+    public void handleCloseDocument() {
+        clearPane();
+        setEditable(false);
+    }
+
+    @Override
+    public void handleOpenDocument(ObjectLoader loader) {
+        clearPane();
+        setEditable(loader.getFile().isOpenedAsOwner());
+    }
+
     private void setTextEditableRoutine(boolean editable) {
+        if (!this.editable) {
+            text.setEditable(false);
+            popupMenu.setSaveToStreamEnabled(false);
+            return;
+        }
+
         text.setEditable(editable);
         if ((pdfStreamGetInputStreamMethod != null) && editable && (target != null) &&
                 (target.getPdfObject() instanceof PdfStream)) {
@@ -285,8 +323,15 @@ public class SyntaxHighlightedStreamPane extends JScrollPane implements Observer
 
         @Override
         public String getToolTipText(MouseEvent ev) {
-            final String toolTip = getStyledSyntaxDocument().getToolTipAt(viewToModel(ev.getPoint()));
+            final String toolTip = getStyledSyntaxDocument()
+                    .getToolTipAt(viewToModel2D(ev.getPoint()));
             return toolTip == null ? super.getToolTipText(ev) : toolTip;
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            // Disable line wrapping by ensuring the text pane is never resized smaller than its preferred width
+            return getParent().getSize().width > getUI().getPreferredSize(this).width;
         }
     }
 

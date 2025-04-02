@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -56,6 +56,7 @@ import java.awt.Component;
  * A TableModel in case we want to show a PDF array in a JTable.
  */
 public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
+    private static final int DATA_COLUMN_COUNT = 1;
 
     /**
      * The PDF array.
@@ -85,29 +86,42 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return columnIndex < 1;
+        return isEditable() && columnIndex < 1;
     }
 
     /**
      * @see javax.swing.table.TableModel#getColumnCount()
      */
+    @Override
     public int getColumnCount() {
-        return 2;
+        if (isEditable()) {
+            // +1 is for the add/remove buttons column
+            return DATA_COLUMN_COUNT + 1;
+        }
+        return DATA_COLUMN_COUNT;
     }
 
     /**
      * @see javax.swing.table.TableModel#getRowCount()
      */
+    @Override
     public int getRowCount() {
-        return array.size() + 1;
+        if (isEditable()) {
+            // +1 is for the "add new row" row
+            return array.size() + 1;
+        }
+        return array.size();
     }
 
     /**
      * @see javax.swing.table.TableModel#getValueAt(int, int)
      */
+    @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         if (columnIndex == 0) {
-            if (rowIndex == array.size()) return tempValue;
+            if (rowIndex == array.size()) {
+                return tempValue;
+            }
             return PdfSyntaxUtils.getSyntaxString(array.get(rowIndex, false));
         }
         return null;
@@ -122,7 +136,7 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
                 tempValue = (String) aValue;
             }
         } else {
-            if (!(aValue instanceof String) || "".equalsIgnoreCase(((String) aValue).trim())) {
+            if (!(aValue instanceof String) || ((String) aValue).isBlank()) {
                 LoggerHelper.warn(Language.ERROR_EMPTY_FIELD.getString(), getClass());
                 return;
             }
@@ -140,6 +154,7 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
     /**
      * @see javax.swing.table.AbstractTableModel#getColumnName(int)
      */
+    @Override
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
             case 0:
@@ -160,7 +175,7 @@ public class PdfArrayTableModel extends AbstractPdfObjectPanelTableModel {
 
     @Override
     public void validateTempRow() {
-        if ("".equalsIgnoreCase(tempValue.trim())) {
+        if (tempValue.isBlank()) {
             LoggerHelper.warn(Language.ERROR_EMPTY_FIELD.getString(), getClass());
             return;
         }

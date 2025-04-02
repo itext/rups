@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -43,92 +43,74 @@
 package com.itextpdf.rups.view.itext;
 
 import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.event.PostOpenDocumentEvent;
-import com.itextpdf.rups.model.IProgressDialog;
+import com.itextpdf.rups.mock.NoopProgressDialog;
+import com.itextpdf.rups.model.IPdfFile;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.view.itext.treenodes.StructureTreeNode;
 import com.itextpdf.test.ExtendedITextTest;
-import com.itextpdf.test.annotations.type.IntegrationTest;
 
+import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+
+import java.util.concurrent.ExecutionException;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 
-@Category(IntegrationTest.class)
-public class StructureTreeTest extends ExtendedITextTest {
-
-
-    private static final String sourceFolder = "./src/test/resources/com/itextpdf/rups/controller/";
+@Tag("IntegrationTest")
+class StructureTreeTest extends ExtendedITextTest {
+    private static final String SOURCE_DIR = "./src/test/resources/com/itextpdf/rups/controller/";
 
     @Test
-    public void extractMcidContentInStructureTreeTest() throws IOException {
-        PdfFile pdfFile = new PdfFile(Files.readAllBytes(Paths.get(sourceFolder + "hello_world_tagged.pdf")), true);
+    void extractMcidContentInStructureTreeTest()
+            throws IOException, ExecutionException, InterruptedException {
+        final PdfFile pdfFile = PdfFile.open(
+                new File(SOURCE_DIR + "hello_world_tagged.pdf")
+        );
 
         StructureTreeNode rootNode = getStructureTreeRootNode(pdfFile);
         StructureTreeNode mciChild = (StructureTreeNode) rootNode.getChildAt(0).getChildAt(0)
                 .getChildAt(0).getChildAt(0);
         String nodeLabel = (String) mciChild.getUserObject();
-        Assert.assertEquals("0 [Hello ]", nodeLabel);
+        Assertions.assertEquals("0 [Hello ]", nodeLabel);
     }
 
     @Test
-    public void extractMcidContentInStructureTreeWithActualTextTest() throws IOException {
-        PdfFile pdfFile = new PdfFile(Files.readAllBytes(Paths.get(sourceFolder + "hello_world_tagged_actualtext.pdf")), true);
+    void extractMcidContentInStructureTreeWithActualTextTest()
+            throws IOException, ExecutionException, InterruptedException {
+        final PdfFile pdfFile = PdfFile.open(
+                new File(SOURCE_DIR + "hello_world_tagged_actualtext.pdf")
+        );
 
         StructureTreeNode rootNode = getStructureTreeRootNode(pdfFile);
         StructureTreeNode mciChild = (StructureTreeNode) rootNode.getChildAt(0).getChildAt(0)
                 .getChildAt(0).getChildAt(0);
         String nodeLabel = (String) mciChild.getUserObject();
-        Assert.assertEquals("0 [Olleh ]", nodeLabel);
+        Assertions.assertEquals("0 [Olleh ]", nodeLabel);
     }
 
-    private static StructureTreeNode getStructureTreeRootNode(PdfFile pdfFile) {
+    private static StructureTreeNode getStructureTreeRootNode(IPdfFile pdfFile)
+            throws ExecutionException, InterruptedException {
 
         PdfReaderController controller = new PdfReaderController(null, null);
-        ObjectLoader loader = new ObjectLoader(controller, pdfFile, pdfFile.getFilename(), new DummyProgressDialog());
+        // Using a noop listener here to prevent threading issues
+        ObjectLoader loader = new ObjectLoader(
+                new IRupsEventListener() {}, pdfFile, "Test loader", new NoopProgressDialog()
+        );
         // preload everything
-        loader.doTask();
+        loader.execute();
+        loader.get();
 
         // initialise the main PDF object tree view
-        controller.update(controller, new PostOpenDocumentEvent(loader));
+        controller.handleOpenDocument(loader);
 
         // set up the structure tree pane and fake-load it
         StructureTree tree = new StructureTree(controller);
         tree.setLoader(loader);
         tree.setModel(tree.recalculateTreeModel());
         return (StructureTreeNode) tree.getModel().getRoot();
-    }
-
-    private static final class DummyProgressDialog implements IProgressDialog {
-
-        @Override
-        public void setMessage(String msg) {
-
-        }
-
-        @Override
-        public void setValue(int value) {
-
-        }
-
-        @Override
-        public void setTotal(int n) {
-
-        }
-
-        @Override
-        public void showErrorDialog(Exception ex) {
-
-        }
-
-        @Override
-        public void setVisible(boolean visible) {
-
-        }
     }
 }

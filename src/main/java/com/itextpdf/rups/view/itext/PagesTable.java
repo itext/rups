@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -45,9 +45,9 @@ package com.itextpdf.rups.view.itext;
 import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
@@ -56,18 +56,20 @@ import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 import com.itextpdf.rups.view.models.JTableAutoModel;
 import com.itextpdf.rups.view.models.JTableAutoModelInterface;
 
-import javax.swing.JTable;
-import javax.swing.event.ListSelectionEvent;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Observable;
-import java.util.Observer;
+import javax.swing.JTable;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableModel;
 
 /**
  * A JTable listing all the pages in a PDF file: the object number of each
  * page dictionary and the page numbers (with label information if present).
  */
-public class PagesTable extends JTable implements JTableAutoModelInterface, Observer {
+public final class PagesTable extends JTable implements JTableAutoModelInterface, IRupsEventListener {
+    private static final int OBJECT_COLUMN_INDEX = 0;
+    private static final int PAGE_COLUMN_INDEX = 1;
 
     /**
      * A list with page nodes.
@@ -77,8 +79,8 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
     /**
      * Nodes in the FormTree correspond with nodes in the main PdfTree.
      */
-    protected PdfReaderController controller;
-    protected PageSelectionListener listener;
+    private final PdfReaderController controller;
+    private final PageSelectionListener listener;
 
     /**
      * Constructs a PagesTable.
@@ -90,47 +92,6 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
         this.controller = controller;
         this.listener = listener;
         setModel(new JTableAutoModel(this));
-    }
-
-    /**
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     */
-    public void update(Observable observable, Object obj) {
-        if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
-            RupsEvent event = (RupsEvent) obj;
-            switch (event.getType()) {
-                case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    list = new ArrayList<>();
-                    break;
-                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    ObjectLoader loader = (ObjectLoader) event.getContent();
-                    String[] pageLabels = loader.getFile().getPdfDocument().getPageLabels();
-                    int i = 0;
-                    TreeNodeFactory factory = loader.getNodes();
-                    PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
-                    PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
-                    final Enumeration<PdfPageTreeNode> p =
-                            new PageEnumerator((PdfDictionary) catalog.getPdfObject(), factory);
-                    PdfPageTreeNode child;
-                    final StringBuilder stringBuilder = new StringBuilder();
-                    while (p.hasMoreElements()) {
-                        child = p.nextElement();
-                        stringBuilder.setLength(0);
-                        i++;
-                        stringBuilder.append(String.format(Language.PAGE_NUMBER.getString(), i));
-                        if (pageLabels != null) {
-                            stringBuilder.append(" ( ");
-                            stringBuilder.append(pageLabels[i - 1]);
-                            stringBuilder.append(" )");
-                        }
-                        child.setUserObject(stringBuilder.toString());
-                        list.add(child);
-                    }
-                    break;
-            }
-            setModel(new JTableAutoModel(this));
-            repaint();
-        }
     }
 
     /**
@@ -154,11 +115,13 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
      */
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
-        if (getRowCount() == 0) return null;
+        if (getRowCount() == 0) {
+            return null;
+        }
         switch (columnIndex) {
-            case 0:
+            case OBJECT_COLUMN_INDEX:
                 return String.format(Language.PAGES_TABLE_OBJECT.getString(), list.get(rowIndex).getNumber());
-            case 1:
+            case PAGE_COLUMN_INDEX:
                 return list.get(rowIndex);
             default:
                 return null;
@@ -171,9 +134,9 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
     @Override
     public String getColumnName(int columnIndex) {
         switch (columnIndex) {
-            case 0:
+            case OBJECT_COLUMN_INDEX:
                 return Language.OBJECT.getString();
-            case 1:
+            case PAGE_COLUMN_INDEX:
                 return Language.PAGE.getString();
             default:
                 return null;
@@ -199,6 +162,44 @@ public class PagesTable extends JTable implements JTableAutoModelInterface, Obse
                     listener.gotoPage(getSelectedRow() + 1);
                 }
             }
+        }
+    }
+
+    @Override
+    public void handleCloseDocument() {
+        list = new ArrayList<>();
+        fireTableDataChanged();
+    }
+
+    @Override
+    public void handleOpenDocument(ObjectLoader loader) {
+        String[] pageLabels = loader.getFile().getPdfDocument().getPageLabels();
+        int i = 0;
+        TreeNodeFactory factory = loader.getNodes();
+        PdfTrailerTreeNode trailer = controller.getPdfTree().getRoot();
+        PdfObjectTreeNode catalog = factory.getChildNode(trailer, PdfName.Root);
+        final Enumeration<PdfPageTreeNode> p =
+                new PageEnumerator((PdfDictionary) catalog.getPdfObject(), factory);
+        PdfPageTreeNode child;
+        final StringBuilder stringBuilder = new StringBuilder();
+        while (p.hasMoreElements()) {
+            child = p.nextElement();
+            stringBuilder.setLength(0);
+            i++;
+            stringBuilder.append(String.format(Language.PAGE_NUMBER.getString(), i));
+            if (pageLabels != null) {
+                stringBuilder.append(" ( ").append(pageLabels[i - 1]).append(" )");
+            }
+            child.setUserObject(stringBuilder.toString());
+            list.add(child);
+        }
+        fireTableDataChanged();
+    }
+
+    private void fireTableDataChanged() {
+        final TableModel model = getModel();
+        if (model instanceof AbstractTableModel) {
+            ((AbstractTableModel) model).fireTableDataChanged();
         }
     }
 }

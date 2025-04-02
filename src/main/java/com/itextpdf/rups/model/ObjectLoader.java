@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -42,24 +42,23 @@
  */
 package com.itextpdf.rups.model;
 
-import com.itextpdf.rups.event.PostOpenDocumentEvent;
 import com.itextpdf.rups.view.Language;
 
-import java.util.Observer;
 import javax.swing.SwingUtilities;
+import javax.swing.SwingWorker;
 
 /**
  * Loads the necessary iText PDF objects in Background.
  */
-public class ObjectLoader extends BackgroundTask {
+public class ObjectLoader extends SwingWorker<Void, Void> {
     /**
      * This is the object that wait for task to complete.
      */
-    protected Observer observer;
+    protected IRupsEventListener eventListener;
     /**
      * RUPS's PdfFile object.
      */
-    protected PdfFile file;
+    protected IPdfFile file;
     /**
      * The factory that can provide PDF objects.
      */
@@ -80,11 +79,11 @@ public class ObjectLoader extends BackgroundTask {
      *
      * @param loaderName the loader name
      * @param progress   the progress dialog
-     * @param observer   the object that will forward the changes.
+     * @param eventListener   the object that will forward the changes.
      * @param file       the PdfFile from which the objects will be read.
      */
-    public ObjectLoader(Observer observer, PdfFile file, String loaderName, IProgressDialog progress) {
-        this.observer = observer;
+    public ObjectLoader(IRupsEventListener eventListener, IPdfFile file, String loaderName, IProgressDialog progress) {
+        this.eventListener = eventListener;
         this.file = file;
         this.loaderName = loaderName;
         this.progress = progress;
@@ -95,7 +94,7 @@ public class ObjectLoader extends BackgroundTask {
      *
      * @return a reader object
      */
-    public PdfFile getFile() {
+    public IPdfFile getFile() {
         return file;
     }
 
@@ -127,11 +126,8 @@ public class ObjectLoader extends BackgroundTask {
         return loaderName;
     }
 
-    /**
-     * @see BackgroundTask#doTask()
-     */
     @Override
-    public void doTask() {
+    protected Void doInBackground() {
         objects = new IndirectObjectFactory(file.getPdfDocument());
         final int n = objects.getXRefMaximum();
         SwingUtilities.invokeLater(() -> {
@@ -144,13 +140,14 @@ public class ObjectLoader extends BackgroundTask {
         SwingUtilities.invokeLater(() -> progress.setTotal(0));
         nodes = new TreeNodeFactory(objects);
         SwingUtilities.invokeLater(() -> progress.setMessage(Language.GUI_UPDATING.getString()));
+        return null;
     }
 
     @Override
-    public void finished() {
+    protected void done() {
         try {
-            observer.update(null, new PostOpenDocumentEvent(this));
-        } catch (Exception ex) {
+            eventListener.handleOpenDocument(this);
+        } catch (RuntimeException ex) {
             progress.showErrorDialog(ex);
             LoggerHelper.error(ex.getLocalizedMessage(), ex, getClass());
         }

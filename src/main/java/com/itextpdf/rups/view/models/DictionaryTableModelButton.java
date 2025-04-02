@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -46,27 +46,13 @@ import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.table.TableCellRenderer;
 import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class DictionaryTableModelButton extends JButton implements TableCellRenderer {
-
-    public DictionaryTableModelButton(String text, final JTable table) {
-        super(text);
-        setOpaque(true);
-        setEnabled(true);
-        addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                //Do nothing
-            }
-        });
-    }
-
-    private Icon deleteIcon;
-    private Icon addIcon;
+    private final Icon deleteIcon;
+    private final Icon addIcon;
 
     public DictionaryTableModelButton(Icon deleteIcon, Icon addIcon) {
         this.deleteIcon = deleteIcon;
@@ -76,7 +62,7 @@ public class DictionaryTableModelButton extends JButton implements TableCellRend
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
             int row, int column) {
         final JLabel label = new JLabel();
-        label.setHorizontalAlignment(JLabel.CENTER);
+        label.setHorizontalAlignment(SwingConstants.CENTER);
 
         if (row == (table.getRowCount() - 1)) {
             label.setIcon(addIcon);
@@ -86,6 +72,4 @@ public class DictionaryTableModelButton extends JButton implements TableCellRend
 
         return label;
     }
-
-
 }

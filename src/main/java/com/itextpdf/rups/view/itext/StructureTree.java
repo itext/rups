@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -48,9 +48,9 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfNumber;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
 import com.itextpdf.rups.view.itext.contentstream.MarkedContentInfoGatherer;
@@ -70,15 +70,13 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import java.util.Enumeration;
 import java.util.Map;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.concurrent.ExecutionException;
 
 /**
  * A JTree visualizing information about the structure tree of
  * the PDF file (if any).
  */
-public class StructureTree extends JTree implements TreeSelectionListener, Observer {
+public final class StructureTree extends JTree implements TreeSelectionListener, IRupsEventListener {
 
     private static final String BULLET_GO_ICON = "bullet_go.png";
 
@@ -87,11 +85,11 @@ public class StructureTree extends JTree implements TreeSelectionListener, Obser
     /**
      * Nodes in the FormTree correspond with nodes in the main PdfTree.
      */
-    protected PdfReaderController controller;
+    private final PdfReaderController controller;
 
-    protected ObjectLoader loader;
+    private transient ObjectLoader loader = null;
 
-    protected boolean loaded = false;
+    private boolean loaded = false;
 
     private transient SwingWorker<TreeModel, Integer> worker;
 
@@ -106,31 +104,15 @@ public class StructureTree extends JTree implements TreeSelectionListener, Obser
         addTreeSelectionListener(this);
     }
 
-    public void update(Observable observable, Object obj) {
-        if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
-            final RupsEvent event = (RupsEvent) obj;
-            switch (event.getType()) {
-                case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    setLoader(null);
-                    setModel(new DefaultTreeModel(new StructureTreeNode()));
-                    repaint();
-                    break;
-                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    setLoader((ObjectLoader) event.getContent());
-                    break;
-                case RupsEvent.OPEN_STRUCTURE_EVENT:
-                    if (loader == null || loaded) {
-                        break;
-                    }
-                    loaded = true;
-                    setModel(new DefaultTreeModel(new DefaultMutableTreeNode(Language.LOADING.getString())));
-                    worker = new TreeUpdateWorker();
-                    worker.execute();
-                    break;
-            }
+    public void openStructure() {
+        if (loader == null || loaded) {
+            return;
         }
+        loaded = true;
+        setModel(new DefaultTreeModel(new DefaultMutableTreeNode(Language.LOADING.getString())));
+        worker = new TreeUpdateWorker();
+        worker.execute();
     }
-
 
     /**
      * Recalculates the tree model backing the structure tree view.
@@ -281,6 +263,17 @@ public class StructureTree extends JTree implements TreeSelectionListener, Obser
             worker = null;
         }
         loaded = false;
+    }
+
+    @Override
+    public void handleCloseDocument() {
+        setLoader(null);
+        setModel(new DefaultTreeModel(new StructureTreeNode()));
+    }
+
+    @Override
+    public void handleOpenDocument(ObjectLoader loader) {
+        setLoader(loader);
     }
 
     private final class TreeUpdateWorker extends SwingWorker<TreeModel, Integer> {

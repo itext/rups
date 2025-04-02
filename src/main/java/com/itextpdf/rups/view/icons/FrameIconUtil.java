@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -46,23 +46,49 @@ import com.itextpdf.rups.Rups;
 
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-public class FrameIconUtil {
-
+public final class FrameIconUtil {
+    /**
+     * Scale between two subsequent icon sizes.
+     */
+    private static final int DIM_SCALE = 2;
+    /**
+     * Minimum width/height of an icon.
+     */
+    private static final int MIN_DIM = 16;
+    /**
+     * Maximum width/height of an icon.
+     */
+    private static final int MAX_DIM = 1024;
+    /**
+     * Path in resources to the logo.
+     */
     private static final String LOGO_ICON = "logo.png";
 
     private FrameIconUtil() {
+        // static class
     }
 
     public static List<Image> loadFrameIcons() {
-        List<Image> images = new ArrayList<>();
-        final Image image = Toolkit.getDefaultToolkit().getImage(Rups.class.getResource(LOGO_ICON));
-        // Add several scaled instances of the image to let the platform decide which ones to use
-        for (int i = 16; i <= 1024; i *= 2) {
-            images.add(image.getScaledInstance(i, i, Image.SCALE_SMOOTH));
+        return LazyHolder.SCALED_ICONS;
+    }
+
+    /**
+     * Wrapper to lazily load the logo from resource and prepare all scaled
+     * versions of it.
+     */
+    private static final class LazyHolder {
+        private static final List<Image> SCALED_ICONS;
+
+        static {
+            final Image image = Toolkit.getDefaultToolkit()
+                    .getImage(Rups.class.getResource(LOGO_ICON));
+            SCALED_ICONS = IntStream.iterate(MIN_DIM, dim -> dim <= MAX_DIM, dim -> dim * DIM_SCALE)
+                    .mapToObj(dim -> image.getScaledInstance(dim, dim, Image.SCALE_SMOOTH))
+                    .collect(Collectors.toUnmodifiableList());
         }
-        return images;
     }
 }

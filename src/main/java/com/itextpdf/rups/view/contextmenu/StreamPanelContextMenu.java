@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -59,7 +59,7 @@ import javax.swing.text.DefaultEditorKit;
  *
  * @author Michael Demey
  */
-public class StreamPanelContextMenu extends JPopupMenu {
+public final class StreamPanelContextMenu extends JPopupMenu {
 
     private final JMenuItem saveToStream;
 
@@ -104,7 +104,7 @@ public class StreamPanelContextMenu extends JPopupMenu {
         saveToStream.setEnabled(enabled);
     }
 
-    static final JMenuItem getJMenuItem(Action rupsAction) {
+    private static JMenuItem getJMenuItem(Action rupsAction) {
         final JMenuItem jMenuItem = new JMenuItem();
         jMenuItem.setText((String) rupsAction.getValue(Action.NAME));
         jMenuItem.setAction(rupsAction);

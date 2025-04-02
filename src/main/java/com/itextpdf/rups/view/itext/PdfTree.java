@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -42,43 +42,40 @@
  */
 package com.itextpdf.rups.view.itext;
 
-import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.listeners.PdfTreeExpansionListener;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
+import com.itextpdf.rups.model.ObjectLoader;
+import com.itextpdf.rups.model.IRupsEventListener;
+import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.icons.IconTreeCellRenderer;
-import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
 import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
-import java.util.Observable;
-import java.util.Observer;
 
 /**
  * A JTree that shows the object hierarchy of a PDF document.
  */
-public class PdfTree extends JTree implements Observer {
+public final class PdfTree extends JTree implements IRupsEventListener {
 
     /**
      * The root of the PDF tree.
      */
-    protected PdfTrailerTreeNode root;
+    private PdfTrailerTreeNode root;
 
     /**
      * Constructs a PDF tree.
      */
     public PdfTree() {
         super();
-        root = new PdfTrailerTreeNode();
         final PdfTreeNavigationListener listener = new PdfTreeNavigationListener();
         addKeyListener(listener);
         addMouseListener(listener);
         setCellRenderer(new IconTreeCellRenderer());
         addTreeExpansionListener(new PdfTreeExpansionListener());
-        setModel(new DefaultTreeModel(root));
-        repaint();
+        reset();
     }
 
     /**
@@ -91,36 +88,35 @@ public class PdfTree extends JTree implements Observer {
     }
 
     /**
-     * Updates the PdfTree when a file is closed or when a ObjectLoader
-     * has finished loading objects.
-     *
-     * @param observable the Observable class that started the update
-     * @param obj        the object that has all the updates
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     */
-    public void update(Observable observable, Object obj) {
-        if (observable instanceof PdfReaderController && obj instanceof RupsEvent) {
-            final RupsEvent event = (RupsEvent) obj;
-            if (RupsEvent.CLOSE_DOCUMENT_EVENT == event.getType()) {
-                root = new PdfTrailerTreeNode();
-            }
-        }
-        setModel(new DefaultTreeModel(root));
-        repaint();
-    }
-
-    /**
      * Select a specific node in the tree.
      * Typically this method will be called from a different tree,
      * such as the pages, outlines or form tree.
      *
      * @param node the node that has to be selected
      */
-    public void selectNode(PdfObjectTreeNode node) {
+    public void selectNode(DefaultMutableTreeNode node) {
         if (node != null) {
             final TreePath path = new TreePath(node.getPath());
             setSelectionPath(path);
             scrollPathToVisible(path);
         }
+    }
+
+    @Override
+    public void handleCloseDocument() {
+        reset();
+    }
+
+    @Override
+    public void handleOpenDocument(ObjectLoader loader) {
+        root.setTrailer(loader.getFile().getPdfDocument().getTrailer());
+        root.setUserObject(String.format(Language.PDF_OBJECT_TREE.getString(), loader.getLoaderName()));
+        loader.getNodes().expandNode(root);
+        setModel(new DefaultTreeModel(root));
+    }
+
+    private void reset() {
+        root = new PdfTrailerTreeNode();
+        setModel(new DefaultTreeModel(root));
     }
 }

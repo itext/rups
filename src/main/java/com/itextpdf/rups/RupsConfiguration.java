@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -42,7 +42,9 @@
  */
 package com.itextpdf.rups;
 
+import com.itextpdf.rups.conf.LookAndFeelId;
 import com.itextpdf.rups.model.LoggerHelper;
+import com.itextpdf.rups.model.MruListHandler;
 import com.itextpdf.rups.view.Language;
 
 import java.io.File;
@@ -50,6 +52,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
@@ -73,6 +76,20 @@ import javax.swing.WindowConstants;
 public enum RupsConfiguration {
     INSTANCE;
 
+    /**
+     * List of supported Look & Feel values.
+     */
+    public static final List<LookAndFeelId> SUPPORTED_LOOK_AND_FEEL = List.of(
+            new LookAndFeelId("system", UIManager.getSystemLookAndFeelClassName()),
+            new LookAndFeelId("crossplatform", UIManager.getCrossPlatformLookAndFeelClassName()),
+            new LookAndFeelId("flatlaflight", "com.formdev.flatlaf.FlatLightLaf"),
+            new LookAndFeelId("flatlafdark", "com.formdev.flatlaf.FlatDarkLaf"),
+            new LookAndFeelId("flatlafintellij", "com.formdev.flatlaf.FlatIntelliJLaf"),
+            new LookAndFeelId("flatlafdarcula", "com.formdev.flatlaf.FlatDarculaLaf"),
+            new LookAndFeelId("flatlafmacoslight", "com.formdev.flatlaf.themes.FlatMacLightLaf"),
+            new LookAndFeelId("flatlafmacosdark", "com.formdev.flatlaf.themes.FlatMacDarkLaf")
+    );
+
     private static final String DEFAULT_CONFIG_PATH = "/config/default.properties";
     private static final String DEFAULT_HOME_VALUE = "home";
     private static final String CLOSE_OPERATION_KEY = "ui.closeoperation";
@@ -84,13 +101,14 @@ public enum RupsConfiguration {
     private final Preferences systemPreferences;
     private final Properties defaultProperties;
     private final Properties temporaryProperties;
+    private final MruListHandler mruListHandler;
 
     RupsConfiguration() {
         this.defaultProperties = loadDefaultProperties();
         this.temporaryProperties = new Properties();
         this.systemPreferences = Preferences.userNodeForPackage(RupsConfiguration.class);
-
         initializeSystemDefaults(this.defaultProperties, this.systemPreferences);
+        this.mruListHandler = new MruListHandler(this.systemPreferences.node("mru"));
     }
 
     /**
@@ -180,27 +198,20 @@ public enum RupsConfiguration {
     /**
      * Gets the set Look and Feel for the application.
      *
-     * @return String
+     * @return The set Look and Feel for the application.
      */
-    public String getLookAndFeel() {
-        final String lookAndFeelName;
-        final String value = getValueFromSystemPreferences(LOOK_AND_FEEL_KEY);
-
-        switch (value) {
-            default:
-            case "system":
-                lookAndFeelName = UIManager.getSystemLookAndFeelClassName();
-                break;
-            case "crossplatform":
-                lookAndFeelName = UIManager.getCrossPlatformLookAndFeelClassName();
-                break;
+    public LookAndFeelId getLookAndFeel() {
+        final String lafKey = getValueFromSystemPreferences(LOOK_AND_FEEL_KEY);
+        for (final LookAndFeelId laf : SUPPORTED_LOOK_AND_FEEL) {
+            if (laf.getConfigurationKey().equals(lafKey)) {
+                return laf;
+            }
         }
-
-        return lookAndFeelName;
+        return SUPPORTED_LOOK_AND_FEEL.get(0);
     }
 
-    public void setLookAndFeel(String lookAndFeel) {
-        this.temporaryProperties.setProperty(LOOK_AND_FEEL_KEY, lookAndFeel);
+    public void setLookAndFeel(LookAndFeelId lookAndFeel) {
+        this.temporaryProperties.setProperty(LOOK_AND_FEEL_KEY, lookAndFeel.getConfigurationKey());
     }
 
     public void setOpenDuplicateFiles(boolean value) {
@@ -213,34 +224,20 @@ public enum RupsConfiguration {
      * @param newDefaultFolder folder to use
      */
     public void setHomeFolder(String newDefaultFolder) {
-        final String defaultHome = System.getProperty(HOME_FOLDER_KEY);
-        if (newDefaultFolder == null || DEFAULT_HOME_VALUE.equals(newDefaultFolder)) {
-            newDefaultFolder = defaultHome;
-        } else {
-            File valueDirectory = new File(newDefaultFolder);
-            if (!valueDirectory.exists() || !valueDirectory.isDirectory()) {
-                newDefaultFolder = defaultHome;
-            }
-        }
-
-        this.temporaryProperties.setProperty(HOME_FOLDER_KEY, newDefaultFolder);
+        this.temporaryProperties.setProperty(HOME_FOLDER_KEY, sanitizeHomeFolder(newDefaultFolder));
     }
 
     public void setUserLocale(Locale locale) {
-        if (locale == null) {
-            locale = Locale.getDefault();
-        }
-
-        this.temporaryProperties.setProperty(LOCALE_KEY, locale.toLanguageTag());
+        this.temporaryProperties.setProperty(LOCALE_KEY, defaultIfNull(locale).toLanguageTag());
     }
 
     /**
      * Saves any unsaved changes. To cancel changes, see {@link RupsConfiguration#cancelTemporaryChanges()}.
      */
     public void saveConfiguration() {
-        this.temporaryProperties.forEach((key, value) -> {
-            this.systemPreferences.put((String) key, (String) value);
-        });
+        this.temporaryProperties.forEach((Object key, Object value) ->
+            this.systemPreferences.put((String) key, (String) value)
+        );
 
         this.temporaryProperties.clear();
     }
@@ -256,9 +253,9 @@ public enum RupsConfiguration {
      * Resets the settings in Preferences, not the local Properties object to the default.
      */
     public void resetToDefaultProperties() {
-        this.defaultProperties.forEach((Object key, Object value) -> {
-            this.systemPreferences.put((String) key, (String) value);
-        });
+        this.defaultProperties.forEach((Object key, Object value) ->
+            this.systemPreferences.put((String) key, (String) value)
+        );
 
         this.temporaryProperties.clear();
     }
@@ -286,24 +283,29 @@ public enum RupsConfiguration {
      * @param properties Properties holding new values for Preferences
      */
     public void restore(Properties properties) {
-        properties.forEach((key, value) -> {
-            this.systemPreferences.put((String) key, (String) value);
-        });
+        properties.forEach((Object key, Object value) ->
+            this.systemPreferences.put((String) key, (String) value)
+        );
+    }
+
+    /**
+     * Returns the MRU list handler for recently opened files.
+     *
+     * @return The MRU list handler for recently opened files.
+     */
+    public MruListHandler getMruListHandler() {
+        return mruListHandler;
     }
 
     private Properties loadDefaultProperties() {
-        final InputStream resourceAsStream = RupsConfiguration.class.getResourceAsStream(DEFAULT_CONFIG_PATH);
         final Properties properties = new Properties();
-
-        if (resourceAsStream != null) {
-            try {
+        try (final InputStream resourceAsStream = RupsConfiguration.class.getResourceAsStream(DEFAULT_CONFIG_PATH)) {
+            if (resourceAsStream != null) {
                 properties.load(resourceAsStream);
-                resourceAsStream.close();
-            } catch (IOException e) {
-                LoggerHelper.error(Language.ERROR_LOADING_DEFAULT_SETTINGS.getString(), e, RupsConfiguration.class);
             }
+        } catch (IOException e) {
+            LoggerHelper.error(Language.ERROR_LOADING_DEFAULT_SETTINGS.getString(), e, RupsConfiguration.class);
         }
-
         return properties;
     }
 
@@ -336,5 +338,23 @@ public enum RupsConfiguration {
 
     private String getValueFromSystemPreferences(String key) {
         return this.systemPreferences.get(key, this.defaultProperties.getProperty(key));
+    }
+
+    private static Locale defaultIfNull(Locale locale) {
+        if (locale == null) {
+            return Locale.getDefault();
+        }
+        return locale;
+    }
+
+    private static String sanitizeHomeFolder(String path) {
+        if (path == null || DEFAULT_HOME_VALUE.equals(path)) {
+            return System.getProperty(HOME_FOLDER_KEY);
+        }
+        final File file = new File(path);
+        if (!file.isDirectory()) {
+            return System.getProperty(HOME_FOLDER_KEY);
+        }
+        return path;
     }
 }

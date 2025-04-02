@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -42,40 +42,31 @@
  */
 package com.itextpdf.rups.mock;
 
-import com.itextpdf.kernel.exceptions.PdfException;
-import com.itextpdf.rups.model.PdfFile;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.rups.model.IPdfFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 
-public class MockedPdfFile extends PdfFile {
-    /**
-     * Constructs a PdfFile object.
-     *
-     * @param file     the byte[] to read
-     * @param readOnly read only
-     *
-     * @throws IOException  an I/O exception
-     * @throws PdfException a PDF exception
-     */
-    public MockedPdfFile(byte[] file, boolean readOnly) throws IOException, PdfException {
-        super(file, readOnly);
+public class MockedPdfFile implements IPdfFile {
+    @Override
+    public File getOriginalFile() {
+        return new File("mock.pdf");
     }
 
     @Override
-    protected void readFile(InputStream fis, boolean checkPass, boolean readOnly) throws IOException, PdfException {
-        // empty on purpose
+    public PdfDocument getPdfDocument() {
+        return null;
     }
 
     @Override
-    public String getFilename() {
-        return "mock.pdf";
+    public byte[] getOriginalContent() {
+        return null;
     }
 
     @Override
-    public File getDirectory() {
-        return new File("");
+    public ByteArrayOutputStream getByteArrayOutputStream() {
+        return null;
     }
 }
 

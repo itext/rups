@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -53,11 +53,16 @@ import javax.swing.filechooser.FileFilter;
  * Filters PDF files in a {@link JFileChooser}.
  */
 public class PdfFilter extends FileFilter {
+    private static final String PDF_FILE_SUFFIX = ".pdf";
 
     /**
      * A public instance of the PdfFilter.
      */
     public static final PdfFilter INSTANCE = new PdfFilter();
+
+    public PdfFilter() {
+        // noop
+    }
 
     /**
      * @param f File
@@ -67,9 +72,8 @@ public class PdfFilter extends FileFilter {
      * @see FileFilter#accept(java.io.File)
      */
     public boolean accept(File f) {
-        final String suffix = ".pdf";
         return f != null && (f.isDirectory() || f.getName().toLowerCase(RupsConfiguration.INSTANCE.getUserLocale())
-                .endsWith(suffix));
+                .endsWith(PDF_FILE_SUFFIX));
     }
 
     /**

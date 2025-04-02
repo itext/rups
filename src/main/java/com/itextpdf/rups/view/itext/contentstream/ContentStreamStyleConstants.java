@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -77,9 +77,14 @@ public final class ContentStreamStyleConstants {
     public static final Attribute HEX_EDIT = new Attribute("hex-editable");
 
     /**
+     * Content used for indentation attribute marker.
+     */
+    public static final Attribute INDENT = new Attribute("indent");
+
+    /**
      * Syntax highlight attributes for operators.
      */
-    static final Map<String, AttributeSet> ATTRIBUTE_MAP = initAttributes();
+    private static final Map<String, AttributeSet> ATTRIBUTE_MAP = initAttributes();
 
     /**
      * Default attribute set.
@@ -97,6 +102,13 @@ public final class ContentStreamStyleConstants {
      */
     static final AttributeSet DISPLAY_ONLY_ATTRS;
 
+    /**
+     * Attribute set for content that is used to indent other content.
+     * Not reflected in the reserialised (binary) output, but
+     * unlike {@link #DISPLAY_ONLY_ATTRS} it is editable.
+     */
+    static final AttributeSet INDENT_ATTRS;
+
     static {
         final MutableAttributeSet mas = new SimpleAttributeSet();
         mas.addAttribute(StyleConstants.Foreground, Color.BLACK);
@@ -112,6 +124,11 @@ public final class ContentStreamStyleConstants {
         final MutableAttributeSet attrs = new SimpleAttributeSet();
         attrs.addAttribute(ContentStreamStyleConstants.BINARY_CONTENT, new byte[0]);
         DISPLAY_ONLY_ATTRS = attrs;
+
+        final MutableAttributeSet indentWhitespace = new SimpleAttributeSet();
+        indentWhitespace.addAttribute(ContentStreamStyleConstants.BINARY_CONTENT, new byte[0]);
+        indentWhitespace.addAttribute(ContentStreamStyleConstants.INDENT, Boolean.TRUE);
+        INDENT_ATTRS = indentWhitespace;
     }
 
     private ContentStreamStyleConstants() {
@@ -122,7 +139,7 @@ public final class ContentStreamStyleConstants {
      * Initialize the syntax highlighting attributes.
      * This could be read from a configuration file, but is hard coded for now
      */
-    static Map<String, AttributeSet> initAttributes() {
+    private static Map<String, AttributeSet> initAttributes() {
         final Map<String, AttributeSet> attributeMap = new HashMap<>();
 
         addPathOps(attributeMap);

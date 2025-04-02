@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -50,31 +50,43 @@ import javax.swing.JPopupMenu;
 import java.awt.Component;
 
 /**
- * Convenience class/factory that return the popup menu for the PdfTree panel.
+ * Convenience class for the popup menu for the PdfTree panel.
  *
  * @author Michael Demey
  */
-public class PdfTreeContextMenu {
+public final class PdfTreeContextMenu extends JPopupMenu {
+    private final InspectObjectAction inspectObjectAction;
+    private final SaveToFilePdfTreeAction saveRawBytesToFileAction;
+    private final SaveToFilePdfTreeAction saveToFileAction;
 
-    public static JPopupMenu getPopupMenu(Component component) {
-        final JPopupMenu popup = new JPopupMenu();
+    public PdfTreeContextMenu(Component component) {
+        inspectObjectAction = new InspectObjectAction(
+                Language.INSPECT_OBJECT.getString(),
+                component
+        );
+        saveRawBytesToFileAction = new SaveToFilePdfTreeAction(
+                Language.SAVE_RAW_BYTES_TO_FILE.getString(),
+                component,
+                true
+        );
+        saveToFileAction = new SaveToFilePdfTreeAction(
+                Language.SAVE_TO_FILE.getString(),
+                component,
+                false
+        );
 
-        popup.add(getJMenuItem(
-                new InspectObjectAction(Language.INSPECT_OBJECT.getString(), component)
-        ));
-
-        popup.add(getJMenuItem(
-                new SaveToFilePdfTreeAction(Language.SAVE_RAW_BYTES_TO_FILE.getString(), component, true)
-        ));
-
-        popup.add(getJMenuItem(
-                new SaveToFilePdfTreeAction(Language.SAVE_TO_FILE.getString(), component, false)
-        ));
-
-        return popup;
+        add(getJMenuItem(inspectObjectAction));
+        add(getJMenuItem(saveRawBytesToFileAction));
+        add(getJMenuItem(saveToFileAction));
     }
 
-    static JMenuItem getJMenuItem(AbstractRupsAction rupsAction) {
+    public void setEnabledForNode(IPdfContextMenuTarget node) {
+        inspectObjectAction.setEnabled(node.supportsInspectObject());
+        saveRawBytesToFileAction.setEnabled(node.supportsSave());
+        saveToFileAction.setEnabled(node.supportsSave());
+    }
+
+    private static JMenuItem getJMenuItem(AbstractRupsAction rupsAction) {
         final JMenuItem jMenuItem = new JMenuItem();
         jMenuItem.setText((String) rupsAction.getValue(Action.NAME));
         jMenuItem.setAction(rupsAction);

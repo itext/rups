@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -42,78 +42,84 @@
  */
 package com.itextpdf.rups.view.itext;
 
-import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.event.RupsEvent;
+import com.itextpdf.rups.model.IPdfFile;
 import com.itextpdf.rups.model.ObjectLoader;
-import com.itextpdf.rups.model.PdfFile;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.view.Language;
 
-import javax.swing.JTextArea;
+import java.io.UnsupportedEncodingException;
 import javax.swing.SwingWorker;
-import java.util.Observable;
-import java.util.Observer;
 import java.util.concurrent.ExecutionException;
 
-public class PlainText extends JTextArea implements Observer {
+public final class PlainText extends ReadOnlyTextArea implements IRupsEventListener {
 
-    protected boolean loaded = false;
+    private boolean loaded = false;
 
-    private PdfFile file;
+    private IPdfFile file = null;
 
-    private SwingWorker<String, Object> worker;
+    private SwingWorker<String, Object> worker = null;
 
-    public void update(Observable o, Object arg) {
-        if (o instanceof PdfReaderController && arg instanceof RupsEvent) {
-            final RupsEvent event = (RupsEvent) arg;
-            switch (event.getType()) {
-                case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    file = null;
-                    setText("");
-                    if (worker != null) {
-                        worker.cancel(true);
-                        worker = null;
-                    }
-                    loaded = false;
-                    break;
-                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    file = ((ObjectLoader) event.getContent()).getFile();
-                    loaded = false;
-                    if (worker != null) {
-                        worker.cancel(true);
-                        worker = null;
-                    }
-                    break;
-                case RupsEvent.OPEN_PLAIN_TEXT_EVENT:
-                    if (file == null || loaded) {
-                        break;
-                    }
-                    loaded = true;
-                    setText(Language.LOADING.getString());
-                    worker = new SwingWorker<String, Object>() {
-                        @Override
-                        protected String doInBackground() {
-                            return file.getRawContent();
-                        }
+    public PlainText() {
+        // Empty
+    }
 
-                        @Override
-                        protected void done() {
-                            if (!isCancelled()) {
-                                String text;
-                                try {
-                                    text = get();
-                                } catch (InterruptedException any) {
-                                    text = Language.ERROR_WHILE_LOADING_TEXT.getString();
-                                    Thread.currentThread().interrupt();
-                                } catch (ExecutionException any) {
-                                    text = Language.ERROR_WHILE_LOADING_TEXT.getString();
-                                }
-                                setText(text);
-                            }
-                        }
-                    };
-                    worker.execute();
-                    break;
+    public void openPlainText() {
+        if (file == null || loaded) {
+            return;
+        }
+        loaded = true;
+        setText(Language.LOADING.getString());
+        worker = new SwingWorker<>() {
+            @Override
+            protected String doInBackground() {
+                return getFileContentAsString(file);
             }
+
+            @Override
+            protected void done() {
+                if (!isCancelled()) {
+                    String text;
+                    try {
+                        text = get();
+                    } catch (InterruptedException any) {
+                        text = Language.ERROR_WHILE_LOADING_TEXT.getString();
+                        Thread.currentThread().interrupt();
+                    } catch (ExecutionException any) {
+                        text = Language.ERROR_WHILE_LOADING_TEXT.getString();
+                    }
+                    setText(text);
+                }
+            }
+        };
+        worker.execute();
+    }
+
+    private static String getFileContentAsString(IPdfFile file) {
+        try {
+            return new String(file.getOriginalContent(), "cp1252");
+        } catch (UnsupportedEncodingException e) {
+            return Language.ERROR_WRONG_ENCODING.getString();
+        }
+    }
+
+    @Override
+    public void handleCloseDocument() {
+        file = null;
+        setText("");
+        if (worker != null) {
+            worker.cancel(true);
+            worker = null;
+        }
+        loaded = false;
+    }
+
+    @Override
+    public void handleOpenDocument(ObjectLoader loader) {
+        file = loader.getFile();
+        loaded = false;
+        if (worker != null) {
+            worker.cancel(true);
+            worker = null;
         }
     }
 }

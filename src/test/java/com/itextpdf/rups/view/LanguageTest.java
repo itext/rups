@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -44,74 +44,73 @@ package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.test.ExtendedITextTest;
-import com.itextpdf.test.annotations.type.UnitTest;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
 
-@Category(UnitTest.class)
+@Tag("UnitTest")
 public class LanguageTest extends ExtendedITextTest {
-    private final Language key = Language.ERROR;
-    private final Locale dutchLocale = Locale.forLanguageTag("nl-NL");
-    private final String expectedEnUS = "Error";
-    private final String expectedNlNL = "Fout";
+    private static final Language TEST_KEY = Language.ERROR;
+    private static final Locale DUTCH_LOCALE = Locale.forLanguageTag("nl-NL");
+    private static final String EXPECTED_EN_US = "Error";
+    private static final String EXPECTED_NL_NL = "Fout";
 
     @Test
     public void englishUSLocaleTest() {
         RupsConfiguration.INSTANCE.setUserLocale(Locale.US);
-        String actual = key.getString();
-        Assert.assertEquals(expectedEnUS, actual);
+        String actual = TEST_KEY.getString();
+        Assertions.assertEquals(EXPECTED_EN_US, actual);
     }
 
     @Test
     public void defaultLocaleTest() {
         RupsConfiguration.INSTANCE.setUserLocale(Locale.getDefault());
-        String actual = key.getString();
-        Assert.assertEquals(expectedEnUS, actual);
+        String actual = TEST_KEY.getString();
+        Assertions.assertEquals(EXPECTED_EN_US, actual);
     }
 
     @Test
     public void changeLocale() {
         Locale userLocale = RupsConfiguration.INSTANCE.getUserLocale();
-        String enActual = key.getString();
-        Assert.assertNotNull(enActual);
-        RupsConfiguration.INSTANCE.setUserLocale(dutchLocale);
+        String enActual = TEST_KEY.getString();
+        Assertions.assertNotNull(enActual);
+        RupsConfiguration.INSTANCE.setUserLocale(DUTCH_LOCALE);
         RupsConfiguration.INSTANCE.saveConfiguration();
-        String nlActual = key.getString();
+        String nlActual = TEST_KEY.getString();
         RupsConfiguration.INSTANCE.setUserLocale(userLocale);
         RupsConfiguration.INSTANCE.saveConfiguration();
-        Assert.assertEquals(expectedNlNL, nlActual);
+        Assertions.assertEquals(EXPECTED_NL_NL, nlActual);
     }
 
     @Test
     public void notExistingLocaleTest() {
         RupsConfiguration.INSTANCE.setUserLocale(new Locale("gibberish"));
         String actual = Language.ERROR.getString();
-        Assert.assertEquals(expectedEnUS, actual);
+        Assertions.assertEquals(EXPECTED_EN_US, actual);
     }
 
     @Test
     public void stringFormatOnLocaleTest() {
         RupsConfiguration.INSTANCE.setUserLocale(Locale.getDefault());
         String actual = String.format(Language.PAGE_NUMBER.getString(), 1);
-        Assert.assertEquals("Page 1", actual);
+        Assertions.assertEquals("Page 1", actual);
     }
 
     @Test
     public void nullLocaleTest() {
         RupsConfiguration.INSTANCE.setUserLocale(null);
         String actual = Language.ERROR.getString();
-        Assert.assertEquals(expectedEnUS, actual);
+        Assertions.assertEquals(EXPECTED_EN_US, actual);
     }
 
     @Test
     public void confirmAllEnumsHaveADefaultValueTest() {
         for ( Language key : Language.values() ) {
             String value = key.getString();
-            Assert.assertNotNull(value);
-            Assert.assertFalse(value.isEmpty());
+            Assertions.assertNotNull(value);
+            Assertions.assertFalse(value.isEmpty());
         }
     }
 }

@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -54,6 +54,7 @@ import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.canvas.parser.util.PdfCanvasParser;
 import com.itextpdf.rups.view.Language;
 
+import java.nio.charset.StandardCharsets;
 import javax.swing.JOptionPane;
 import java.awt.Component;
 import java.io.IOException;
@@ -64,9 +65,13 @@ public class PdfSyntaxParser {
     private int openArraysCount = 0;
     private int openDictionaryCount = 0;
 
-    private PdfDocument document;
+    private PdfDocument document = null;
     private boolean isValid = true;
     private final List<PdfLiteral> unrecognizedChunks = new LinkedList<>();
+
+    public PdfSyntaxParser() {
+        // noop
+    }
 
     public void setDocument(PdfDocument document) {
         this.document = document;
@@ -85,14 +90,17 @@ public class PdfSyntaxParser {
         unrecognizedChunks.clear();
         openArraysCount = 0;
         openDictionaryCount = 0;
-        final byte[] bytesToParse = s.getBytes();
+        /*
+         * This is not that great, as this API prevents us from adding Unicode
+         * string into arrays and dictionaries...
+         */
+        final byte[] bytesToParse = s.getBytes(StandardCharsets.ISO_8859_1);
         final RandomAccessSourceFactory factory = new RandomAccessSourceFactory();
         final PdfTokenizer tokenizer =
                 new PdfTokenizer(new RandomAccessFileOrArray(factory.createSource(bytesToParse)));
         final UnderlineParser parser = new UnderlineParser(tokenizer);
-        PdfObject result;
         try {
-            result = parser.readObject();
+            final PdfObject result = parser.readObject();
             if (parser.nextValidToken()) {
                 LoggerHelper.warn(Language.ERROR_TRUNCATED_INPUT.getString(), getClass());
             }
@@ -110,21 +118,20 @@ public class PdfSyntaxParser {
                         JOptionPane.YES_NO_OPTION,
                         JOptionPane.WARNING_MESSAGE);
                 if (input != JOptionPane.YES_OPTION || failOnError) {
-                    result = null;
+                    return null;
                 }
             }
+            return result;
         } catch (IOException | RuntimeException any) {
             LoggerHelper.warn(Language.ERROR_PARSING_PDF_OBJECT.getString(), any, getClass());
-            result = null;
+            return null;
         }
-        return result;
     }
 
     private String getUnknownValues() {
         final StringBuilder builder = new StringBuilder();
         for (final PdfLiteral literal : unrecognizedChunks) {
-            builder.append(literal.toString());
-            builder.append("\n");
+            builder.append(literal).append('\n');
         }
         return builder.toString();
     }

@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -45,36 +45,48 @@ package com.itextpdf.rups.model;
 import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfBoolean;
 import com.itextpdf.kernel.pdf.PdfDictionary;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfIndirectReference;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfNumber;
 import com.itextpdf.kernel.pdf.PdfString;
+import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.test.ExtendedITextTest;
-import com.itextpdf.test.annotations.type.UnitTest;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
 
-@Category(UnitTest.class)
-public class PdfSyntaxUtilsTest extends ExtendedITextTest {
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+
+@Tag("UnitTest")
+class PdfSyntaxUtilsTest extends ExtendedITextTest {
 
     @Test
-    public void testSimpleString() {
-        Assert.assertEquals("(hello world)", PdfSyntaxUtils.getSyntaxString(new PdfString("hello world")));
+    void testSimpleString() {
+        Assertions.assertEquals("(hello world)", PdfSyntaxUtils.getSyntaxString(new PdfString("hello world")));
     }
 
     @Test
-    public void testSimpleDictionary() {
+    void testSimpleDictionary() {
         PdfDictionary pdfDictionary = new PdfDictionary();
         pdfDictionary.put(PdfName.ON, PdfBoolean.TRUE);
-        Assert.assertEquals("<< /ON true >>", PdfSyntaxUtils.getSyntaxString(pdfDictionary));
+        Assertions.assertEquals("<< /ON true >>", PdfSyntaxUtils.getSyntaxString(pdfDictionary));
     }
 
     @Test
-    public void testSimpleArray() {
+    void testSimpleArray() {
         PdfArray array = new PdfArray(Arrays.asList(new PdfNumber(1), new PdfString("hello")));
-        Assert.assertEquals("[ 1 (hello) ]", PdfSyntaxUtils.getSyntaxString(array));
+        Assertions.assertEquals("[ 1 (hello) ]", PdfSyntaxUtils.getSyntaxString(array));
     }
 
+    @Test
+    void testIndirectRef() {
+        final PdfDocument doc = new PdfDocument(new PdfWriter(new ByteArrayOutputStream()));
+        final PdfIndirectReference ref = new PdfString("test")
+                .makeIndirect(doc)
+                .getIndirectReference();
+        Assertions.assertEquals(ref.getObjNumber() + " 0 R", PdfSyntaxUtils.getSyntaxString(ref));
+    }
 }

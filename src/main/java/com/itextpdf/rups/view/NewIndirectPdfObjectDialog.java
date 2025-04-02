@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -44,7 +44,6 @@ package com.itextpdf.rups.view;
 
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.rups.controller.RupsController;
-import com.itextpdf.rups.event.NewIndirectObjectEvent;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 
 import javax.swing.AbstractAction;
@@ -64,7 +63,9 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
-public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChangeListener {
+public final class NewIndirectPdfObjectDialog extends JDialog implements PropertyChangeListener {
+    private static final Dimension DIALOG_SIZE = new Dimension(300, 450);
+    private static final Dimension TEXT_AREA_MIN_SIZE = new Dimension(100, 200);
 
     private PdfObject result;
     private final JTextArea textArea;
@@ -88,10 +89,10 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
 
         this.parser = parser;
         textArea = new JTextArea();
-        textArea.setMinimumSize(new Dimension(100, 200));
+        textArea.setMinimumSize(TEXT_AREA_MIN_SIZE);
 
         final JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setMinimumSize(new Dimension(100, 200));
+        scrollPane.setMinimumSize(TEXT_AREA_MIN_SIZE);
         //Create an array of the text and components to be displayed.
         final Object[] array = {Language.DIALOG_VALUE.getString(), scrollPane};
 
@@ -108,7 +109,7 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
         setContentPane(optionPane);
 
         pack();
-        setSize(300, 450);
+        setSize(DIALOG_SIZE);
         final Point parentLocation = parent.getLocation();
         setLocation(parentLocation.x + 20, parentLocation.y + 40);
 
@@ -162,7 +163,8 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
             if (btnString1.equals(value)) {
                 result = parser.parseString(textArea.getText(), getContentPane());
                 clearAndHide();
-            } else { //user closed dialog or clicked cancel
+            } else {
+                // User closed dialog or clicked cancel
                 result = null;
                 clearAndHide();
             }
@@ -202,7 +204,7 @@ public class NewIndirectPdfObjectDialog extends JDialog implements PropertyChang
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            controller.update(null, new NewIndirectObjectEvent());
+            this.controller.createNewIndirectObject();
         }
     }
 }

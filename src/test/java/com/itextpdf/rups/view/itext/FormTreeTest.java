@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -47,42 +47,75 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.mock.NoopProgressDialog;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.model.IndirectObjectFactory;
+import com.itextpdf.rups.model.ObjectLoader;
+import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.XfaTreeNode;
 import com.itextpdf.test.ExtendedITextTest;
-import com.itextpdf.test.annotations.type.UnitTest;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
-import java.io.IOException;
 
-@Category(UnitTest.class)
-public class FormTreeTest extends ExtendedITextTest {
-
-    private static final String sourceFolder = "./src/test/resources/com/itextpdf/rups/view/itext/";
+@Tag("UnitTest")
+final class FormTreeTest extends ExtendedITextTest {
+    private static final String SOURCE_DIR = "./src/test/resources/com/itextpdf/rups/view/itext/";
 
     @Test
-    public void testLoadXfa() throws IOException {
-        File inPdf = new File(sourceFolder + "cmp_purchase_order_filled.pdf");
-
-        PdfDocument pdfDocument = new PdfDocument(new PdfReader(inPdf));
-
-        IndirectObjectFactory indirectObjectFactory = new IndirectObjectFactory(pdfDocument);
-        while (indirectObjectFactory.storeNextObject());
-        TreeNodeFactory factory = new TreeNodeFactory(indirectObjectFactory);
-
-        PdfReaderController controller = new PdfReaderController(null, null);
-        FormTree formTree = new FormTree(controller);
-
-        PdfObject xfa = pdfDocument.getCatalog().getPdfObject().getAsDictionary(PdfName.AcroForm).getAsArray(PdfName.XFA);
-        PdfObjectTreeNode xfaObjTreeNode = PdfObjectTreeNode.getInstance(xfa);
-        XfaTreeNode xfaTreeNode = new XfaTreeNode(xfaObjTreeNode);
-
-        formTree.loadXfa(factory, xfaTreeNode, xfaObjTreeNode);
+    void testConstructorSmoke() {
+        Assertions.assertDoesNotThrow(() -> {
+            new FormTree(new PdfReaderController(null, null));
+        });
     }
 
+    @Test
+    void testLoadXfa() {
+        Assertions.assertDoesNotThrow(() -> {
+            File inPdf = new File(SOURCE_DIR + "cmp_purchase_order_filled.pdf");
 
+            PdfDocument pdfDocument = new PdfDocument(new PdfReader(inPdf));
+
+            IndirectObjectFactory indirectObjectFactory = new IndirectObjectFactory(pdfDocument);
+            while (indirectObjectFactory.storeNextObject()) {
+                // Empty
+            }
+            TreeNodeFactory factory = new TreeNodeFactory(indirectObjectFactory);
+
+            PdfObject xfa = pdfDocument.getCatalog().getPdfObject().getAsDictionary(PdfName.AcroForm)
+                    .getAsArray(PdfName.XFA);
+            PdfObjectTreeNode xfaObjTreeNode = PdfObjectTreeNode.getInstance(xfa);
+            XfaTreeNode xfaTreeNode = new XfaTreeNode(xfaObjTreeNode);
+
+            FormTree.loadXfa(factory, xfaTreeNode, xfaObjTreeNode);
+        });
+    }
+
+    @Test
+    void testHandleOpenDocument() {
+        Assertions.assertDoesNotThrow(() -> {
+            // Preload everything
+            final PdfFile pdfFile = PdfFile.open(
+                    new File(SOURCE_DIR + "cmp_purchase_order_filled.pdf")
+            );
+
+            // Using a noop listener here to prevent threading issues
+            final ObjectLoader loader = new ObjectLoader(
+                    new IRupsEventListener() {
+                    }, pdfFile, "Test loader", new NoopProgressDialog()
+            );
+            loader.execute();
+            loader.get();
+
+            // There is a FormTree inside the controller, which will also
+            // handle the event
+            final PdfReaderController controller = new PdfReaderController(null, null);
+            controller.handleOpenDocument(loader);
+        });
+    }
 }

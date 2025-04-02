@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -42,17 +42,16 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
-import com.itextpdf.test.annotations.type.UnitTest;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.experimental.categories.Category;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
 
 import javax.swing.Action;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.MenuElement;
 
-@Category(UnitTest.class)
+@Tag("UnitTest")
 public class ConsoleContextMenuTest {
 
     @Test
@@ -60,7 +59,7 @@ public class ConsoleContextMenuTest {
         JPopupMenu popupMenu = ConsoleContextMenu.getPopupMenu(null);
 
         MenuElement[] subElements = popupMenu.getSubElements();
-        Assert.assertEquals(2, subElements.length);
+        Assertions.assertEquals(2, subElements.length);
     }
 
     @Test
@@ -70,7 +69,7 @@ public class ConsoleContextMenuTest {
         MenuElement[] subElements = popupMenu.getSubElements();
 
         for (MenuElement menuElement : subElements) {
-            Assert.assertTrue(menuElement instanceof JMenuItem);
+            Assertions.assertTrue(menuElement instanceof JMenuItem);
         }
     }
 
@@ -83,7 +82,7 @@ public class ConsoleContextMenuTest {
         for (MenuElement menuElement : subElements) {
             Action action = ((JMenuItem) menuElement).getAction();
 
-            Assert.assertTrue(action instanceof CopyToClipboardAction || action instanceof ClearConsoleAction );
+            Assertions.assertTrue(action instanceof CopyToClipboardAction || action instanceof ClearConsoleAction );
         }
     }
 

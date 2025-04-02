@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -88,7 +88,8 @@ public enum Language {
 
     EDITOR_CONSOLE,
     EDITOR_CONSOLE_TOOLTIP,
-    ENTER_PASSWORD,
+    ENTER_ANY_PASSWORD,
+    ENTER_OWNER_PASSWORD,
 
     ERROR,
     ERROR_BUILDING_CONTENT_STREAM,
@@ -112,8 +113,11 @@ public enum Language {
     ERROR_KEY_IS_NOT_NAME,
     ERROR_LOADING_DEFAULT_SETTINGS,
     ERROR_LOADING_IMAGE,
+    ERROR_LOADING_MAVEN_SETTINGS,
     ERROR_LOADING_XFA,
     ERROR_LOOK_AND_FEEL,
+    ERROR_MISSING_PASSWORD,
+    ERROR_NO_OPEN_DOCUMENT,
     ERROR_NO_OPEN_DOCUMENT_COMPARE,
     ERROR_ONLY_OPEN_ONE_FILE,
     ERROR_OPENING_FILE,
@@ -127,6 +131,7 @@ public enum Language {
     ERROR_QUERY_CONTENT_STREAM,
     ERROR_READING_OBJECT_NUMBER,
     ERROR_REFLECTION_PDF_STREAM,
+    ERROR_SETTING_OPEN_FILE_HANDLER,
     ERROR_TOO_MANY_OUTPUT,
     ERROR_TRUNCATED_INPUT,
     ERROR_UNEXPECTED_EXCEPTION,
@@ -160,8 +165,10 @@ public enum Language {
     LOADING,
     LOCALE,
     LOG_TREE_NODE_CREATED,
+    LOOK_AND_FEEL,
 
     MENU_BAR_ABOUT,
+    MENU_BAR_CLEAR_RECENTLY_OPENED,
     MENU_BAR_CLOSE,
     MENU_BAR_COMPARE_WITH,
     MENU_BAR_EDIT,
@@ -170,6 +177,8 @@ public enum Language {
     MENU_BAR_NEW_INDIRECT,
     MENU_BAR_OPEN,
     MENU_BAR_OPEN_IN_PDF_VIEWER,
+    MENU_BAR_OPEN_RECENT,
+    MENU_BAR_REOPEN_AS_OWNER,
     MENU_BAR_SAVE_AS,
     MENU_BAR_VERSION,
     MESSAGE_ABOUT,
@@ -226,6 +235,9 @@ public enum Language {
     TOOLTIP_HEX,
 
     WARNING,
+    WARNING_FAILED_TO_PARSE_AS_ASN1_OBJECT,
+    WARNING_OPENED_IN_READ_ONLY_MODE,
+    WARNING_OID_NAME_NOT_FOUND,
 
     XREF,
     XREF_DESCRIPTION,
@@ -241,10 +253,20 @@ public enum Language {
     /**
      * Retrieves the String appropriate for the selected Locale.
      *
+     * @param name Name to return the string for.
+     *
+     * @return The correct String value.
+     */
+    public static String getString(String name) {
+        return ResourceBundle.getBundle(BUNDLE_LOCATION, RupsConfiguration.INSTANCE.getUserLocale()).getString(name);
+    }
+
+    /**
+     * Retrieves the String appropriate for the selected Locale.
+     *
      * @return the correct String value
      */
     public String getString() {
-        return ResourceBundle.getBundle(BUNDLE_LOCATION, RupsConfiguration.INSTANCE.getUserLocale()).getString(name());
+        return getString(name());
     }
-
 }

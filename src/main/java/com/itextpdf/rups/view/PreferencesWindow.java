@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -43,15 +43,18 @@
 package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.RupsConfiguration;
+import com.itextpdf.rups.conf.LookAndFeelId;
 import com.itextpdf.rups.view.icons.FrameIconUtil;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ItemEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.util.Locale;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -69,7 +72,7 @@ import javax.swing.WindowConstants;
 /**
  * The window responsible for holding the UI to set the preferences.
  */
-public class PreferencesWindow {
+public final class PreferencesWindow {
 
     private JDialog jDialog;
 
@@ -85,6 +88,10 @@ public class PreferencesWindow {
     private JTextField pathField;
     private JLabel restartLabel;
     private JComboBox<String> localeBox;
+    /**
+     * Combo box for selecting Look & Feel.
+     */
+    private JComboBox<LookAndFeelId> lookAndFeelBox;
 
     public PreferencesWindow() {
         initializeJDialog();
@@ -116,12 +123,16 @@ public class PreferencesWindow {
     }
 
     private void initializeLayout() {
+        final Insets insets = new Insets(2, 2, 2, 2);
+
         this.gridBagLayout = new GridBagLayout();
 
         this.left = new GridBagConstraints();
+        this.left.insets = insets;
         this.left.anchor = GridBagConstraints.EAST;
 
         this.right = new GridBagConstraints();
+        this.right.insets = insets;
         this.right.weightx = 2.0;
         this.right.fill = GridBagConstraints.HORIZONTAL;
         this.right.gridwidth = GridBagConstraints.REMAINDER;
@@ -133,7 +144,7 @@ public class PreferencesWindow {
         pathLabel.setLabelFor(this.pathField);
 
         JButton pathChooser = new JButton(Language.PREFERENCES_SELECT_NEW_DEFAULT_FOLDER.getString());
-        pathChooser.addActionListener(e -> {
+        pathChooser.addActionListener((ActionEvent e) -> {
             JFileChooser fileChooser = new JFileChooser(RupsConfiguration.INSTANCE.getHomeFolder());
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             int choice = fileChooser.showOpenDialog(jDialog);
@@ -150,8 +161,8 @@ public class PreferencesWindow {
         fieldsPanel.add(pathChooser);
 
         this.openDuplicateFiles = new JCheckBox("", RupsConfiguration.INSTANCE.canOpenDuplicateFiles());
-        this.openDuplicateFiles.addActionListener(
-                e -> RupsConfiguration.INSTANCE.setOpenDuplicateFiles(((JCheckBox) e.getSource()).isSelected())
+        this.openDuplicateFiles.addActionListener((ActionEvent e) ->
+            RupsConfiguration.INSTANCE.setOpenDuplicateFiles(((JCheckBox) e.getSource()).isSelected())
         );
         JLabel openDuplicateFilesLabel = new JLabel(Language.PREFERENCES_ALLOW_DUPLICATE_FILES.getString());
         openDuplicateFilesLabel.setLabelFor(this.openDuplicateFiles);
@@ -169,27 +180,48 @@ public class PreferencesWindow {
     }
 
     private void createVisualSettingsTab() {
+        /*
+         * Kind of a hack. Instead of using label visibility, we will set it
+         * to " ". This way it has a height, so the place for the label remains
+         * in the window and, because of that, component do not jump. Would
+         * assume there is a better way to do this...
+         */
+        this.restartLabel = new JLabel(" ");
+
+        this.lookAndFeelBox = new JComboBox<>();
+        for (final LookAndFeelId laf : RupsConfiguration.SUPPORTED_LOOK_AND_FEEL) {
+            this.lookAndFeelBox.addItem(laf);
+        }
+        this.lookAndFeelBox.setSelectedItem(RupsConfiguration.INSTANCE.getLookAndFeel());
+        this.lookAndFeelBox.addItemListener((ItemEvent e) -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                RupsConfiguration.INSTANCE.setLookAndFeel((LookAndFeelId) e.getItem());
+                this.restartLabel.setText(Language.PREFERENCES_NEED_RESTART.getString());
+            }
+        });
+
+        final JLabel lookAndFeelLabel = new JLabel(Language.LOOK_AND_FEEL.getString());
+        lookAndFeelLabel.setLabelFor(this.lookAndFeelBox);
+
         this.localeBox = new JComboBox<>();
         this.localeBox.addItem("nl-NL");
         this.localeBox.addItem("en-US");
         this.localeBox.setSelectedItem(RupsConfiguration.INSTANCE.getUserLocale().toLanguageTag());
-        final JLabel localeLabel = new JLabel(Language.LOCALE.getString());
-        localeLabel.setLabelFor(localeBox);
-
-        this.restartLabel = new JLabel(Language.PREFERENCES_NEED_RESTART.getString());
-        this.restartLabel.setVisible(false);
-        this.restartLabel.setLabelFor(localeBox);
-
-        this.localeBox.addActionListener(e -> {
+        this.localeBox.addActionListener((ActionEvent e) -> {
             Object selectedItem = localeBox.getSelectedItem();
             String selectedString = (String) selectedItem;
             RupsConfiguration.INSTANCE.setUserLocale(Locale.forLanguageTag(selectedString));
-            this.restartLabel.setVisible(true);
+            this.restartLabel.setText(Language.PREFERENCES_NEED_RESTART.getString());
         });
+
+        final JLabel localeLabel = new JLabel(Language.LOCALE.getString());
+        localeLabel.setLabelFor(localeBox);
 
         this.visualPanel = new JPanel();
         this.visualPanel.setLayout(this.gridBagLayout);
 
+        this.visualPanel.add(lookAndFeelLabel, this.left);
+        this.visualPanel.add(this.lookAndFeelBox, this.right);
         this.visualPanel.add(localeLabel, this.left);
         this.visualPanel.add(this.localeBox, this.right);
         this.visualPanel.add(this.restartLabel, this.right);
@@ -208,31 +240,16 @@ public class PreferencesWindow {
         JPanel buttons = new JPanel();
 
         JButton save = new JButton(Language.SAVE.getString());
-        save.addActionListener(e -> {
-            RupsConfiguration.INSTANCE.saveConfiguration();
-            resetView();
-            this.jDialog.dispose();
-        });
+        save.addActionListener(this::handleSave);
         buttons.add(save);
 
         JButton cancel = new JButton(Language.DIALOG_CANCEL.getString());
-        cancel.addActionListener(e -> {
-            if (RupsConfiguration.INSTANCE.hasUnsavedChanges()) {
-                int choice = JOptionPane.showConfirmDialog(jDialog,
-                        Language.SAVE_UNSAVED_CHANGES.getString());
-                if (choice == JOptionPane.OK_OPTION) {
-                    RupsConfiguration.INSTANCE.cancelTemporaryChanges();
-                    this.jDialog.dispose();
-                }
-            } else {
-                this.jDialog.dispose();
-            }
-        });
+        cancel.addActionListener(this::handleCancel);
         buttons.add(cancel);
 
         JButton reset = new JButton(Language.PREFERENCES_RESET_TO_DEFAULTS.getString());
 
-        reset.addActionListener(e -> {
+        reset.addActionListener((ActionEvent e) -> {
             int choice = JOptionPane.showConfirmDialog(jDialog,
                     Language.PREFERENCES_RESET_TO_DEFAULTS_CONFIRM.getString());
             if (choice == JOptionPane.OK_OPTION) {
@@ -253,12 +270,34 @@ public class PreferencesWindow {
     private void resetView() {
         this.pathField.setText(RupsConfiguration.INSTANCE.getHomeFolder().getPath());
         this.openDuplicateFiles.setSelected(RupsConfiguration.INSTANCE.canOpenDuplicateFiles());
+        this.lookAndFeelBox.setSelectedItem(RupsConfiguration.INSTANCE.getLookAndFeel());
         this.localeBox.setSelectedItem(RupsConfiguration.INSTANCE.getUserLocale().toLanguageTag());
-        this.restartLabel.setVisible(false);
+        this.restartLabel.setText(" ");
     }
 
     public void show(Component component) {
         jDialog.setLocationRelativeTo(component);
         jDialog.setVisible(true);
+    }
+
+    private void handleSave(ActionEvent e) {
+        RupsConfiguration.INSTANCE.saveConfiguration();
+        resetView();
+        jDialog.dispose();
+    }
+
+    private void handleCancel(ActionEvent e) {
+        // Warn user of unsaved changes via dialog
+        if (RupsConfiguration.INSTANCE.hasUnsavedChanges()) {
+            final int choice = JOptionPane.showConfirmDialog(
+                    jDialog, Language.SAVE_UNSAVED_CHANGES.getString()
+            );
+            if (choice != JOptionPane.OK_OPTION) {
+                return;
+            }
+        }
+        RupsConfiguration.INSTANCE.cancelTemporaryChanges();
+        resetView();
+        jDialog.dispose();
     }
 }

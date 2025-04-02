@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -57,17 +57,14 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import javax.swing.WindowConstants;
 
 /**
  * @author Michael Demey
  */
 public class InspectObjectAction extends AbstractRupsAction {
-
-    private Component invoker;
-
     public InspectObjectAction(String name, Component invoker) {
-        super(name);
-        this.invoker = invoker;
+        super(name, invoker);
     }
 
     @Override
@@ -82,7 +79,7 @@ public class InspectObjectAction extends AbstractRupsAction {
         frame.setResizable(true);
 
         frame.setVisible(true);
-        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
         final PdfObjectTreeNode node =
                 (PdfObjectTreeNode) ((PdfTree) invoker).getSelectionPath().getLastPathComponent();

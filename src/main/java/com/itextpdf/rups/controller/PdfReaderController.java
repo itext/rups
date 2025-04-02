@@ -1,14 +1,14 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 iText Group NV
-    Authors: iText Software.
+    Copyright (c) 1998-2025 Apryse Group NV
+    Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License version 3
     as published by the Free Software Foundation with the addition of the
     following permission added to Section 15 as permitted in Section 7(a):
     FOR ANY PART OF THE COVERED WORK IN WHICH THE COPYRIGHT IS OWNED BY
-    ITEXT GROUP. ITEXT GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
+    APRYSE GROUP. APRYSE GROUP DISCLAIMS THE WARRANTY OF NON INFRINGEMENT
     OF THIRD PARTY RIGHTS
 
     This program is distributed in the hope that it will be useful, but
@@ -48,29 +48,25 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.utils.CompareTool;
+import com.itextpdf.kernel.utils.CompareTool.CompareResult;
 import com.itextpdf.kernel.utils.objectpathitems.ArrayPathItem;
 import com.itextpdf.kernel.utils.objectpathitems.DictPathItem;
 import com.itextpdf.kernel.utils.objectpathitems.IndirectPathItem;
 import com.itextpdf.kernel.utils.objectpathitems.LocalPathItem;
 import com.itextpdf.kernel.utils.objectpathitems.ObjectPath;
-import com.itextpdf.rups.event.NodeAddArrayChildEvent;
-import com.itextpdf.rups.event.NodeAddDictChildEvent;
-import com.itextpdf.rups.event.NodeDeleteArrayChildEvent;
-import com.itextpdf.rups.event.NodeDeleteDictChildEvent;
-import com.itextpdf.rups.event.OpenPlainTextEvent;
-import com.itextpdf.rups.event.OpenStructureEvent;
-import com.itextpdf.rups.event.RupsEvent;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.DebugView;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenuMouseListener;
 import com.itextpdf.rups.view.icons.IconTreeNode;
 import com.itextpdf.rups.view.itext.FormTree;
+import com.itextpdf.rups.view.itext.IPdfObjectPanelEventListener;
 import com.itextpdf.rups.view.itext.OutlineTree;
 import com.itextpdf.rups.view.itext.PagesTable;
 import com.itextpdf.rups.view.itext.PdfObjectPanel;
@@ -80,19 +76,17 @@ import com.itextpdf.rups.view.itext.StructureTree;
 import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
 import com.itextpdf.rups.view.itext.XRefTable;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
-import com.itextpdf.rups.view.itext.treenodes.PdfTrailerTreeNode;
 
 import java.awt.Color;
 import java.awt.event.KeyListener;
-import java.util.Observable;
-import java.util.Observer;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Stack;
+import java.util.function.Consumer;
 import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
@@ -100,7 +94,7 @@ import javax.swing.tree.TreePath;
 /**
  * Controls the components that get their content from iText's PdfReader.
  */
-public class PdfReaderController extends Observable implements Observer {
+public class PdfReaderController implements IPdfObjectPanelEventListener, IRupsEventListener {
 
     /**
      * Treeview of the PDF file.
@@ -153,9 +147,9 @@ public class PdfReaderController extends Observable implements Observer {
      */
     protected PlainText text;
 
-    private Stack<IconTreeNode> highlights = new Stack<>();
+    private final Deque<IconTreeNode> highlights = new ArrayDeque<>();
 
-    private PdfSyntaxParser parser = new PdfSyntaxParser();
+    private final PdfSyntaxParser parser = new PdfSyntaxParser();
 
     /**
      * Constructs the PdfReaderController.
@@ -170,23 +164,16 @@ public class PdfReaderController extends Observable implements Observer {
         pdfTree = new PdfTree();
 
         pdfTree.addTreeSelectionListener(treeSelectionListener);
-        JPopupMenu menu = PdfTreeContextMenu.getPopupMenu(pdfTree);
+        final PdfTreeContextMenu menu = new PdfTreeContextMenu(pdfTree);
         pdfTree.setComponentPopupMenu(menu);
         pdfTree.addMouseListener(new PdfTreeContextMenuMouseListener(menu, pdfTree));
-        addObserver(pdfTree);
 
         pages = new PagesTable(this, pageSelectionListener);
-        addObserver(pages);
         outlines = new OutlineTree(this);
-        addObserver(outlines);
         structure = new StructureTree(this);
-        addObserver(structure);
         form = new FormTree(this);
-        addObserver(form);
         xref = new XRefTable(this);
-        addObserver(xref);
         text = new PlainText();
-        addObserver(text);
 
         navigationTabs = new JTabbedPane();
         final String pagesString = Language.PAGES.getString();
@@ -203,27 +190,22 @@ public class PdfReaderController extends Observable implements Observer {
                 Language.XREF_DESCRIPTION.getString());
         navigationTabs.addTab(Language.PLAINTEXT.getString(), null, new JScrollPane(text),
                 Language.PLAINTEXT_DESCRIPTION.getString());
-        navigationTabs.addChangeListener(new ChangeListener() {
-            public void stateChanged(ChangeEvent e) {
-                if (navigationTabs.getSelectedIndex() != -1) {
-                    final String title = navigationTabs.getTitleAt(navigationTabs.getSelectedIndex());
+        navigationTabs.addChangeListener((ChangeEvent e) -> {
+            if (navigationTabs.getSelectedIndex() != -1) {
+                final String title = navigationTabs.getTitleAt(navigationTabs.getSelectedIndex());
 
-                    if (Language.STRUCTURE.getString().equals(title)) {
-                        structure.update(PdfReaderController.this, new OpenStructureEvent());
-                    } else if (Language.PLAINTEXT.getString().equals(title)) {
-                        text.update(PdfReaderController.this, new OpenPlainTextEvent());
-                    } else {
-                        // Intentionally empty
-                    }
+                if (Language.STRUCTURE.getString().equals(title)) {
+                    structure.openStructure();
+                } else if (Language.PLAINTEXT.getString().equals(title)) {
+                    text.openPlainText();
                 }
+                // No special handling for other tabs
             }
         });
 
         objectPanel = new PdfObjectPanel();
-        addObserver(objectPanel);
-        objectPanel.addObserver(this);
+        objectPanel.addEventListener(this);
         streamPane = new SyntaxHighlightedStreamPane(this);
-        addObserver(streamPane);
         JScrollPane debug = new JScrollPane(DebugView.getInstance().getTextArea());
         editorTabs = new JTabbedPane();
         editorTabs.addTab(Language.STREAM.getString(), null, streamPane, Language.STREAM.getString());
@@ -288,81 +270,6 @@ public class PdfReaderController extends Observable implements Observer {
     }
 
     /**
-     * @see java.util.Observer#update(java.util.Observable, java.lang.Object)
-     */
-    public void update(Observable observable, Object obj) {
-        if (observable != null && obj instanceof RupsEvent) {
-            RupsEvent event = (RupsEvent) obj;
-            switch (event.getType()) {
-                case RupsEvent.CLOSE_DOCUMENT_EVENT:
-                    nodes = null;
-                    setChanged();
-                    super.notifyObservers(event);
-                    break;
-                case RupsEvent.COMPARE_POST_EVENT:
-                    highlightChanges((CompareTool.CompareResult) event.getContent());
-                    pdfTree.repaint();
-                    break;
-                case RupsEvent.OPEN_DOCUMENT_POST_EVENT:
-                    ObjectLoader loader = (ObjectLoader) event.getContent();
-                    nodes = loader.getNodes();
-                    PdfTrailerTreeNode root = pdfTree.getRoot();
-                    root.setTrailer(loader.getFile().getPdfDocument().getTrailer());
-                    root.setUserObject(String.format(Language.PDF_OBJECT_TREE.getString(), loader.getLoaderName()));
-                    nodes.expandNode(root);
-                    navigationTabs.setSelectedIndex(0);
-                    setChanged();
-                    super.notifyObservers(event);
-                    break;
-                case RupsEvent.TREE_NODE_CLICKED_EVENT:
-                    PdfObjectTreeNode node = (PdfObjectTreeNode) event.getContent();
-                    nodes.expandNode(node);
-
-                    if (node.isRecursive()) {
-                        boolean keyboardNav = false;
-
-                        KeyListener[] listeners = pdfTree.getKeyListeners();
-
-                        for (KeyListener listener : listeners) {
-                            if (listener instanceof PdfTreeNavigationListener) {
-                                keyboardNav = ((PdfTreeNavigationListener) listener).isLastActionKeyboardNavigation();
-                            }
-                        }
-
-                        if (!keyboardNav) {
-                            pdfTree.selectNode(node.getAncestor());
-                            return;
-                        }
-                    }
-                    render(node);
-                    break;
-                case RupsEvent.NODE_DELETE_DICT_CHILD_EVENT:
-                    deleteTreeNodeDictChild(((NodeDeleteDictChildEvent.Content) event.getContent()).parent,
-                            ((NodeDeleteDictChildEvent.Content) event.getContent()).key);
-                    break;
-                case RupsEvent.NODE_ADD_DICT_CHILD_EVENT:
-                    addTreeNodeDictChild(((NodeAddDictChildEvent.Content) event.getContent()).parent,
-                            ((NodeAddDictChildEvent.Content) event.getContent()).key,
-                            ((NodeAddDictChildEvent.Content) event.getContent()).index);
-                    break;
-                case RupsEvent.NODE_ADD_ARRAY_CHILD_EVENT:
-                    addTreeNodeArrayChild(((NodeAddArrayChildEvent.Content) event.getContent()).parent,
-                            ((NodeAddArrayChildEvent.Content) event.getContent()).index);
-                    break;
-                case RupsEvent.NODE_DELETE_ARRAY_CHILD_EVENT:
-                    deleteTreeChild(((NodeDeleteArrayChildEvent.Content) event.getContent()).parent,
-                            ((NodeDeleteArrayChildEvent.Content) event.getContent()).index);
-                    break;
-                case RupsEvent.POST_NEW_INDIRECT_OBJECT_EVENT:
-                    nodes.addNewIndirectObject((PdfObject) event.getContent());
-                    setChanged();
-                    notifyObservers(event);
-                    break;
-            }
-        }
-    }
-
-    /**
      * Selects a node in the PdfTree.
      *
      * @param node a node in the PdfTree
@@ -406,15 +313,15 @@ public class PdfReaderController extends Observable implements Observer {
      * @param pageNumber the page number that needs to be selected
      */
     public void gotoPage(int pageNumber) {
-        pageNumber--;
+        final int rowIndex = pageNumber - 1;
 
         if (pages == null
-                || pages.getSelectedRow() == pageNumber) {
+                || pages.getSelectedRow() == rowIndex) {
             return;
         }
 
-        if (pageNumber < pages.getRowCount()) {
-            pages.setRowSelectionInterval(pageNumber, pageNumber);
+        if (rowIndex < pages.getRowCount()) {
+            pages.setRowSelectionInterval(rowIndex, rowIndex);
         }
     }
 
@@ -454,7 +361,7 @@ public class PdfReaderController extends Observable implements Observer {
     }
 
     protected void clearHighlights() {
-        while (!highlights.empty()) {
+        while (!highlights.isEmpty()) {
             highlights.pop().restoreDefaultTextColor();
         }
     }
@@ -489,5 +396,85 @@ public class PdfReaderController extends Observable implements Observer {
         nodes.expandNode(child);
         ((DefaultTreeModel) pdfTree.getModel()).reload(parent);
         return index;
+    }
+
+    @Override
+    public void handleCloseDocument() {
+        nodes = null;
+        forAllComponents(IRupsEventListener::handleCloseDocument);
+    }
+
+    @Override
+    public void handleOpenDocument(ObjectLoader loader) {
+        nodes = loader.getNodes();
+        navigationTabs.setSelectedIndex(0);
+        forAllComponents(c -> c.handleOpenDocument(loader));
+    }
+
+    @Override
+    public void handleNewIndirectObject(PdfObject object) {
+        nodes.addNewIndirectObject(object);
+        forAllComponents(c -> c.handleNewIndirectObject(object));
+    }
+
+    @Override
+    public void handleCompare(CompareResult result) {
+        highlightChanges(result);
+        pdfTree.repaint();
+    }
+
+    @Override
+    public void handlePdfTreeNodeClicked(PdfObjectTreeNode node) {
+        nodes.expandNode(node);
+
+        if (node.isRecursive()) {
+            boolean keyboardNav = false;
+
+            KeyListener[] listeners = pdfTree.getKeyListeners();
+
+            for (KeyListener listener : listeners) {
+                if (listener instanceof PdfTreeNavigationListener) {
+                    keyboardNav = ((PdfTreeNavigationListener) listener).isLastActionKeyboardNavigation();
+                }
+            }
+
+            if (!keyboardNav) {
+                pdfTree.selectNode(node.getAncestor());
+                return;
+            }
+        }
+        render(node);
+    }
+
+    @Override
+    public void handleArrayChildAdded(PdfObject value, PdfObjectTreeNode parent, int index) {
+        addTreeNodeArrayChild(parent, index);
+    }
+
+    @Override
+    public void handleArrayChildDeleted(PdfObjectTreeNode parent, int index) {
+        deleteTreeChild(parent, index);
+    }
+
+    @Override
+    public void handleDictChildAdded(PdfObject value, PdfObjectTreeNode parent, PdfName key, int index) {
+        addTreeNodeDictChild(parent, key, index);
+    }
+
+    @Override
+    public void handleDictChildDeleted(PdfObjectTreeNode parent, PdfName key) {
+        deleteTreeNodeDictChild(parent, key);
+    }
+
+    private void forAllComponents(Consumer<IRupsEventListener> func) {
+        func.accept(pdfTree);
+        func.accept(pages);
+        func.accept(outlines);
+        func.accept(structure);
+        func.accept(form);
+        func.accept(xref);
+        func.accept(text);
+        func.accept(objectPanel);
+        func.accept(streamPane);
     }
 }
