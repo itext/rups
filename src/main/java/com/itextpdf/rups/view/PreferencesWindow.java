@@ -205,6 +205,7 @@ public final class PreferencesWindow {
 
         this.localeBox = new JComboBox<>();
         this.localeBox.addItem("nl-NL");
+        this.localeBox.addItem("be-BY");
         this.localeBox.addItem("en-US");
         this.localeBox.setSelectedItem(RupsConfiguration.INSTANCE.getUserLocale().toLanguageTag());
         this.localeBox.addActionListener((ActionEvent e) -> {
