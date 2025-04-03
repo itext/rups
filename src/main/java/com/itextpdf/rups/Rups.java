@@ -142,9 +142,9 @@ public final class Rups {
         final RupsController rupsController = new RupsController(screen, rupsTabbedPane);
         final RupsMenuBar rupsMenuBar = new RupsMenuBar(rupsController);
 
-        frame.setDropTarget(new RupsDropTarget(rupsController));
         frame.setJMenuBar(rupsMenuBar);
 
+        frame.getContentPane().setDropTarget(new RupsDropTarget(rupsController));
         frame.getContentPane().add(rupsController.getMasterComponent(), BorderLayout.CENTER);
         frame.setVisible(true);
 
