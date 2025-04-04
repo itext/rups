@@ -69,11 +69,11 @@ public interface IProgressDialog {
     void setTotal(int n);
 
     /**
-     * Displays an error dialog for the given exception.
+     * Displays an error dialog for the given throwable.
      *
-     * @param ex exception to display information about
+     * @param th throwable to display information about
      */
-    void showErrorDialog(Exception ex);
+    void showErrorDialog(Throwable th);
 
     /**
      * Control the visibility of the progress dialog.

@@ -52,10 +52,10 @@ public final class LoggerHelper {
         // static class
     }
 
-    public static void warn(String message, Exception e, String className) {
+    public static void warn(String message, Throwable th, String className) {
         final Logger logger = LoggerFactory.getLogger(className);
         logger.warn(message);
-        logger.debug(message, e);
+        logger.debug(message, th);
     }
 
     public static void warn(String message, String className) {
@@ -64,8 +64,8 @@ public final class LoggerHelper {
         logger.debug(message);
     }
 
-    public static void warn(String message, Exception e, Class<?> c) {
-        warn(message, e, c.getName());
+    public static void warn(String message, Throwable th, Class<?> c) {
+        warn(message, th, c.getName());
     }
 
     public static void warn(String message, Class<?> c) {
@@ -80,10 +80,10 @@ public final class LoggerHelper {
         warnf(format.getString(), c, args);
     }
 
-    public static void error(String message, Exception e, String className) {
+    public static void error(String message, Throwable th, String className) {
         final Logger logger = LoggerFactory.getLogger(className);
         logger.error(message);
-        logger.debug(message, e);
+        logger.debug(message, th);
     }
 
     public static void error(String message, String className) {
@@ -92,8 +92,8 @@ public final class LoggerHelper {
         logger.debug(message);
     }
 
-    public static void error(String message, Exception e, Class<?> c) {
-        error(message, e, c.getName());
+    public static void error(String message, Throwable th, Class<?> c) {
+        error(message, th, c.getName());
     }
 
     public static void error(String message, Class<?> c) {
@@ -110,12 +110,12 @@ public final class LoggerHelper {
         info(message, c.getName());
     }
 
-    public static void debug(String message, Exception e, String className) {
-        LoggerFactory.getLogger(className).debug(message, e);
+    public static void debug(String message, Throwable th, String className) {
+        LoggerFactory.getLogger(className).debug(message, th);
     }
 
-    public static void debug(String message, Exception e, Class<?> c) {
-        debug(message, e, c.getName());
+    public static void debug(String message, Throwable th, Class<?> c) {
+        debug(message, th, c.getName());
     }
 
     public static void debug(String message, String className) {

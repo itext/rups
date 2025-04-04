@@ -42,31 +42,35 @@
  */
 package com.itextpdf.rups.model;
 
+import com.itextpdf.rups.util.ExcludeFromGeneratedJacocoReport;
 import com.itextpdf.rups.view.Language;
 
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 /**
  * Loads the necessary iText PDF objects in Background.
  */
-public class ObjectLoader extends SwingWorker<Void, Void> {
+public final class ObjectLoader extends SwingWorker<Void, Void> {
     /**
      * This is the object that wait for task to complete.
      */
-    protected IRupsEventListener eventListener;
+    private final IRupsEventListener eventListener;
     /**
      * RUPS's PdfFile object.
      */
-    protected IPdfFile file;
+    private final IPdfFile file;
     /**
      * The factory that can provide PDF objects.
      */
-    protected IndirectObjectFactory objects;
+    private IndirectObjectFactory objects;
     /**
      * The factory that can provide tree nodes.
      */
-    protected TreeNodeFactory nodes;
+    private TreeNodeFactory nodes;
     /**
      * a human readable name for this loaded
      */
@@ -128,6 +132,7 @@ public class ObjectLoader extends SwingWorker<Void, Void> {
 
     @Override
     protected Void doInBackground() {
+        clearResult();
         objects = new IndirectObjectFactory(file.getPdfDocument());
         final int n = objects.getXRefMaximum();
         SwingUtilities.invokeLater(() -> {
@@ -145,12 +150,56 @@ public class ObjectLoader extends SwingWorker<Void, Void> {
 
     @Override
     protected void done() {
+        if (handleTaskException()) {
+            return;
+        }
         try {
             eventListener.handleOpenDocument(this);
+            SwingUtilities.invokeLater(this::hideProgress);
         } catch (RuntimeException ex) {
-            progress.showErrorDialog(ex);
-            LoggerHelper.error(ex.getLocalizedMessage(), ex, getClass());
+            displayThrowable(ex);
         }
+    }
+
+    // Excluding from coverage as all exceptions scenarios involve showing
+    // a modal dialog, which is not easy to test in a headless env...
+    @ExcludeFromGeneratedJacocoReport
+    private boolean handleTaskException() {
+        try {
+            // This will throw an ExecutionException, if doInBackground
+            // threw an exception
+            get(0L, TimeUnit.NANOSECONDS);
+            return false;
+        } catch (ExecutionException e) {
+            displayThrowable(e.getCause());
+            clearResult();
+        } catch (TimeoutException | RuntimeException e) {
+            // This should not happen in practice
+            displayThrowable(e);
+            clearResult();
+        } catch (InterruptedException e) {
+            // This should not happen in practice
+            displayThrowable(e);
+            clearResult();
+            Thread.currentThread().interrupt();
+        }
+        return true;
+    }
+
+    private void clearResult() {
+        objects = null;
+        nodes = null;
+    }
+
+    // Excluding from coverage as effects are only shown in the UI
+    @ExcludeFromGeneratedJacocoReport
+    private void displayThrowable(Throwable th) {
+        LoggerHelper.error(th.getLocalizedMessage(), th, getClass());
+        progress.showErrorDialog(th);
+        SwingUtilities.invokeLater(this::hideProgress);
+    }
+
+    private void hideProgress() {
         progress.setVisible(false);
     }
 }

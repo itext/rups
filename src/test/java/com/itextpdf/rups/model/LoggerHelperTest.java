@@ -40,36 +40,47 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.mock;
+package com.itextpdf.rups.model;
 
-import com.itextpdf.rups.model.IProgressDialog;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.slf4j.LoggerFactory;
 
-/**
- * {@link IProgressDialog} implementation, that does nothing.
- */
-public final class NoopProgressDialog implements IProgressDialog {
-    @Override
-    public void setMessage(String msg) {
-        // noop
-    }
-
-    @Override
-    public void setValue(int value) {
-        // noop
-    }
-
-    @Override
-    public void setTotal(int n) {
-        // noop
-    }
-
-    @Override
-    public void showErrorDialog(Throwable th) {
-        // noop
-    }
-
-    @Override
-    public void setVisible(boolean visible) {
-        // noop
+@Tag("UnitTest")
+class LoggerHelperTest {
+    @Test
+    void debug() {
+        final Logger logger = (Logger) LoggerFactory.getLogger(LoggerHelperTest.class);
+        ListAppender<ILoggingEvent> logAppender = new ListAppender<>();
+        try {
+            logAppender.start();
+            logger.addAppender(logAppender);
+            {
+                final IllegalArgumentException ex = new IllegalArgumentException();
+                LoggerHelper.debug("Message /w Throwable", ex, LoggerHelperTest.class);
+                Assertions.assertEquals(1, logAppender.list.size());
+                final ILoggingEvent event = logAppender.list.get(0);
+                Assertions.assertEquals(Level.DEBUG, event.getLevel());
+                Assertions.assertEquals("Message /w Throwable", event.getMessage());
+                Assertions.assertEquals(ex.getClass().getName(), event.getThrowableProxy().getClassName());
+            }
+            logAppender.list.clear();
+            {
+                LoggerHelper.debug("Message /wo Throwable", LoggerHelperTest.class);
+                Assertions.assertEquals(1, logAppender.list.size());
+                final ILoggingEvent event = logAppender.list.get(0);
+                Assertions.assertEquals(Level.DEBUG, event.getLevel());
+                Assertions.assertEquals("Message /wo Throwable", event.getMessage());
+                Assertions.assertNull(event.getThrowableProxy());
+            }
+        } finally {
+            logger.detachAppender(logAppender);
+            logAppender.stop();
+        }
     }
 }
