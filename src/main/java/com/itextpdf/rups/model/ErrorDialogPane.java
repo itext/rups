@@ -42,6 +42,15 @@
  */
 package com.itextpdf.rups.model;
 
+import com.itextpdf.rups.util.ExcludeFromGeneratedJacocoReport;
+
+import java.awt.Dialog;
+import java.awt.GraphicsConfiguration;
+import java.awt.Insets;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.Window;
+import java.awt.event.HierarchyEvent;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -49,12 +58,16 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import javax.swing.SwingUtilities;
 
 /**
  * A utility to display a dialog showing Throwable object
  */
+// Excluding from coverage as it contains only UI code
+@ExcludeFromGeneratedJacocoReport
 public final class ErrorDialogPane {
-    private static final Dimension DIALOG_PREFERRED_SIZE = new Dimension(300, 200);
+    private static final int DEFAULT_DOUBLED_MARGIN = 100;
+    private static final int FALLBACK_MAX_SIZE_DIM = 200;
 
     private ErrorDialogPane() {
         // do not instantiate
@@ -64,8 +77,71 @@ public final class ErrorDialogPane {
         final String msg = getTraceString(th);
         final JTextArea textArea = new JTextArea(msg);
         final JScrollPane scrollPane = new JScrollPane(textArea);
-        scrollPane.setPreferredSize(DIALOG_PREFERRED_SIZE);
+        /*
+         * Update the dialog, created by JOptionPane, using the HierarchyListener.
+         * Taken from https://stackoverflow.com/a/7989417/6564861 and the linked blog post
+         * (which was cached in Wayback Machine).
+         */
+        scrollPane.addHierarchyListener(ErrorDialogPane::tweakDialogSize);
         JOptionPane.showMessageDialog(parent, scrollPane);
+    }
+
+    private static void tweakDialogSize(HierarchyEvent e) {
+        final Window window = SwingUtilities.getWindowAncestor(e.getComponent());
+        // We are fishing for JOptionPane dialog...
+        if (!(window instanceof Dialog)) {
+            return;
+        }
+        Dialog dialog = (Dialog) window;
+        /*
+         * If dialog was set to resizeable, then this handler was already
+         * called for the dialog. So no reason to change sizes again.
+         */
+        if (dialog.isResizable()) {
+            return;
+        }
+        dialog.setResizable(true);
+        limitDialogSize(dialog);
+    }
+
+    /**
+     * Limits the preferred size of the window based on the linked graphics
+     * configuration.
+     *
+     * @param window Window to update.
+     */
+    private static void limitDialogSize(Window window) {
+        final GraphicsConfiguration gc = window.getGraphicsConfiguration();
+        if (gc == null) {
+            return;
+        }
+        final Rectangle bounds = gc.getBounds();
+        final Insets insets = Toolkit.getDefaultToolkit().getScreenInsets(gc);
+        final int gcMaxWidth = Math.max(
+                FALLBACK_MAX_SIZE_DIM,
+                bounds.width - insets.left - insets.right - DEFAULT_DOUBLED_MARGIN
+        );
+        final int gcMaxHeight = Math.max(
+                FALLBACK_MAX_SIZE_DIM,
+                bounds.height - insets.top - insets.bottom - DEFAULT_DOUBLED_MARGIN
+        );
+        final Dimension currentSize = window.getPreferredSize();
+        boolean sizeModified = false;
+        if (currentSize.width > gcMaxWidth) {
+            currentSize.width = gcMaxWidth;
+            sizeModified = true;
+        }
+        if (currentSize.height > gcMaxHeight) {
+            currentSize.height = gcMaxHeight;
+            sizeModified = true;
+        }
+        /*
+         * We should call setPreferredSize only when we actually change the
+         * size. As it might be calculated dynamically, if not set explicitly.
+         */
+        if (sizeModified) {
+            window.setPreferredSize(currentSize);
+        }
     }
 
     private static String getTraceString(Throwable th) {
