@@ -54,10 +54,15 @@ import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.model.MruListHandler;
 import com.itextpdf.rups.model.ObjectLoader;
 
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import javax.swing.Box;
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -78,9 +83,10 @@ public final class RupsMenuBar extends JMenuBar implements IRupsEventListener {
     /**
      * Creates a JMenuBar.
      */
-    public RupsMenuBar(RupsController controller) {
+    public RupsMenuBar(RupsController controller, JFrame mainFrame) {
         this.controller = controller;
 
+        final int shortcutKeyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
         preferencesWindow = new PreferencesWindow();
 
         final JMenu file = new JMenu(Language.MENU_BAR_FILE.getString());
@@ -116,6 +122,17 @@ public final class RupsMenuBar extends JMenuBar implements IRupsEventListener {
                 KeyStroke.getKeyStroke('E', InputEvent.CTRL_DOWN_MASK)
         );
         add(file);
+        if (mainFrame != null) {
+            file.addSeparator();
+            addItem(
+                    file,
+                    Language.MENU_BAR_EXIT,
+                    (ActionEvent e) -> mainFrame.dispatchEvent(
+                            new WindowEvent(mainFrame, WindowEvent.WINDOW_CLOSING)
+                    ),
+                    KeyStroke.getKeyStroke(KeyEvent.VK_Q, shortcutKeyMask)
+            );
+        }
 
         final JMenu edit = new JMenu(Language.MENU_BAR_EDIT.getString());
         addItem(
