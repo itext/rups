@@ -61,7 +61,6 @@ import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -136,10 +135,11 @@ public final class SyntaxHighlightedStreamPane extends JScrollPane implements IR
         manager = new UndoManager();
         manager.setLimit(MAX_NUMBER_OF_EDITS);
         text.getDocument().addUndoableEditListener(manager);
+        final int shortcutKeyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
         text.registerKeyboardAction(new UndoAction(manager),
-                KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
+                KeyStroke.getKeyStroke(KeyEvent.VK_Z, shortcutKeyMask), JComponent.WHEN_FOCUSED);
         text.registerKeyboardAction(new RedoAction(manager),
-                KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
+                KeyStroke.getKeyStroke(KeyEvent.VK_Y, shortcutKeyMask), JComponent.WHEN_FOCUSED);
     }
 
     /**
