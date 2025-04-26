@@ -57,7 +57,6 @@ import com.itextpdf.rups.model.ObjectLoader;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -94,7 +93,7 @@ public final class RupsMenuBar extends JMenuBar implements IRupsEventListener {
                 file,
                 Language.MENU_BAR_OPEN,
                 new PdfFileOpenAction(controller::openNewFile, controller.getMasterComponent()),
-                KeyStroke.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK)
+                KeyStroke.getKeyStroke(KeyEvent.VK_O, shortcutKeyMask)
         );
         file.add(createOpenRecentSubMenu());
         reopenAsOwnerMenuItem = addItem(
@@ -106,20 +105,20 @@ public final class RupsMenuBar extends JMenuBar implements IRupsEventListener {
                 file,
                 Language.MENU_BAR_CLOSE,
                 e -> controller.closeCurrentFile(),
-                KeyStroke.getKeyStroke('W', InputEvent.CTRL_DOWN_MASK)
+                KeyStroke.getKeyStroke(KeyEvent.VK_W, shortcutKeyMask)
         );
         saveAsMenuItem = addItem(
                 file,
                 Language.MENU_BAR_SAVE_AS,
                 new PdfFileSaveAction(controller, controller.getMasterComponent()),
-                KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK)
+                KeyStroke.getKeyStroke(KeyEvent.VK_S, shortcutKeyMask)
         );
         file.addSeparator();
         openInPdfViewerMenuItem = addItem(
                 file,
                 Language.MENU_BAR_OPEN_IN_PDF_VIEWER,
                 new OpenInViewerAction(controller),
-                KeyStroke.getKeyStroke('E', InputEvent.CTRL_DOWN_MASK)
+                KeyStroke.getKeyStroke(KeyEvent.VK_E, shortcutKeyMask)
         );
         add(file);
         if (mainFrame != null) {
