@@ -140,7 +140,7 @@ public final class Rups {
 
         final RupsTabbedPane rupsTabbedPane = new RupsTabbedPane();
         final RupsController rupsController = new RupsController(screen, rupsTabbedPane);
-        final RupsMenuBar rupsMenuBar = new RupsMenuBar(rupsController);
+        final RupsMenuBar rupsMenuBar = new RupsMenuBar(rupsController, frame);
 
         frame.setDropTarget(new RupsDropTarget(rupsController));
         frame.setJMenuBar(rupsMenuBar);
