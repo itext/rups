@@ -49,6 +49,7 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.Optional;
 
 /**
  * A utility to display a dialog showing Throwable object
@@ -71,7 +72,17 @@ public final class ErrorDialogPane {
     private static String getTraceString(Throwable th) {
         final StringWriter sw = new StringWriter();
         final PrintWriter pw = new PrintWriter(sw);
-        th.printStackTrace(pw);
+        Optional<Throwable> chuckIt = Optional.ofNullable(th);
+        chuckIt.map(Throwable::getLocalizedMessage)
+                .ifPresent(pw::println);
+        chuckIt.map(Throwable::getCause)
+                .map(Throwable::getLocalizedMessage)
+                .ifPresent(msg -> {
+                    pw.print("Caused by: ");
+                    pw.println(msg);
+                });
+        pw.append("[Stack Trace]\n");
+        chuckIt.ifPresent(throwable -> throwable.printStackTrace(pw));
         return sw.toString();
     }
 }

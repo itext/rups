@@ -42,6 +42,7 @@
  */
 package com.itextpdf.rups.model;
 
+import com.itextpdf.io.exceptions.IOException;
 import com.itextpdf.rups.view.Language;
 
 import javax.swing.SwingUtilities;
@@ -134,8 +135,13 @@ public class ObjectLoader extends SwingWorker<Void, Void> {
             progress.setMessage(Language.XREF_READING.getString());
             progress.setTotal(n);
         });
-        while (objects.storeNextObject()) {
-            SwingUtilities.invokeLater(() -> progress.setValue(objects.getCurrent()));
+        try {
+            while (objects.storeNextObject()) {
+                SwingUtilities.invokeLater(() -> progress.setValue(objects.getCurrent()));
+            }
+        }
+        catch (IOException ioe) {
+            progress.showErrorDialog(ioe);
         }
         SwingUtilities.invokeLater(() -> progress.setTotal(0));
         nodes = new TreeNodeFactory(objects);
