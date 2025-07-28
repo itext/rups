@@ -51,6 +51,7 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.HierarchyEvent;
+import java.util.Optional;
 import javax.swing.JOptionPane;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -147,7 +148,17 @@ public final class ErrorDialogPane {
     private static String getTraceString(Throwable th) {
         final StringWriter sw = new StringWriter();
         final PrintWriter pw = new PrintWriter(sw);
-        th.printStackTrace(pw);
+        final Optional<Throwable> chuckIt = Optional.ofNullable(th);
+        chuckIt.map(Throwable::getLocalizedMessage)
+                .ifPresent(pw::println);
+        chuckIt.map(Throwable::getCause)
+                .map(Throwable::getLocalizedMessage)
+                .ifPresent((String msg) -> {
+                    pw.print("Caused by: ");
+                    pw.println(msg);
+                });
+        pw.append("[Stack Trace]\n");
+        chuckIt.ifPresent(throwable -> throwable.printStackTrace(pw));
         return sw.toString();
     }
 }
