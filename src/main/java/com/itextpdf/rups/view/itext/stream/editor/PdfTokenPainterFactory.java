@@ -40,20 +40,21 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.contextmenu;
+package com.itextpdf.rups.view.itext.stream.editor;
 
-import com.itextpdf.rups.view.itext.stream.StreamTextEditorPane;
+import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
+import org.fife.ui.rsyntaxtextarea.TokenPainter;
+import org.fife.ui.rsyntaxtextarea.TokenPainterFactory;
 
-import java.awt.event.ActionEvent;
-
-public class SaveToPdfStreamJTextPaneAction extends AbstractRupsAction {
-
-    public SaveToPdfStreamJTextPaneAction(String name, StreamTextEditorPane invoker) {
-        super(name, invoker);
-    }
-
-    public void actionPerformed(ActionEvent event) {
-        final StreamTextEditorPane pane = (StreamTextEditorPane) invoker;
-        pane.saveToTarget();
+/**
+ * Returns the {@link PdfTokenPainter} to use for a text area.
+ */
+public final class PdfTokenPainterFactory implements TokenPainterFactory {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public TokenPainter getTokenPainter(RSyntaxTextArea textArea) {
+        return new PdfTokenPainter(textArea);
     }
 }

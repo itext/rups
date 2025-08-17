@@ -46,6 +46,7 @@ import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfIndirectReference;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.view.Language;
@@ -220,6 +221,19 @@ public class PdfObjectTreeNode extends IconTreeNode implements IPdfContextMenuTa
             return ((PdfIndirectReference) object).getObjNumber();
         }
         return number;
+    }
+
+    /**
+     * Returns the object associated with this tree node as a PdfStream. If the
+     * value isn't a PdfStream, null is returned.
+     *
+     * @return PdfStream associated with this tree node
+     */
+    public PdfStream getAsStream() {
+        if (object.isStream()) {
+            return (PdfStream) object;
+        }
+        return null;
     }
 
     /**

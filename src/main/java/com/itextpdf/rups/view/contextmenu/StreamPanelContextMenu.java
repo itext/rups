@@ -43,13 +43,13 @@
 package com.itextpdf.rups.view.contextmenu;
 
 import com.itextpdf.rups.view.Language;
-import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
+import com.itextpdf.rups.view.itext.stream.StreamTextEditorPane;
 
 import javax.swing.Action;
+import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
-import javax.swing.JTextPane;
 import javax.swing.text.DefaultEditorKit;
 
 /**
@@ -73,7 +73,7 @@ public final class StreamPanelContextMenu extends JPopupMenu {
      * @param textPane   the text pane
      * @param controller the controller
      */
-    public StreamPanelContextMenu(final JTextPane textPane, final SyntaxHighlightedStreamPane controller) {
+    public StreamPanelContextMenu(final JComponent textPane, final StreamTextEditorPane controller) {
         super();
 
         final JMenuItem copyItem = getJMenuItem(

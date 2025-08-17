@@ -40,20 +40,55 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.contextmenu;
+package com.itextpdf.rups.model;
 
-import com.itextpdf.rups.view.itext.stream.StreamTextEditorPane;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.PdfStream;
+import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
+import com.itextpdf.rups.view.Language;
 
-import java.awt.event.ActionEvent;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 
-public class SaveToPdfStreamJTextPaneAction extends AbstractRupsAction {
-
-    public SaveToPdfStreamJTextPaneAction(String name, StreamTextEditorPane invoker) {
-        super(name, invoker);
+/**
+ * Static utility class for getting information on PDF streams.
+ */
+public final class PdfStreamUtil {
+    private PdfStreamUtil() {
+        // static class
     }
 
-    public void actionPerformed(ActionEvent event) {
-        final StreamTextEditorPane pane = (StreamTextEditorPane) invoker;
-        pane.saveToTarget();
+    public static BufferedImage getAsImage(PdfStream stream) {
+        if (!isImage(stream)) {
+            return null;
+        }
+        final PdfImageXObject xObject = new PdfImageXObject(stream);
+        try {
+            return xObject.getBufferedImage();
+        } catch (IOException e) {
+            LoggerHelper.warn(Language.ERROR_PARSING_IMAGE.getString(), e, PdfStreamUtil.class);
+            return null;
+        }
+    }
+
+    public static boolean isImage(PdfStream stream) {
+        /*
+         * We will consider stream being an image, if it has /Width and
+         * /Height number fields present and /Subtype is /Image.
+         *
+         * This could skip thumbnail images, as those do not require the
+         * /Subtype field being there.
+         */
+        return PdfName.Image.equals(stream.getAsName(PdfName.Subtype))
+                && (stream.getAsNumber(PdfName.Width) != null)
+                && (stream.getAsNumber(PdfName.Height) != null);
+    }
+
+    public static boolean isFont(PdfStream stream) {
+        /*
+         * For now just checking, that there is a /Length1 field present. It
+         * is required for Type 1 and TrueType fonts.
+         */
+        return stream.containsKey(PdfName.Length1);
     }
 }
