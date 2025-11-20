@@ -53,6 +53,7 @@ import com.itextpdf.rups.model.IPdfFile;
 import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.model.MruListHandler;
 import com.itextpdf.rups.model.ObjectLoader;
+import com.itextpdf.rups.util.ExcludeFromGeneratedJacocoReport;
 
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -82,6 +83,8 @@ public final class RupsMenuBar extends JMenuBar implements IRupsEventListener {
     /**
      * Creates a JMenuBar.
      */
+    // Excluding from coverage as this is UI init code
+    @ExcludeFromGeneratedJacocoReport
     public RupsMenuBar(RupsController controller, JFrame mainFrame) {
         this.controller = controller;
 
