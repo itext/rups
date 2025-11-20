@@ -45,6 +45,7 @@ package com.itextpdf.rups;
 import com.itextpdf.rups.controller.IRupsController;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.model.LoggerHelper;
+import com.itextpdf.rups.util.ExcludeFromGeneratedJacocoReport;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.RupsDropTarget;
 import com.itextpdf.rups.view.RupsMenuBar;
@@ -125,6 +126,8 @@ public final class Rups {
         }
     }
 
+    // Excluding from coverage as this is UI init code
+    @ExcludeFromGeneratedJacocoReport
     static IRupsController initApplication(JFrame frame) {
         mainFrame = frame;
 
