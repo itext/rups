@@ -1,0 +1,5 @@
+  "licensee": {
+    "company": "iText",
+    "name": "Dzmitry",
+    "email": "dev@itextpdf.com"
+  },
