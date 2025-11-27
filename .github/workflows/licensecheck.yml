@@ -1,0 +1,148 @@
+name: LicenseCheck
+
+on:
+  push:
+    # 'branches-ignore' or 'branches' can be used to filter specific branches.
+    # By default, without any filters, it runs on every push to all branches.
+    # To be explicit, you can use:
+    branches-ignore:
+      - 'develop'
+      - 'master'
+      - 'rebased/*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Get push type
+        id: push-type
+        run: |
+            echo "Getting push type"
+            PUSH_TYPE='commit'
+            FETCH_DEPTH=10
+            if ${{ github.event.forced }} || ${{ github.event.before == '0000000000000000000000000000000000000000' }}; then
+                PUSH_TYPE='branch'
+                FETCH_DEPTH=0
+            fi
+            echo "Push type: $PUSH_TYPE"
+            echo "Fetch depth: $FETCH_DEPTH"
+            echo "push_type=$PUSH_TYPE" >> $GITHUB_OUTPUT
+            echo "fetch_depth=$FETCH_DEPTH" >> $GITHUB_OUTPUT
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+         fetch-depth: ${{ steps.push-type.outputs.fetch_depth }}
+
+      - name: Get changed files
+        id: changed-files
+        run: |
+            if ${{ steps.push-type.outputs.push_type == 'branch'}}; then
+                echo "First commit on feature branch or force push - getting all changed files compared to 'develop'"
+                CHANGED_FILES=$(git diff --name-only remotes/origin/develop ${{ github.event.after }} | xargs)
+            else
+                echo "Getting changed files from ${{ github.event.before }} to ${{ github.event.after }}"
+                CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | xargs)
+            fi
+            for file in $CHANGED_FILES; do
+                echo "'$file' was changed"
+            done
+            echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
+
+      - name: Process changed files
+        id: process-files
+        run: |
+            LICENSE_LINES=''
+            for file in ${{ steps.changed-files.outputs.changed_files }}; do
+              echo "Processing '$file'..."
+              LICENSE_MATCH=$(cat $file | grep -Pzo '(<|")licensee("| )(\n|.)*(}|</licensee>)' | xargs)
+              if [ -z "$LICENSE_MATCH" ]; then
+                echo "...no licenses found"
+              else
+                echo "license found!"
+                LICENSE_LINE="<$file>
+                $LICENSE_MATCH
+                "
+                LICENSE_LINES="$LICENSE_LINES
+                $LICENSE_LINE"
+              fi
+            done
+            {
+                echo 'license_lines<<EOF'
+                echo "${LICENSE_LINES}"
+                echo EOF
+            } >> $GITHUB_OUTPUT
+
+      - name: Remove commit/branch if licenses found
+        if: ${{ steps.process-files.outputs.license_lines != '' }}
+        id: remove-license
+        run: |
+            if ${{ steps.push-type.outputs.push_type == 'commit'}}; then
+                echo "Removing commit ${{ github.event.after }} as it contains licenses"
+                git reset --hard ${{ github.event.before }}
+                git push origin ${{ github.ref }} --force-with-lease
+                echo "link=https://github.com/${{ github.repository }}/commits/${{ github.ref }}" >> $GITHUB_OUTPUT
+                echo "short_msg=push denied, reset to '${{ toJSON(github.event.before) }}'!" >> $GITHUB_OUTPUT
+                echo "action_type=reverted to" >> $GITHUB_OUTPUT
+                echo "msg_code=${{ github.event.before }}" >> $GITHUB_OUTPUT
+                echo "xtra_msg=('${{ toJSON(github.event.head_commit.message) }}' denied)" >> $GITHUB_OUTPUT
+            else
+                echo "Removing branch ${{ github.ref }} as it contains licenses"
+                git push origin --delete ${{ github.ref }}
+                echo "link=https://github.com/${{ github.repository }}/branches" >> $GITHUB_OUTPUT
+                echo "short_msg='${{ github.ref }}' was removed!" >> $GITHUB_OUTPUT
+                echo "action_type=removed" >> $GITHUB_OUTPUT
+                echo "msg_code=${{ github.ref }}" >> $GITHUB_OUTPUT
+                echo "xtra_msg=" >> $GITHUB_OUTPUT
+            fi
+
+      - name: Find correspondences
+        if: ${{ steps.process-files.outputs.license_lines != '' }}
+        id: email
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          method: users.lookupByEmail # https://api.slack.com/methods/users.lookupByEmail
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            email: ${{ github.event.pusher.email }}
+
+      - name: Search email detail
+        if: ${{ steps.email.outputs.ok }}
+        run: |
+          SLACK_USER_ID=$(echo '${{ steps.email.outputs.response }}' | jq -r '.user.id')
+          echo "SLACK_USER_ID=$SLACK_USER_ID" >> $GITHUB_ENV
+
+      - name: Send a direct message
+        if: ${{ steps.email.outputs.ok }}
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          errors: true
+          method: chat.postMessage # https://api.slack.com/methods/chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            "channel": "${{ env.SLACK_USER_ID }}",
+            "text": "${{ steps.remove-license.outputs.short_msg }}",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": ":alert: *LICENSES DETECTED* :alert:"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "${{ steps.remove-license.outputs.action_type}} ${{ steps.push-type.outputs.push_type}} `${{ steps.remove-license.outputs.msg_code }}` ${{ steps.remove-license.outputs.xtra_msg }}"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "<${{ steps.remove-license.outputs.link }}>"
+                }
+              }
+            ]
