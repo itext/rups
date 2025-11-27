@@ -1,0 +1,48 @@
+name: LicenseCheck
+
+on:
+  push:
+    # 'branches-ignore' or 'branches' can be used to filter specific branches.
+    # By default, without any filters, it runs on every push to all branches.
+    # To be explicit, you can use:
+    branches-ignore:
+      - 'develop'
+      - 'master'
+      - 'rebased/*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+         fetch-depth: 1
+      
+      - name: Get changes
+        id: changed-files
+        run: |
+            git fetch origin develop
+            echo "changed_files=$(git diff --name-only remotes/origin/develop ${{ github.event.after }} | xargs)" >> $GITHUB_OUTPUT
+
+      - name: Process changed files
+        id: license-lines
+        run: |
+            LICENSE_LINES=''
+            for file in ${{ steps.changed-files.outputs.changed_files }}; do
+              echo "$file was changed"
+              LICENSE_LINE="<$file>
+              $(cat $file | grep -Pzo '(<|")licensee("| )(\n|.)*(}|</licensee>)' | xargs)
+              "
+              LICENSE_LINES="$LICENSE_LINES
+              $LICENSE_LINE"
+            done
+            {
+                echo 'license_lines<<EOF'
+                echo "${LICENSE_LINES}"
+                echo EOF
+            } >> $GITHUB_OUTPUT
+
+      - name: List licenses found
+        run: echo "${{ steps.license-lines.outputs.license_lines }}"
