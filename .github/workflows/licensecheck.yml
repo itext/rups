@@ -23,8 +23,9 @@ jobs:
       - name: Get changes
         id: changed-files
         run: |
-            echo "Chnaged files from ${{ github.event.before }} > ${{ github.event.after }}"
-            if ${{ github.event.before == '000000000000000000000' }}; then
+            echo "Changed files from ${{ github.event.before }} > ${{ github.event.after }}"
+            SHA_BEFORE="${{ github.event.before }}"
+            if SHA_BEFORE == "000000000000000000000"; then
                 git fetch origin develop
                 echo "changed_files=$(git diff --name-only remotes/origin/develop ${{ github.event.after }} | xargs)" >> $GITHUB_OUTPUT
             else
