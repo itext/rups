@@ -18,16 +18,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-         fetch-depth: 0
+         fetch-depth: 1
       
       - name: Get changes
         id: changed-files
         run: |
             echo "Getting changed files from ${{ github.event.before }} to ${{ github.event.after }}"
-             if ${{ github.event.before == '0000000000000000000000000000000000000000' }}; then
+            if ${{ github.event.before == '0000000000000000000000000000000000000000' }}; then
                 git fetch origin develop
                 echo "changed_files=$(git diff --name-only remotes/origin/develop ${{ github.event.after }} | xargs)" >> $GITHUB_OUTPUT
             else
+                git fetch origin ${{ github.ref }}
                 echo "changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | xargs)" >> $GITHUB_OUTPUT
             fi
 
