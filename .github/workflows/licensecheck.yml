@@ -25,11 +25,12 @@ jobs:
         run: |
             echo "Changed files from ${{ github.event.before }} > ${{ github.event.after }}"
             SHA_BEFORE="${{ github.event.before }}"
+            SHA_AFTER="${{ github.event.after }}"
             if SHA_BEFORE == "000000000000000000000"; then
                 git fetch origin develop
-                echo "changed_files=$(git diff --name-only remotes/origin/develop ${{ github.event.after }} | xargs)" >> $GITHUB_OUTPUT
+                echo "changed_files=$(git diff --name-only remotes/origin/develop $SHA_AFTER | xargs)" >> $GITHUB_OUTPUT
             else
-                echo "changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | xargs)" >> $GITHUB_OUTPUT
+                echo "changed_files=$(git diff --name-only $SHA_BEFORE $SHA_AFTER | xargs)" >> $GITHUB_OUTPUT
             fi
 
       - name: Process changed files
