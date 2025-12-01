@@ -28,7 +28,7 @@ jobs:
                 git fetch origin develop
                 echo "changed_files=$(git diff --name-only remotes/origin/develop ${{ github.event.after }} | xargs)" >> $GITHUB_OUTPUT
             else
-                echo "changed_files=$(git diff --name-only HEAD^ HEAD | xargs)" >> $GITHUB_OUTPUT
+                echo "changed_files=$(git diff --name-only HEAD | xargs)" >> $GITHUB_OUTPUT
             fi
 
       - name: Process changed files
