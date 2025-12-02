@@ -20,7 +20,7 @@ jobs:
         run: |
             echo "Getting push type"
             PUSH_TYPE='commit'
-            FETCH_DEPTH=2
+            FETCH_DEPTH=10
             if ${{ github.event.forced }} || ${{ github.event.before == '0000000000000000000000000000000000000000' }}; then
                 PUSH_TYPE='branch'
                 FETCH_DEPTH=0
