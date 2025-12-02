@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<license issuer="iText Group NV" library="3">
+    <licensee expire="2100-12-31">
+        <name>iText Development</name>
+        <email>dev@itextpf.com</email>
+        <company>iText Software Group</company>
+        <version>7.1</version>
+        <key>TEST-LICE-NSE0</key>
+        <comment>Test License</comment>
+    </licensee>
+</license>

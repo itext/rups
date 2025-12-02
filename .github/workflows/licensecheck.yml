@@ -81,20 +81,19 @@ jobs:
             if ${{ steps.push-type.outputs.push_type == 'commit'}}; then
                 BAD_COMMIT="${{ github.event.after }}"
                 echo "Removing commit $BAD_COMMIT as it contains licenses"
-                git reset --hard ${{ github.event.before }}
+                git reset --hard $BAD_COMMIT
                 git push origin ${{ github.ref }} --force-with-lease
-                echo "bad=$BAD_COMMIT" >> $GITHUB_OUTPUT
                 echo "link=https://github.com/${{ github.repository }}/commits/${{ github.ref }}" >> $GITHUB_OUTPUT
-                echo "msg=${{ toJSON(github.event.head_commit.message) }} " >> $GITHUB_OUTPUT
+                echo "shortMsg=$BAD_COMMIT was removed!" >> $GITHUB_OUTPUT
+                echo "msg=Commit with message '${{ toJSON(github.event.head_commit.message) }}' `$BAD_COMMIT` was removed!" >> $GITHUB_OUTPUT
             else
                 BAD_BRANCH="${{ github.ref }}"
                 echo "Removing branch $BAD_BRANCH as it contains licenses"
-                git push origin --delete ${{ github.ref }}
-                echo "bad=$BAD_BRANCH" >> $GITHUB_OUTPUT
+                git push origin --delete $BAD_BRANCH
                 echo "link=https://github.com/${{ github.repository }}/branches" >> $GITHUB_OUTPUT
-                echo "msg=" >> $GITHUB_OUTPUT
+                echo "shortMsg=$BAD_BRANCH was removed!" >> $GITHUB_OUTPUT
+                echo "msg=Branch '$BAD_BRANCH' was removed!" >> $GITHUB_OUTPUT
             fi
-            echo "msg=${{ toJSON(github.event.head_commit.message) }}"
 
       - name: Find correspondences
         if: ${{ steps.process-files.outputs.license_lines != '' }}
@@ -121,20 +120,20 @@ jobs:
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
             "channel": "${{ env.SLACK_USER_ID }}",
-            "text": "${{ steps.push-type.outputs.push_type }} ${{ steps.remove-license.outputs.bad }} was removed!",
+            "text": "${{ steps.remove-license.outputs.shortMsg }}",
             "blocks": [
               {
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": ":alert: ${{ steps.remove-license.outputs.msg }}`${{ steps.remove-license.outputs.bad }}` was removed! :alert:"
+                  "text": ":alert: ${{ steps.remove-license.outputs.msg }} :alert:"
                 }
               },
               {
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "<$link|$link>"
+                  "text": "<${{ steps.remove-license.outputs.link }}>"
                 }
               }
             ]
