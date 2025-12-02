@@ -20,7 +20,7 @@ jobs:
         run: |
             echo "Getting push type"
             PUSH_TYPE='commit'
-            FETCH_DEPTH=1
+            FETCH_DEPTH=2
             if ${{ github.event.forced }} || ${{ github.event.before == '0000000000000000000000000000000000000000' }}; then
                 PUSH_TYPE='branch'
                 FETCH_DEPTH=0
@@ -78,7 +78,7 @@ jobs:
         if: ${{ steps.process-files.outputs.license_lines != '' }}
         id: remove-license
         run: |
-            if ${{ steps.changed-files.outputs.changed_files == 'branch'}}; then
+            if ${{ steps.push-type.outputs.push_type == 'commit'}}; then
                 BAD_COMMIT="${{ github.event.after }}"
                 echo "Removing commit $BAD_COMMIT as it contains licenses"
                 git reset --hard ${{ github.event.before }}
@@ -89,7 +89,7 @@ jobs:
             else
                 BAD_BRANCH="${{ github.ref }}"
                 echo "Removing branch $BAD_BRANCH as it contains licenses"
-                sh "git push origin --delete ${{ github.ref }}"
+                git push origin --delete ${{ github.ref }}
                 echo "bad=$BAD_BRANCH" >> $GITHUB_OUTPUT
                 echo "link=https://github.com/${{ github.repository }}/branches" >> $GITHUB_OUTPUT
                 echo "msg=" >> $GITHUB_OUTPUT
