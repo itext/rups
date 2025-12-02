@@ -19,16 +19,27 @@ jobs:
         uses: actions/checkout@v4
         with:
          fetch-depth: 0
+
+      - name: Get push type
+        id: push-type
+        run: |
+            echo "Getting push type"
+            PUSH_TYPE='commit'
+            if ${{ github.event.forced }} || ${{ github.event.before == '0000000000000000000000000000000000000000' }}; then
+                PUSH_TYPE='branch'
+            fi
+            echo "Push type: $PUSH_TYPE"
+            echo "push_type=$PUSH_TYPE" >> $GITHUB_OUTPUT
       
       - name: Get changed files
         id: changed-files
         run: |
-            echo "Getting changed files from ${{ github.event.before }} to ${{ github.event.after }}"
-            if ${{ github.event.forced }} || ${{ github.event.before == '0000000000000000000000000000000000000000' }}; then
+            if ${{ steps.changed-files.outputs.changed_files == 'branch'}}; then
                 echo "First commit on feature branch or force push - getting all changed files compared to 'develop'"
                 git fetch origin develop
                 CHANGED_FILES=$(git diff --name-only remotes/origin/develop ${{ github.event.after }} | xargs)
             else
+                echo "Getting changed files from ${{ github.event.before }} to ${{ github.event.after }}"
                 CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | xargs)
             fi
             for file in $CHANGED_FILES; do
