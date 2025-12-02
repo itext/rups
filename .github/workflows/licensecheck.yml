@@ -34,7 +34,7 @@ jobs:
       - name: Get changed files
         id: changed-files
         run: |
-            if ${{ steps.changed-files.outputs.changed_files == 'branch'}}; then
+            if ${{ steps.push-type.outputs.push_type == 'branch'}}; then
                 echo "First commit on feature branch or force push - getting all changed files compared to 'develop'"
                 git fetch origin develop
                 CHANGED_FILES=$(git diff --name-only remotes/origin/develop ${{ github.event.after }} | xargs)
@@ -71,15 +71,22 @@ jobs:
                 echo EOF
             } >> $GITHUB_OUTPUT
 
-      - name: Remove commit if licenses found
+      - name: Remove commit/branch if licenses found
         if: ${{ steps.process-files.outputs.license_lines != '' }}
         id: remove-commit
         run: |
-            BAD_COMMIT="${{ github.event.after }}"
-            echo "Removing commit $BAD_COMMIT as it contains licenses"
-            git reset --hard ${{ github.event.before }}
-            git push origin ${{ github.ref }} --force-with-lease
-            echo "bad_commit=$BAD_COMMIT" >> $GITHUB_OUTPUT
+            if ${{ steps.changed-files.outputs.changed_files == 'branch'}}; then
+                BAD_COMMIT="${{ github.event.after }}"
+                echo "Removing commit $BAD_COMMIT as it contains licenses"
+                git reset --hard ${{ github.event.before }}
+                git push origin ${{ github.ref }} --force-with-lease
+                echo "bad=$BAD_COMMIT" >> $GITHUB_OUTPUT
+            else
+                BAD_BRANCH="${{ github.ref }}"
+                echo "Removing branch $BAD_BRANCH as it contains licenses"
+                sh "git push origin --delete ${{ github.ref }}"
+                echo "bad=$BAD_BRANCH" >> $GITHUB_OUTPUT
+            fi
 
       - name: Find correspondences
         if: ${{ steps.process-files.outputs.license_lines != '' }}
@@ -106,7 +113,7 @@ jobs:
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
             "channel": "${{ env.SLACK_USER_ID }}",
-            "text": "Commit ${{ steps.remove-commit.outputs.bad_commit }} was removed!",
+            "text": "${{ steps.push-type.outputs.push_type }} ${{ steps.remove-commit.outputs.bad }} was removed!",
             "blocks": [
               {
                 "type": "section",
