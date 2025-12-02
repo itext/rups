@@ -85,7 +85,7 @@ jobs:
                 git push origin ${{ github.ref }} --force-with-lease
                 echo "bad=$BAD_COMMIT" >> $GITHUB_OUTPUT
                 echo "link=https://github.com/${{ github.repository }}/commits/${{ github.ref }}" >> $GITHUB_OUTPUT
-                echo "msg=${{ toJSON(github.event.head_commit.message) }}" >> $GITHUB_OUTPUT
+                echo "msg=${{ toJSON(github.event.head_commit.message) }} " >> $GITHUB_OUTPUT
             else
                 BAD_BRANCH="${{ github.ref }}"
                 echo "Removing branch $BAD_BRANCH as it contains licenses"
@@ -94,7 +94,7 @@ jobs:
                 echo "link=https://github.com/${{ github.repository }}/branches" >> $GITHUB_OUTPUT
                 echo "msg=" >> $GITHUB_OUTPUT
             fi
-            echo "msg=${{ toJSON(github.event.head_commit.message) }} "
+            echo "msg=${{ toJSON(github.event.head_commit.message) }}"
 
       - name: Find correspondences
         if: ${{ steps.process-files.outputs.license_lines != '' }}
