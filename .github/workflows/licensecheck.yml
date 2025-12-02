@@ -72,17 +72,13 @@ jobs:
             } >> $GITHUB_OUTPUT
 
       - name: Remove commit if licenses found
+        if: ${{ steps.process-files.outputs.license_lines != '' }}
         id: remove-commit
         run: |
-            BAD_COMMIT=''
-            if ${{ steps.process-files.outputs.license_lines != '' }}; then
-                BAD_COMMIT="${{ github.event.after }}"
-                echo "Removing commit $BAD_COMMIT as it contains licenses"
-                git reset --hard ${{ github.event.before }}
-                git push origin ${{ github.ref }} --force-with-lease
-            else
-                echo "NOT Removing commit"
-            fi
+            BAD_COMMIT="${{ github.event.after }}"
+            echo "Removing commit $BAD_COMMIT as it contains licenses"
+            git reset --hard ${{ github.event.before }}
+            git push origin ${{ github.ref }} --force-with-lease
             echo "bad_commit=$BAD_COMMIT" >> $GITHUB_OUTPUT
 
       - name: Find correspondences
