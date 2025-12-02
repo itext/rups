@@ -18,37 +18,47 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-         fetch-depth: 2
+         fetch-depth: 0
       
-      - name: Get changes
+      - name: Get changed files
         id: changed-files
         run: |
             echo "Getting changed files from ${{ github.event.before }} to ${{ github.event.after }}"
-            if ${{ github.event.before == '0000000000000000000000000000000000000000' }}; then
+            if ${{ github.event.forced }} || ${{ github.event.before == '0000000000000000000000000000000000000000' }}; then
+                echo "First commit on feature branch or force push - getting all changed files compared to 'develop'"
                 git fetch origin develop
-                echo "changed_files=$(git diff --name-only remotes/origin/develop ${{ github.event.after }} | xargs)" >> $GITHUB_OUTPUT
+                CHANGED_FILES=$(git diff --name-only remotes/origin/develop ${{ github.event.after }} | xargs)
             else
-                echo "changed_files=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | xargs)" >> $GITHUB_OUTPUT
+                CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.event.after }} | xargs)
             fi
+            for file in $CHANGED_FILES; do
+                echo "'$file' was changed"
+            done
+            echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
+
       - name: Process changed files
         id: license-lines
         run: |
             LICENSE_LINES=''
             for file in ${{ steps.changed-files.outputs.changed_files }}; do
-              echo "$file was changed"
-              LICENSE_LINE="<$file>
-              $(cat $file | grep -Pzo '(<|")licensee("| )(\n|.)*(}|</licensee>)' | xargs)
-              "
-              LICENSE_LINES="$LICENSE_LINES
-              $LICENSE_LINE"
+              echo "Processing '$file'..."
+              LICENSE_MATCH=$(cat $file | grep -Pzo '(<|")licensee("| )(\n|.)*(}|</licensee>)' | xargs)
+              if [ -z "$LICENSE_MATCH" ]; then
+                echo "...no licenses found"
+              else
+                echo "license found!"
+                LICENSE_LINE="<$file>
+                $LICENSE_MATCH
+                "
+                LICENSE_LINES="$LICENSE_LINES
+                $LICENSE_LINE"
+              fi
             done
             {
                 echo 'license_lines<<EOF'
                 echo "${LICENSE_LINES}"
                 echo EOF
             } >> $GITHUB_OUTPUT
-      - name: List licenses found
-        run: echo "${{ steps.license-lines.outputs.license_lines }}"
 
       - name: Remove commit if licenses found
         id: remove-commit
