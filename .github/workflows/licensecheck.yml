@@ -48,7 +48,7 @@ jobs:
             echo "changed_files=$CHANGED_FILES" >> $GITHUB_OUTPUT
 
       - name: Process changed files
-        id: license-lines
+        id: process-files
         run: |
             LICENSE_LINES=''
             for file in ${{ steps.changed-files.outputs.changed_files }}; do
@@ -75,7 +75,7 @@ jobs:
         id: remove-commit
         run: |
             BAD_COMMIT=''
-            if ${{ steps.license-lines.outputs.license_lines != '' }}; then
+            if ${{ steps.process-files.outputs.license_lines != '' }}; then
                 BAD_COMMIT="${{ github.event.after }}"
                 echo "Removing commit $BAD_COMMIT as it contains licenses"
                 git reset --hard ${{ github.event.before }}
@@ -86,7 +86,7 @@ jobs:
             echo "bad_commit=$BAD_COMMIT" >> $GITHUB_OUTPUT
 
       - name: Find correspondences
-        if: ${{ steps.license-lines.outputs.license_lines != '' }}
+        if: ${{ steps.process-files.outputs.license_lines != '' }}
         id: email
         uses: slackapi/slack-github-action@v2.1.1
         with:
