@@ -76,7 +76,7 @@ jobs:
 
       - name: Remove commit/branch if licenses found
         if: ${{ steps.process-files.outputs.license_lines != '' }}
-        id: remove-commit
+        id: remove-license
         run: |
             if ${{ steps.changed-files.outputs.changed_files == 'branch'}}; then
                 BAD_COMMIT="${{ github.event.after }}"
@@ -84,12 +84,17 @@ jobs:
                 git reset --hard ${{ github.event.before }}
                 git push origin ${{ github.ref }} --force-with-lease
                 echo "bad=$BAD_COMMIT" >> $GITHUB_OUTPUT
+                echo "link=https://github.com/${{ github.repository }}/commits/${{ github.ref }}" >> $GITHUB_OUTPUT
+                echo "msg=${{ toJSON(github.event.head_commit.message) }}" >> $GITHUB_OUTPUT
             else
                 BAD_BRANCH="${{ github.ref }}"
                 echo "Removing branch $BAD_BRANCH as it contains licenses"
                 sh "git push origin --delete ${{ github.ref }}"
                 echo "bad=$BAD_BRANCH" >> $GITHUB_OUTPUT
+                echo "link=https://github.com/${{ github.repository }}/branches" >> $GITHUB_OUTPUT
+                echo "msg=" >> $GITHUB_OUTPUT
             fi
+            echo "msg=${{ toJSON(github.event.head_commit.message) }}"
 
       - name: Find correspondences
         if: ${{ steps.process-files.outputs.license_lines != '' }}
@@ -116,20 +121,20 @@ jobs:
           token: ${{ secrets.SLACK_BOT_TOKEN }}
           payload: |
             "channel": "${{ env.SLACK_USER_ID }}",
-            "text": "${{ steps.push-type.outputs.push_type }} ${{ steps.remove-commit.outputs.bad }} was removed!",
+            "text": "${{ steps.push-type.outputs.push_type }} ${{ steps.remove-license.outputs.bad }} was removed!",
             "blocks": [
               {
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": ":alert-beam: <https://github.com/${{ github.repository }}/commits/${{ github.ref }}|*${{ github.repository }}>${{ github.ref }}*>: `${{ github.sha }}`"
+                  "text": ":alert: `${{ steps.remove-license.outputs.bad }}` was removed! :alert:"
                 }
               },
               {
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": ${{ toJSON(github.event.head_commit.message) }}
+                  "text": "<$link>"
                 }
               }
             ]
