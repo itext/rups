@@ -94,7 +94,7 @@ jobs:
                 echo "link=https://github.com/${{ github.repository }}/branches" >> $GITHUB_OUTPUT
                 echo "msg=" >> $GITHUB_OUTPUT
             fi
-            echo "msg=${{ toJSON(github.event.head_commit.message) }}"
+            echo "msg=${{ toJSON(github.event.head_commit.message) }} "
 
       - name: Find correspondences
         if: ${{ steps.process-files.outputs.license_lines != '' }}
@@ -127,14 +127,14 @@ jobs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": ":alert: `${{ steps.remove-license.outputs.bad }}` was removed! :alert:"
+                  "text": ":alert: ${{ steps.remove-license.outputs.msg }}`${{ steps.remove-license.outputs.bad }}` was removed! :alert:"
                 }
               },
               {
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "<$link>"
+                  "text": "<$link|$link>"
                 }
               }
             ]
