@@ -15,28 +15,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-         fetch-depth: 0
-
       - name: Get push type
         id: push-type
         run: |
             echo "Getting push type"
             PUSH_TYPE='commit'
+            FETCH_DEPTH=1
             if ${{ github.event.forced }} || ${{ github.event.before == '0000000000000000000000000000000000000000' }}; then
                 PUSH_TYPE='branch'
+                FETCH_DEPTH=0
             fi
             echo "Push type: $PUSH_TYPE"
+            echo "Fetch depth: $FETCH_DEPTH"
             echo "push_type=$PUSH_TYPE" >> $GITHUB_OUTPUT
-      
+            echo "fetch_depth=$FETCH_DEPTH" >> $GITHUB_OUTPUT
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+         fetch-depth: ${{ steps.push-type.outputs.fetch_depth }}
+
       - name: Get changed files
         id: changed-files
         run: |
             if ${{ steps.push-type.outputs.push_type == 'branch'}}; then
                 echo "First commit on feature branch or force push - getting all changed files compared to 'develop'"
-                git fetch origin develop
                 CHANGED_FILES=$(git diff --name-only remotes/origin/develop ${{ github.event.after }} | xargs)
             else
                 echo "Getting changed files from ${{ github.event.before }} to ${{ github.event.after }}"
