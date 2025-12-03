@@ -78,7 +78,7 @@
     <dom4j.version>2.2.0</dom4j.version>
     <flatlaf.version>3.7</flatlaf.version>
     <icu4j.version>76.1</icu4j.version>
-    <itext.version>9.4.0</itext.version>
+    <itext.version>9.5.0-SNAPSHOT</itext.version>
     <jackson.version>2.20.1</jackson.version>
     <logback.version>1.5.22</logback.version>
 
@@ -115,6 +115,11 @@
     <dependency>
       <groupId>com.itextpdf</groupId>
       <artifactId>bouncy-castle-adapter</artifactId>
+      <version>${itext.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.itextpdf</groupId>
+      <artifactId>brotli-compressor</artifactId>
       <version>${itext.version}</version>
     </dependency>
     <dependency>

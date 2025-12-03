@@ -42,11 +42,14 @@
  */
 package com.itextpdf.rups.model;
 
+import com.itextpdf.brotlicompressor.BrotliStreamCompressionStrategy;
 import com.itextpdf.kernel.exceptions.BadPasswordException;
+import com.itextpdf.kernel.pdf.IStreamCompressionStrategy;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.ReaderProperties;
+import com.itextpdf.kernel.pdf.StampingProperties;
 import com.itextpdf.rups.view.Language;
 
 import java.io.ByteArrayInputStream;
@@ -252,7 +255,7 @@ public final class PdfFile implements IPdfFile {
             );
             final ByteArrayOutputStream tempWriterOutputStream = new ByteArrayOutputStream();
             final PdfWriter writer = new PdfWriter(tempWriterOutputStream);
-            document = new PdfDocument(reader, writer);
+            document = new PdfDocument(reader, writer, createStampingProps());
             writerOutputStream = tempWriterOutputStream;
             return true;
         } catch (BadPasswordException e) {
@@ -292,5 +295,14 @@ public final class PdfFile implements IPdfFile {
         } catch (BadPasswordException e) {
             return false;
         }
+    }
+
+    private static StampingProperties createStampingProps() {
+        final StampingProperties props = new StampingProperties();
+        props.registerDependency(
+                IStreamCompressionStrategy.class,
+                new BrotliStreamCompressionStrategy()
+        );
+        return props;
     }
 }
