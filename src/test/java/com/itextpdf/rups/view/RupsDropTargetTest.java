@@ -45,7 +45,6 @@ package com.itextpdf.rups.view;
 import com.itextpdf.rups.mock.MockedDropTargetDropEvent;
 import com.itextpdf.rups.mock.MockedRupsController;
 import com.itextpdf.rups.mock.MockedTransferable;
-import com.itextpdf.test.ITextTest;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -61,7 +60,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @Tag("UnitTest")
-public class RupsDropTargetTest extends ITextTest {
+public class RupsDropTargetTest {
 
     private RupsDropTarget dropTarget;
     private List<File> fileList;
