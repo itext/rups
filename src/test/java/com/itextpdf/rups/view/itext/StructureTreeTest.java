@@ -49,7 +49,6 @@ import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.view.itext.treenodes.StructureTreeNode;
-import com.itextpdf.test.ExtendedITextTest;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,7 +60,7 @@ import org.junit.jupiter.api.Test;
 
 
 @Tag("IntegrationTest")
-class StructureTreeTest extends ExtendedITextTest {
+class StructureTreeTest {
     private static final String SOURCE_DIR = "./src/test/resources/com/itextpdf/rups/controller/";
 
     @Test

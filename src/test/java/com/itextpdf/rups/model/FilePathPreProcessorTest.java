@@ -42,8 +42,6 @@
  */
 package com.itextpdf.rups.model;
 
-import com.itextpdf.test.ExtendedITextTest;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -59,9 +57,8 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-// TODO: add dir test
 @Tag("UnitTest")
-class FilePathPreProcessorTest extends ExtendedITextTest {
+class FilePathPreProcessorTest {
     private static final BiFunction<String, String, String> platformChoice;
     static {
         final String os = System.getProperty("os.name");

@@ -43,7 +43,6 @@
 package com.itextpdf.rups.view;
 
 import com.itextpdf.rups.RupsConfiguration;
-import com.itextpdf.test.ExtendedITextTest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -51,7 +50,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Locale;
 
 @Tag("UnitTest")
-public class LanguageTest extends ExtendedITextTest {
+public class LanguageTest {
     private static final Language TEST_KEY = Language.ERROR;
     private static final Locale DUTCH_LOCALE = Locale.forLanguageTag("nl-NL");
     private static final String EXPECTED_EN_US = "Error";

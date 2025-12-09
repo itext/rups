@@ -55,7 +55,6 @@ import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.XfaTreeNode;
-import com.itextpdf.test.ExtendedITextTest;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
@@ -64,7 +63,7 @@ import org.junit.jupiter.api.Test;
 import java.io.File;
 
 @Tag("UnitTest")
-final class FormTreeTest extends ExtendedITextTest {
+final class FormTreeTest {
     private static final String SOURCE_DIR = "./src/test/resources/com/itextpdf/rups/view/itext/";
 
     @Test

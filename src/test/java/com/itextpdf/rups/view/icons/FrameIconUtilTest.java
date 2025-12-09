@@ -42,8 +42,6 @@
  */
 package com.itextpdf.rups.view.icons;
 
-import com.itextpdf.test.ExtendedITextTest;
-
 import java.awt.Image;
 import java.util.List;
 
@@ -52,7 +50,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @Tag("UnitTest")
-public class FrameIconUtilTest extends ExtendedITextTest {
+public class FrameIconUtilTest {
 
     @Test
     public void testThatIconsAreLoadedFromResources() {
