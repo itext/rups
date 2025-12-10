@@ -211,6 +211,14 @@ public abstract class AbstractAsn1TreeNode
      * {@inheritDoc}
      */
     @Override
+    public boolean isPdfStreamNode() {
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean supportsInspectObject() {
         return false;
     }

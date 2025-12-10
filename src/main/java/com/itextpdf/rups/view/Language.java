@@ -55,6 +55,7 @@ import java.util.ResourceBundle;
  * in the resource bundles.
  */
 public enum Language {
+    APPLY_FILTER,
     ARRAY,
     ARRAY_CHOOSE_INDEX,
 
@@ -92,6 +93,7 @@ public enum Language {
     ENTER_OWNER_PASSWORD,
 
     ERROR,
+    ERROR_APPLYING_FILTER,
     ERROR_BUILDING_CONTENT_STREAM,
     ERROR_CANNOT_CHECK_NULL_FOR_INPUT_STREAM,
     ERROR_CANNOT_FIND_FILE,
@@ -212,6 +214,7 @@ public enum Language {
     PREFERENCES_VISUAL_SETTINGS,
 
     RAW_BYTES,
+    REMOVE_ALL_FILTERS,
 
     SAVE,
     SAVE_IMAGE,

@@ -446,6 +446,14 @@ public class PdfObjectTreeNode extends IconTreeNode implements IPdfContextMenuTa
      * {@inheritDoc}
      */
     @Override
+    public boolean isPdfStreamNode() {
+        return object.isStream();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean supportsInspectObject() {
         /*
          * "Inspect Object" is useful only for streams at the moment.
