@@ -42,6 +42,10 @@
  */
 package com.itextpdf.rups;
 
+import com.itextpdf.brotlicompressor.BrotliStreamCompressionStrategy;
+import com.itextpdf.kernel.pdf.FlateCompressionStrategy;
+import com.itextpdf.kernel.pdf.PdfName;
+
 import java.util.Set;
 import org.junit.jupiter.api.*;
 
@@ -132,6 +136,35 @@ public class RupsConfigurationTest {
     public void closingOperationsPossibleValuesTest() {
         final int closeOperation = RupsConfiguration.INSTANCE.getCloseOperation();
         Assertions.assertTrue(VALID_CLOSE_OPERATION_VALUES.contains(closeOperation));
+    }
+
+    @Test
+    void setDefaultFilterTest() {
+        // Default is /FlateDecode
+        Assertions.assertSame(
+                PdfName.FlateDecode,
+                RupsConfiguration.INSTANCE.getDefaultFilter()
+        );
+        Assertions.assertInstanceOf(
+                FlateCompressionStrategy.class,
+                RupsConfiguration.INSTANCE.getDefaultFilterStrategy()
+        );
+        // Changing to /BrotliDecode
+        RupsConfiguration.INSTANCE.setDefaultFilter(PdfName.BrotliDecode);
+        RupsConfiguration.INSTANCE.saveConfiguration();
+        Assertions.assertSame(
+                PdfName.BrotliDecode,
+                RupsConfiguration.INSTANCE.getDefaultFilter()
+        );
+        Assertions.assertInstanceOf(
+                BrotliStreamCompressionStrategy.class,
+                RupsConfiguration.INSTANCE.getDefaultFilterStrategy()
+        );
+        // Changing to an unsupported value, should return null
+        RupsConfiguration.INSTANCE.setDefaultFilter(PdfName.ASCIIHexDecode);
+        RupsConfiguration.INSTANCE.saveConfiguration();
+        Assertions.assertNull(RupsConfiguration.INSTANCE.getDefaultFilter());
+        Assertions.assertNull(RupsConfiguration.INSTANCE.getDefaultFilterStrategy());
     }
 
     @AfterAll

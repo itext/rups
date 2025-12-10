@@ -47,6 +47,7 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
 import com.itextpdf.rups.Rups;
+import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.ObjectLoader;
@@ -224,7 +225,7 @@ public final class SyntaxHighlightedStreamPane extends JScrollPane implements IR
             PdfStreamUtil.setDataWithFilter(
                     targetStream,
                     baos.toByteArray(),
-                    null
+                    RupsConfiguration.INSTANCE.getDefaultFilterStrategy()
             );
         } catch (IOException e) {
             final String errorMessage = Language.ERROR_APPLYING_FILTER.getString();
