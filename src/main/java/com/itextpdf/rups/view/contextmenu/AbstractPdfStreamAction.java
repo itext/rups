@@ -42,30 +42,38 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
-/**
- * Interface for tree nodes, which can spawn {@link com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu}.
- */
-public interface IPdfContextMenuTarget {
-    /**
-     * Returns true, if the tree node is a PDF stream node.
-     *
-     * @return true, if the tree node is a PDF stream node.
-     */
-    boolean isPdfStreamNode();
+import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.view.itext.PdfTree;
+import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
-    /**
-     * Returns true, if the tree node supports the "Inspect Object" operation.
-     *
-     * @return true, if the tree node supports the "Inspect Object" operation.
-     */
-    boolean supportsInspectObject();
+public abstract class AbstractPdfStreamAction extends AbstractRupsAction {
+    protected final transient PdfReaderController controller;
 
-    /**
-     * Returns true, if the tree node supports the "Save Raw Bytes to File" and
-     * "Save to File" operations.
-     *
-     * @return true, if the tree node supports the "Save Raw Bytes to File" and
-     * "Save to File" operations.
-     */
-    boolean supportsSave();
+    protected AbstractPdfStreamAction(String name, PdfTree invoker, PdfReaderController controller) {
+        super(name, invoker);
+        this.controller = controller;
+    }
+
+    protected PdfObjectTreeNode getTargetPdfStreamNode() {
+        final PdfTree tree = (PdfTree) invoker;
+        final Object node = tree.getLastSelectedPathComponent();
+        if (!(node instanceof PdfObjectTreeNode)) {
+            return null;
+        }
+        final PdfObjectTreeNode objectNode = (PdfObjectTreeNode) node;
+        if (!objectNode.isPdfStreamNode()) {
+            return null;
+        }
+        return objectNode;
+    }
+
+    protected void forceTreeRebuild(PdfObjectTreeNode root) {
+        // We need to delete all children from the tree node to force them to
+        // be regenerated after the update. Presumably there should be a
+        // better way to do this, but this works fine for now
+        if (controller != null) {
+            controller.deleteAllTreeChildren(root);
+            controller.selectNode(root);
+        }
+    }
 }

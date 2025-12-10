@@ -339,7 +339,7 @@ public class RupsInstanceController implements TreeSelectionListener, PageSelect
          */
         final JPopupMenu menu = tree.getComponentPopupMenu();
         if ((menu instanceof PdfTreeContextMenu) && (selectedNode instanceof IPdfContextMenuTarget)) {
-            ((PdfTreeContextMenu) menu).setEnabledForNode((IPdfContextMenuTarget) selectedNode);
+            ((PdfTreeContextMenu) menu).prepareForNode((IPdfContextMenuTarget) selectedNode);
         }
 
         if (selectedNode instanceof PdfTrailerTreeNode) {

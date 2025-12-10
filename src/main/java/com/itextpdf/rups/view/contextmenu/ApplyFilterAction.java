@@ -42,30 +42,48 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
-/**
- * Interface for tree nodes, which can spawn {@link com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu}.
- */
-public interface IPdfContextMenuTarget {
-    /**
-     * Returns true, if the tree node is a PDF stream node.
-     *
-     * @return true, if the tree node is a PDF stream node.
-     */
-    boolean isPdfStreamNode();
+import com.itextpdf.kernel.pdf.IStreamCompressionStrategy;
+import com.itextpdf.kernel.pdf.PdfStream;
+import com.itextpdf.rups.Rups;
+import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.model.LoggerHelper;
+import com.itextpdf.rups.util.PdfStreamUtil;
+import com.itextpdf.rups.view.Language;
+import com.itextpdf.rups.view.itext.PdfTree;
+import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
-    /**
-     * Returns true, if the tree node supports the "Inspect Object" operation.
-     *
-     * @return true, if the tree node supports the "Inspect Object" operation.
-     */
-    boolean supportsInspectObject();
+import java.awt.event.ActionEvent;
+import java.io.IOException;
+import java.util.Objects;
+import java.util.function.Supplier;
 
-    /**
-     * Returns true, if the tree node supports the "Save Raw Bytes to File" and
-     * "Save to File" operations.
-     *
-     * @return true, if the tree node supports the "Save Raw Bytes to File" and
-     * "Save to File" operations.
-     */
-    boolean supportsSave();
+public class ApplyFilterAction extends AbstractPdfStreamAction {
+    private final transient Supplier<IStreamCompressionStrategy> encodingStrategySupplier;
+
+    public ApplyFilterAction(
+            String name,
+            PdfTree invoker,
+            PdfReaderController controller,
+            Supplier<IStreamCompressionStrategy> encodingStrategySupplier
+    ) {
+        super(name, invoker, controller);
+        this.encodingStrategySupplier = Objects.requireNonNull(encodingStrategySupplier);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        final PdfObjectTreeNode target = getTargetPdfStreamNode();
+        if (target == null) {
+            return;
+        }
+        try {
+            PdfStreamUtil.applyFilter((PdfStream) target.getPdfObject(), encodingStrategySupplier.get());
+        } catch (IOException | RuntimeException ex) {
+            final String errorMessage = Language.ERROR_APPLYING_FILTER.getString();
+            LoggerHelper.error(errorMessage, ex, getClass());
+            Rups.showBriefMessage(errorMessage);
+            return;
+        }
+        forceTreeRebuild(target);
+    }
 }
