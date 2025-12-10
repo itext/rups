@@ -42,6 +42,10 @@
  */
 package com.itextpdf.rups;
 
+import com.itextpdf.brotlicompressor.BrotliStreamCompressionStrategy;
+import com.itextpdf.kernel.pdf.FlateCompressionStrategy;
+import com.itextpdf.kernel.pdf.IStreamCompressionStrategy;
+import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.rups.conf.LookAndFeelId;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.MruListHandler;
@@ -94,6 +98,7 @@ public enum RupsConfiguration {
     private static final String DEFAULT_HOME_VALUE = "home";
     private static final String CLOSE_OPERATION_KEY = "ui.closeoperation";
     private static final String DUPLICATE_OPEN_FILES_KEY = "rups.duplicatefiles";
+    private static final String DEFAULT_FILTER_KEY = "rups.defaultfilter";
     private static final String HOME_FOLDER_KEY = "user.home";
     private static final String LOCALE_KEY = "user.locale";
     private static final String LOOK_AND_FEEL_KEY = "ui.lookandfeel";
@@ -130,6 +135,39 @@ public enum RupsConfiguration {
     public boolean canOpenDuplicateFiles() {
         final String value = getValueFromSystemPreferences(DUPLICATE_OPEN_FILES_KEY);
         return Boolean.parseBoolean(value);
+    }
+
+    /**
+     * Returns which default compression filter RUPS should use for streams.
+     *
+     * @return PdfName of the compression filter, or {@code null} if none.
+     */
+    public PdfName getDefaultFilter() {
+        final String value = getValueFromSystemPreferences(DEFAULT_FILTER_KEY);
+        if (PdfName.FlateDecode.getValue().equals(value)) {
+            return PdfName.FlateDecode;
+        }
+        if (PdfName.BrotliDecode.getValue().equals(value)) {
+            return PdfName.BrotliDecode;
+        }
+        return null;
+    }
+
+    /**
+     * Returns which default compression filter strategy RUPS should use for streams.
+     *
+     * @return compression strategy for the default filter or {@code null} if
+     *         no compression required.
+     */
+    public IStreamCompressionStrategy getDefaultFilterStrategy() {
+        final String value = getValueFromSystemPreferences(DEFAULT_FILTER_KEY);
+        if (PdfName.FlateDecode.getValue().equals(value)) {
+            return new FlateCompressionStrategy();
+        }
+        if (PdfName.BrotliDecode.getValue().equals(value)) {
+            return new BrotliStreamCompressionStrategy();
+        }
+        return null;
     }
 
     /**
@@ -216,6 +254,18 @@ public enum RupsConfiguration {
 
     public void setOpenDuplicateFiles(boolean value) {
         this.temporaryProperties.setProperty(DUPLICATE_OPEN_FILES_KEY, Boolean.toString(value));
+    }
+
+    /**
+     * Sets which default compression filter RUPS should use for streams.
+     *
+     * @param value PdfName of the compression filter, or {@code null} if none.
+     */
+    public void setDefaultFilter(PdfName value) {
+        this.temporaryProperties.setProperty(
+                DEFAULT_FILTER_KEY,
+                value != null ? value.getValue() : "null"
+        );
     }
 
     /**
