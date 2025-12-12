@@ -1,0 +1,25 @@
+name: CreatePR
+
+on:
+  create:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Open pull request
+        if: ${{ ! startsWith(github.ref, 'refs/heads/rebased') }}
+        run: |
+          gh pr create \
+            --title "Pull Request to create/update 'rebased/${{ github.ref//refs\/heads/ }}' branch" \
+            --body "Programmatically created Pull Request to automatically keep merge branch to develop up-to-date" \
+            --base develop \
+            --head ${{ github.ref }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
