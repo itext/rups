@@ -1,0 +1,52 @@
+name: Send Slack message to pusher
+
+on:
+  workflow_call:
+    inputs:
+      emailslackuser:
+        required: true
+        type: string
+      shortmsg:
+        required: true
+        type: string
+      blocks:
+        required: true
+        type: string
+
+jobs:
+  send_slack_msg:
+  
+    runs-on: ubuntu-latest
+      
+    steps:
+
+      - name: logging
+        run: |
+            echo "emailslackuser: ${{ inputs.emailslackuser }}"
+
+      - name: Find correspondences
+        id: email
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          method: users.lookupByEmail # https://api.slack.com/methods/users.lookupByEmail
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            email: ${{ inputs.emailslackuser }}
+
+      - name: Search email detail
+        if: ${{ steps.email.outputs.ok }}
+        run: |
+          SLACK_USER_ID=$(echo '${{ steps.email.outputs.response }}' | jq -r '.user.id')
+          echo "SLACK_USER_ID=$SLACK_USER_ID" >> $GITHUB_ENV
+
+      - name: Send a direct message
+        if: ${{ steps.email.outputs.ok }}
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          errors: true
+          method: chat.postMessage # https://api.slack.com/methods/chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            "channel": "${{ env.SLACK_USER_ID }}",
+            "text": "${{ inputs.shortmsg }}",
+            "blocks": ${{ inputs.blocks }}

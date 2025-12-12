@@ -1,0 +1,305 @@
+name: "Create rebased branch"
+
+on:
+  pull_request:
+    branches:
+      - 'develop'
+    types:
+      - assigned
+      - synchronize
+
+env:
+  GITHUB_USERNAME: 'Apryse Software'
+  GITHUB_USEREMAIL: 'development@apryse.com'
+  FROMREF: ${{ github.head_ref }}
+  TOREF: ${{ github.base_ref }}
+  AUTOPORTED_REPOS: (
+        XodoDocs/itext-sdk-core-dotnet
+        XodoDocs/itext-licensekey-dotnet
+        XodoDocs/itext-sdk-cleanup-dotnet
+        XodoDocs/itext-sdk-typography-dotnet
+        XodoDocs/itext-sdk-html2pdf-dotnet
+        XodoDocs/itext-sdk-pdfoptimizer-dotnet
+        XodoDocs/itext-sdk-pdfocr-dotnet
+        XodoDocs/itext-sdk-cross-module-tests-dotnet
+        XodoDocs/itext-functional-tests-dotnet
+        XodoDocs/itext-publications-samples-dotnet
+    )
+
+jobs:
+  check_conditions:
+  
+    runs-on: ubuntu-latest
+
+    outputs:
+      ok: ${{ steps.check_commits_requirements.outputs.ok }}
+      isdotnetrepo: ${{ steps.check_commits_requirements.outputs.isdotnetrepo }}
+      matchingjavarepo: ${{ steps.check_commits_requirements.outputs.matchingjavarepo }}
+      slack_email: ${{ steps.prepare_slack_msg.outputs.last_author }}
+      slack_short_msg: ${{ steps.prepare_slack_msg.outputs.short_msg }}
+      slack_blocks: ${{ steps.prepare_slack_msg.outputs.blocks }}
+      fork_ok: ${{ steps.get_fork_conditions.outputs.ok }}
+      dotnet_ok: ${{ steps.check_dotnet_requirements.outputs.ok }}
+      commits_ok: ${{ steps.check_commits_requirements.outputs.ok }}
+    
+    steps:
+      - name: Get fork conditions
+        id: get_fork_conditions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+            FORK=${{ false }}
+            CI_ASSIGNED=${{ false }}
+            if ${{ github.event.pull_request.head.repo.full_name != github.repository }}; then
+                echo "Pullrequest for a fork"
+                FORK=${{ true }}
+            fi
+            if ${{ github.event.assignee.login == 'iText-CI' }}; then
+                echo "Pullrequest assigned to iText-CI"
+                CI_ASSIGNED=${{ true }}
+            fi
+            if [[ ($FORK == ${{ true }}) && ($CI_ASSIGNED == ${{ true }}) ]]; then
+                echo "Pullrequest for a fork and iText-CI assigned > unassign iText-CI"
+                curl --request DELETE --url "https://api.github.com/repos/${{ github.repository }}/issues/${{ github.event.number }}/assignees" --header "X-GitHub-Api-Version: 2022-11-28" --header "Authorization: Bearer $GITHUB_TOKEN" --silent -d '{"assignees":["iText-CI"]}'
+            fi
+            OK=${{ false }}
+            if [[ ($FORK == ${{ false }}) || (($FORK == ${{ true }}) && ($CI_ASSIGNED == ${{ true }})) ]]; then
+                OK=${{ true }}
+            fi
+            echo "ok=$OK" >> $GITHUB_OUTPUT
+
+      - name: Check .NET repo requirements
+        if: ${{ (steps.get_fork_conditions.outputs.ok == 'true') && contains(github.repository, 'dotnet') }}
+        id: check_dotnet_requirements
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+            OK=${{ true }}
+            MATCHINGJAVAREPO=''
+            echo "check if $testRepository is in the AUTOPORTED_REPOS: ${AUTOPORTED_REPOS[*]}"
+            if [[ " ${AUTOPORTED_REPOS[*]} " =~ [[:space:]]${{ github.repository }}[[:space:]] ]]; then
+                echo "${{ github.repository }} managed by autoport"
+                java_repository=$(echo "${{ github.repository }}" | sed -e 's/dotnet/java/g')
+                echo "check if there is a matching java_repository: $java_repository"
+                check_repo=$(curl --request GET --url "https://api.github.com/repos/$java_repository" --header "X-GitHub-Api-Version: 2022-11-28" --header "Authorization: Bearer $GITHUB_TOKEN" --silent | jq '.message' | sed -e 's/\"//g')
+                if [[ $check_repo != "Not Found" ]]; then
+                    MATCHINGJAVAREPO=$java_repository
+                    echo "repo exists > check $FROMREF branch"
+                    branches=()
+                    for i in $(seq 1 3); do
+                        branchescallreturn=$(curl --request GET --url "https://api.github.com/repos/$java_repository/branches?per_page=100&page=$i" --header "X-GitHub-Api-Version: 2022-11-28" --header "Authorization: Bearer $GITHUB_TOKEN" --silent)
+                        branch_count=$(echo $branchescallreturn | jq '. | length' )
+                        if [[ $branch_count != "0" ]]; then
+                            branches+=$(echo $branchescallreturn | jq '.[] | .name')
+                        fi
+                    done
+                    branches=$(echo $branches | sed -e 's/\"//g')
+                    if [[ " ${branches[*]} " =~ [[:space:]]$FROMREF[[:space:]] ]]; then
+                        echo "branch $FROMREF exists for Java - not creating rebased branch"
+                        OK=${{ false }}
+                    fi
+                fi
+            fi
+            echo "matchingjavarepo=$MATCHINGJAVAREPO" >> $GITHUB_OUTPUT
+            echo "ok=$OK" >> $GITHUB_OUTPUT
+            
+      - name: Check commits requirements
+        if: ${{ (steps.get_fork_conditions.outputs.ok == 'true') && ((! contains(github.repository, 'dotnet')) || (contains(github.repository, 'dotnet') && (steps.check_dotnet_requirements.outputs.ok == 'true'))) }}
+        id: check_commits_requirements
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+            OK=${{ true }}
+            commits_toref=$(curl --request GET --url "https://api.github.com/repos/${{ github.repository }}/commits?sha=$TOREF&per_page=50" --header "X-GitHub-Api-Version: 2022-11-28" --header "Authorization: Bearer $GITHUB_TOKEN" --silent | jq '.[] | .sha')
+            commits_fromref=$(curl --request GET --url "https://api.github.com/repos/${{ github.repository }}/commits?sha=$FROMREF&per_page=50" --header "X-GitHub-Api-Version: 2022-11-28" --header "Authorization: Bearer $GITHUB_TOKEN" --silent | jq '.[] | .sha')
+            number_commits_behind=0
+            for x in $commits_toref; do
+                if [[ ! " ${commits_fromref[*]} " =~ [[:space:]]$x[[:space:]] ]]; then
+                    number_commits_behind=$((number_commits_behind + 1))
+                fi
+            done
+            if [[ $number_commits_behind -gt 40 ]]; then
+                echo "more than 40 commits behind: $number_commits_behind"
+                OK=${{ false }}
+            fi
+            latestCommitDateTime=$(curl --request GET --url "https://api.github.com/repos/${{ github.repository }}/commits?sha=$FROMREF&per_page=50" --header "X-GitHub-Api-Version: 2022-11-28" --header "Authorization: Bearer $GITHUB_TOKEN" --silent | jq 'first | .commit.committer.date' | sed -e 's/T.*//g' -e 's/\"//g')
+            datelimit=$(date --date="${date} -30 day" +"%Y%m%d")
+            latestCommitDateTimeFormat=$(date --date="${latestCommitDateTime}" +"%Y%m%d")
+            if [[ $latestCommitDateTimeFormat < $datelimit ]]; then
+                echo "last commit date more than 30 days ago: $latestCommitDateTimeFormat"
+                OK=${{ false }}
+            fi
+            if [[ $OK == ${{ true }} ]]; then
+                echo "all conditions successful"
+            fi
+            echo "setting outputs..."
+            ISDOTNETREPO=${{ false }}
+            MATCHINGJAVAREPO=''
+            if [[ "${{ github.repository }}" == *"dotnet" ]]; then
+                ISDOTNETREPO=${{ true }}
+                MATCHINGJAVAREPO=${{ steps.check_dotnet_requirements.outputs.matchingjavarepo }}
+            fi
+            echo "isdotnetrepo=$ISDOTNETREPO"
+            echo "matchingjavarepo=$MATCHINGJAVAREPO"
+            echo "isdotnetrepo=$ISDOTNETREPO" >> $GITHUB_OUTPUT
+            echo "matchingjavarepo=$MATCHINGJAVAREPO" >> $GITHUB_OUTPUT
+            echo "ok=$OK" >> $GITHUB_OUTPUT
+
+      - name: Prepare slack message
+        if: ${{ (steps.get_fork_conditions.outputs.ok == 'false') || (steps.check_dotnet_requirements.outputs.ok == 'false') || (steps.check_commits_requirements.outputs.ok == 'false') }}
+        id: prepare_slack_msg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+            LAST_AUTHOR=$(curl --request GET --url "https://api.github.com/repos/${{ github.repository }}/commits?sha=$FROMREF&per_page=50" --header "X-GitHub-Api-Version: 2022-11-28" --header "Authorization: Bearer $GITHUB_TOKEN" --silent | jq '.[0] | .commit.author.email')
+            echo "last_author=$LAST_AUTHOR" >> $GITHUB_OUTPUT
+            SHORT_MSG=$(echo "'rebased/$FROMREF' > Requirements not met")
+            echo "short_msg=$SHORT_MSG" >> $GITHUB_OUTPUT
+            FIRSTBLOCK="{\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \":alert-beam: 'rebased/$FROMREF' not created in '${{ github.repository }}'\"}}"
+            if [[ ${{ steps.get_fork_conditions.outputs.ok }} == 'false' ]]; then
+                BLOCKS="[$FIRSTBLOCK, {\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"Fork or iText-CI not assigned\"}}]"
+            fi
+            if [[ ("${{ github.repository }}" == *"dotnet") && ("${{ steps.check_dotnet_requirements.outputs.ok }}" == "false") ]]; then
+                BLOCKS="[$FIRSTBLOCK, {\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \".NET repo and Java branch detected\"}}]"
+            fi
+            if [[ ${{ steps.check_commits_requirements.outputs.ok }} == 'false' ]]; then
+                BLOCKS="[$FIRSTBLOCK, {\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"Branch to far behind or last commit too old\"}}]"
+            fi
+            echo "blocks=$BLOCKS" >> $GITHUB_OUTPUT
+
+
+  delete_rebased_branch:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Delete rebased branch remotely
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          echo "delete branch 'rebased/$FROMREF'"
+          curl --request DELETE --url "https://api.github.com/repos/${{ github.repository }}/git/refs/heads/rebased/$FROMREF" --header "X-GitHub-Api-Version: 2022-11-28" --header "Authorization: Bearer $GITHUB_TOKEN" --silent
+  
+
+  create_rebased_branch:
+
+    needs: [check_conditions, delete_rebased_branch]
+
+    if: needs.check_conditions.outputs.ok == 'true'
+
+    continue-on-error: true
+    
+    runs-on: ubuntu-latest
+
+    outputs:
+      failure: ${{ steps.failure_handling.outputs.failure == 'true' }}
+      slack_email: ${{ steps.failure_handling.outputs.last_author }}
+      slack_short_msg: ${{ steps.failure_handling.outputs.short_msg }}
+      slack_blocks: ${{ steps.failure_handling.outputs.blocks }}
+      
+    steps:
+      - name: Checkout main repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Create rebased branch locally
+        run: |
+          git config user.name '$GITHUB_USERNAME'
+          git config user.email '$GITHUB_USEREMAIL'
+          git checkout -b rebased/$FROMREF
+          git checkout $TOREF
+          git checkout rebased/$FROMREF
+          git rebase $TOREF
+
+      - name: Install Java 
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '8'
+
+      - name: Install Groovy
+        uses: wtfjoke/setup-groovy@v3
+        with:
+          groovy-version: "2.5.6"
+
+      - name: Get InspectHeaders.groovy
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          curl --request GET --url "https://api.github.com/repos/XodoDocs/itext-dev-tools-itext-release-scripts/contents/itext/year-copyrights-update-script/src/main/groovy/com/itextpdf/copyright/InspectHeaders.groovy" --header "Authorization: Bearer $GITHUB_TOKEN" --header "X-GitHub-Api-Version: 2022-11-28" --silent | python3 -c "import sys, json; print(json.load(sys.stdin)['content'])" | base64 --decode >  InspectHeaders.groovy
+
+      - name: Add missing copyright headers
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}      
+        run: |
+          if ${{ needs.check_conditions.outputs.isdotnetrepo == 'true'}}; then
+            if ${{ needs.check_conditions.outputs.matchingjavarepo == ''}}; then
+                groovy InspectHeaders.groovy
+                git add '**/*.cs'
+            else
+                curl --request GET --url "https://api.github.com/repos/${{ needs.check_conditions.outputs.matchingjavarepo }}/contents/sharpenConfiguration.xml?ref=develop" --header "Authorization: Bearer $GITHUB_TOKEN" --header "X-GitHub-Api-Version: 2022-11-28" --silent | python3 -c "import sys, json; print(json.load(sys.stdin)['content'])" | base64 --decode | grep '<file path' | grep '.java' | sed -e 's/<file path=\"com\/itextpdf\//**\//g' -e 's/\"//g' -e 's/\/>//g' -e 's/java/cs/g' -e 's/\s\+//g' > inclusionFile.txt
+                groovy InspectHeaders.groovy -i inclusionFile.txt
+                git add '**/*.cs'
+            fi
+          else
+            groovy InspectHeaders.groovy
+            git add './**/*.java'
+          fi
+
+      - name: Push rebased branch to remote
+        run: |
+            git push origin rebased/$FROMREF
+
+      - name: Set git notes
+        id: gitnotes
+        run: |
+            git fetch origin refs/notes/*:refs/notes/*
+            git notes add -f -m 'CREATED_BY: PR-${{ github.event.pull_request.id }}'
+            git push origin refs/notes/*
+
+      - name: Failure handling
+        if: failure()
+        id: failure_handling
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+            FAILURE=${{ true }}
+            echo "failure=$FAILURE" >> $GITHUB_OUTPUT
+            LAST_AUTHOR=$(curl --request GET --url "https://api.github.com/repos/${{ github.repository }}/commits?sha=$FROMREF&per_page=50" --header "X-GitHub-Api-Version: 2022-11-28" --header "Authorization: Bearer $GITHUB_TOKEN" --silent | jq '.[0] | .commit.author.email')
+            echo "last_author=$LAST_AUTHOR" >> $GITHUB_OUTPUT
+            SHORT_MSG=$(echo "'rebased/$FROMREF' > Rebase failed")
+            echo "short_msg=$SHORT_MSG" >> $GITHUB_OUTPUT
+            FIRSTBLOCK="{\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \":alert-beam: 'rebased/$FROMREF' not created in '${{ github.repository }}'\"}}"
+            BLOCKS="[$FIRSTBLOCK, {\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"Rebase failed\"}}]"
+            echo "blocks=$BLOCKS" >> $GITHUB_OUTPUT
+
+
+  notification_conditions:
+
+    needs: [check_conditions]
+    
+    if: (needs.check_conditions.outputs.fork_ok == 'false') ||  (needs.check_conditions.outputs.dotnet_ok == 'false') || (needs.check_conditions.outputs.commits_ok == 'false')
+        
+    uses: itext/rups/.github/workflows/sendslackmsgtopusher.yml@createRebased
+    secrets: inherit
+    with:
+      emailslackuser: ${{ needs.check_conditions.outputs.slack_email }}
+      shortmsg: ${{ needs.check_conditions.outputs.slack_short_msg }}
+      blocks: ${{ needs.check_conditions.outputs.slack_blocks }}
+
+      
+  notification_rebase_failure:
+
+    needs: [create_rebased_branch]
+    
+    if: (needs.create_rebased_branch.outputs.failure == 'true')
+        
+    uses: itext/rups/.github/workflows/sendslackmsgtopusher.yml@createRebased
+    secrets: inherit
+    with:
+      emailslackuser: ${{ needs.create_rebased_branch.outputs.slack_email }}
+      shortmsg: ${{ needs.create_rebased_branch.outputs.slack_short_msg }}
+      blocks: ${{ needs.create_rebased_branch.outputs.slack_blocks }}
+      
