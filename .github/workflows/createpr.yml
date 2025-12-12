@@ -1,0 +1,26 @@
+name: CreatePR
+
+on:
+  create:
+    # 'branches-ignore' or 'branches' can be used to filter specific branches.
+    # By default, without any filters, it runs on every push to all branches.
+    # To be explicit, you can use:
+    branches-ignore:
+      - 'develop'
+      - 'master'
+      - 'rebased/*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Open pull request
+        run: |
+          gh pr create \
+            --title "Pull Request to create/update 'rebased/${{ github.ref }}' branch" \
+            --body "Programmatically created Pull Request to automatically keep merge branch to develop up-to-date" \
+            --base develop \
+            --head ${{ github.ref }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
