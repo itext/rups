@@ -1,0 +1,77 @@
+name: CreatePR
+
+on:
+  create:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Open pull request
+        id: open-pull-request
+        if: ${{ ! startsWith(github.ref, 'refs/heads/rebased') }}
+        run: |
+          gh pr create \
+            --title "Pull Request to create/update rebased branch for '${{ github.ref }}'" \
+            --body "Programmatically created Pull Request to automatically keep merge branch to develop up-to-date" \
+            --base develop \
+            --head ${{ github.ref }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          
+      - name: Find correspondences
+        if: ${{ ! steps.open-pull-request.outputs.ok }}
+        id: email
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          method: users.lookupByEmail # https://api.slack.com/methods/users.lookupByEmail
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            email: ${{ github.event.pusher.email }}
+
+      - name: Search email detail
+        if: ${{ ! steps.open-pull-request.outputs.ok && steps.email.outputs.ok }}
+        run: |
+          SLACK_USER_ID=$(echo '${{ steps.email.outputs.response }}' | jq -r '.user.id')
+          echo "SLACK_USER_ID=$SLACK_USER_ID" >> $GITHUB_ENV
+
+      - name: Send a direct message
+        if: ${{ ! steps.open-pull-request.outputs.ok && steps.email.outputs.ok }}
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          errors: true
+          method: chat.postMessage # https://api.slack.com/methods/chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            "channel": "${{ env.SLACK_USER_ID }}",
+            "text": "${{ steps.remove-license.outputs.short_msg }}",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": ":alert: *LICENSES DETECTED* :alert:"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "${{ steps.remove-license.outputs.action_type}} ${{ steps.push-type.outputs.push_type}} `${{ steps.remove-license.outputs.msg_code }}` ${{ steps.remove-license.outputs.xtra_msg }}"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "<${{ steps.remove-license.outputs.link }}>"
+                }
+              }
+            ]
+
