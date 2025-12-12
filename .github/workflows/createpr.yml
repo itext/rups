@@ -1,0 +1,82 @@
+name: CreatePR
+
+on:
+  create:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Open pull request
+        id: open-pull-request
+        if: ${{ ! startsWith(github.ref, 'refs/heads/rebased') }}
+        run: |
+          gh pr create \
+            --title "Pull Request to create/update rebased branch for '${{ github.ref }}'" \
+            --body "Programmatically created Pull Request to automatically keep merge branch to develop up-to-date" \
+            --base develop \
+            --head ${{ github.ref }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Get email
+        if: steps.open-pull-request.outcome == 'failure'
+        id: get-email
+        uses: evvanErb/get-github-email-by-username-action@v2.0
+        with:
+          github-username: ${{ github.event.sender.login }}
+          token: ${{ secrets.GH_TOKEN }}
+          
+      - name: Find correspondences
+        if: steps.open-pull-request.outcome == 'failure'
+        id: get-slack-user
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          method: users.lookupByEmail # https://api.slack.com/methods/users.lookupByEmail
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            email: ${{ steps.get-email.outputs.email }}
+
+      - name: Search email detail
+        id: get-slack-user-id
+        if: steps.open-pull-request.outcome == 'failure'
+        run: |
+          SLACK_USER_ID=$(echo '${{ steps.get-slack-user.outputs.response }}' | jq -r '.user.id')
+          echo "SLACK_USER_ID=$SLACK_USER_ID" >> $GITHUB_ENV
+
+      - name: Send a direct message
+        if: steps.open-pull-request.outcome == 'failure'
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          errors: true
+          method: chat.postMessage # https://api.slack.com/methods/chat.postMessage
+          token: ${{ secrets.SLACK_BOT_TOKEN }}
+          payload: |
+            "channel": "${{ env.SLACK_USER_ID }}",
+            "text": "No pull request created for '${{ github.ref }}'!",
+            "blocks": [
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": ":alert-beam: *NO PULL REQUEST CREATED*"
+                }
+              },
+              {
+                "type": "section",
+                "text": {
+                  "type": "mrkdwn",
+                  "text": "for branch '${{ github.ref }}' of ${{ github.server_url }}/${{ github.repository }}"
+                }
+              }
+            ]
+
