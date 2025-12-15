@@ -317,6 +317,15 @@ public class PdfObjectTreeNode extends IconTreeNode implements IPdfContextMenuTa
     }
 
     /**
+     * Tells you if the node contains a string.
+     *
+     * @return true if the object is a PdfString
+     */
+    public boolean isString() {
+        return object.isString();
+    }
+
+    /**
      * Set this to true if the object is a reference to a node higher up in the tree.
      *
      * @param recursive true if the object is indirect and recursive
