@@ -29,7 +29,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Get email
-        if: steps.open-pull-request.outcome == 'failure'
+        if: failure()
         id: get-email
         uses: evvanErb/get-github-email-by-username-action@v2.0
         with:
@@ -37,7 +37,7 @@ jobs:
           token: ${{ secrets.GH_TOKEN }}
           
       - name: Find correspondences
-        if: steps.open-pull-request.outcome == 'failure'
+        if: failure()
         id: get-slack-user
         uses: slackapi/slack-github-action@v2.1.1
         with:
@@ -48,13 +48,13 @@ jobs:
 
       - name: Search email detail
         id: get-slack-user-id
-        if: steps.open-pull-request.outcome == 'failure'
+        if: failure()
         run: |
           SLACK_USER_ID=$(echo '${{ steps.get-slack-user.outputs.response }}' | jq -r '.user.id')
           echo "SLACK_USER_ID=$SLACK_USER_ID" >> $GITHUB_ENV
 
       - name: Send a direct message
-        if: steps.open-pull-request.outcome == 'failure'
+        if: failure()
         uses: slackapi/slack-github-action@v2.1.1
         with:
           errors: true
