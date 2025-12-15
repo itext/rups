@@ -73,7 +73,6 @@ import javax.swing.tree.TreeNode;
 public class TreeNodeFactory {
     // These should be available in later versions of iText, remove later
     private static final PdfName PdfNameIssuer = new PdfName("Issuer");
-    private static final PdfName PdfNameSV = new PdfName("SV");
     private static final PdfName PdfNameSVCert = new PdfName("SVCert");
     private static final PdfName PdfNameTS = new PdfName("TS");
 
@@ -130,7 +129,7 @@ public class TreeNodeFactory {
     }
 
     /**
-     * Creates the Child TreeNode objects for a PDF object TreeNode.
+     * Creates the child TreeNode objects for a PDF object TreeNode.
      *
      * @param node the parent node
      */
@@ -224,7 +223,7 @@ public class TreeNodeFactory {
     }
 
     /**
-     * Creates the Child TreeNode objects for a PDF object TreeNode, which
+     * Creates the child TreeNode objects for a PDF object TreeNode, which
      * contains DER-encoded ASN.1 bytes.
      *
      * @param node the parent node.
@@ -239,7 +238,7 @@ public class TreeNodeFactory {
     }
 
     /**
-     * Creates the Child TreeNode objects for a PDF object TreeNode, which
+     * Creates the child TreeNode objects for a PDF object TreeNode, which
      * is a /Contents entry in a /Sig or /DocTimeStamp dictionary.
      *
      * @param node the parent node.
@@ -326,7 +325,7 @@ public class TreeNodeFactory {
     }
 
     /**
-     * Creates the Child TreeNode objects for a PDF object TreeNode, which
+     * Creates the child TreeNode objects for a PDF object TreeNode, which
      * is inside /Subject or /Issuer arrays in a /SVCert dictionary.
      *
      * @param node the parent node.
@@ -410,7 +409,7 @@ public class TreeNodeFactory {
             return false;
         }
         dictType = parent.getPdfDictionaryType();
-        if (PdfNameSV.equals(dictType)) {
+        if (PdfName.SV.equals(dictType)) {
             return true;
         }
         if (dictType != null) {
@@ -422,7 +421,7 @@ public class TreeNodeFactory {
          * It should be a form field dictionary with the form field type of
          * /Sig and the parent object should be under /SV there.
          */
-        return isUnderSigFormFieldDict(parent, PdfNameSV);
+        return isUnderSigFormFieldDict(parent, PdfName.SV);
     }
 
     /**
@@ -442,7 +441,7 @@ public class TreeNodeFactory {
     }
 
     /**
-     * Creates the Child TreeNode objects for a PDF object TreeNode, which
+     * Creates the child TreeNode objects for a PDF object TreeNode, which
      * is a DER-encoded object under the DSS dictionary nodes.
      *
      * @param node the parent node.
@@ -458,7 +457,7 @@ public class TreeNodeFactory {
     }
 
     /**
-     * Creates the Child TreeNode objects for a PDF object TreeNode, which
+     * Creates the child TreeNode objects for a PDF object TreeNode, which
      * is in an array under DSS.
      *
      * @param node the parent node.
@@ -510,7 +509,7 @@ public class TreeNodeFactory {
     }
 
     /**
-     * Creates the Child TreeNode objects for a PDF object TreeNode, which
+     * Creates the child TreeNode objects for a PDF object TreeNode, which
      * is a stream under /TS in DSS.
      *
      * @param node the parent node.
