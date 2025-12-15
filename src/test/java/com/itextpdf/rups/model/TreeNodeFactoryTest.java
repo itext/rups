@@ -66,7 +66,6 @@ import org.junit.jupiter.api.Test;
 
 @Tag("UnitTest")
 final class TreeNodeFactoryTest {
-    private static final PdfName SV = new PdfName("SV");
     private static final PdfName SVCert = new PdfName("SVCert");
 
     @Test
@@ -418,7 +417,7 @@ final class TreeNodeFactoryTest {
          *
          * Checking both keys at the same time.
          */
-        doSVCertTest(PdfName.Sig, SV, SVCert, new PdfString(new byte[] {0x30, 0x00}), "certificate");
+        doSVCertTest(PdfName.Sig, PdfName.SV, SVCert, new PdfString(new byte[] {0x30, 0x00}), "certificate");
     }
 
     @Test
@@ -440,7 +439,7 @@ final class TreeNodeFactoryTest {
          *
          * Checking both keys at the same time.
          */
-        doSVCertTest(PdfName.Sig, SV, SVCert, new PdfString(new byte[] {0x01, 0x00}), null);
+        doSVCertTest(PdfName.Sig, PdfName.SV, SVCert, new PdfString(new byte[] {0x01, 0x00}), null);
     }
 
     @Test
@@ -460,7 +459,7 @@ final class TreeNodeFactoryTest {
          *
          * Checking both keys at the same time.
          */
-        doSVCertTest(PdfName.Sig, SV, PdfName.Tx, new PdfString(new byte[] {0x30, 0x00}), null);
+        doSVCertTest(PdfName.Sig, PdfName.SV, PdfName.Tx, new PdfString(new byte[] {0x30, 0x00}), null);
     }
 
     @Test
@@ -480,7 +479,7 @@ final class TreeNodeFactoryTest {
          *
          * Checking both keys at the same time.
          */
-        doSVCertTest(PdfName.Sig, SV, SVCert, new PdfNumber(1), null);
+        doSVCertTest(PdfName.Sig, PdfName.SV, SVCert, new PdfNumber(1), null);
     }
 
     @Test
@@ -499,7 +498,7 @@ final class TreeNodeFactoryTest {
          *
          * Checking both keys at the same time.
          */
-        doSVCertTest(PdfName.Sig, SV, null, new PdfString(new byte[] {0x30, 0x00}), "certificate");
+        doSVCertTest(PdfName.Sig, PdfName.SV, null, new PdfString(new byte[] {0x30, 0x00}), "certificate");
     }
 
     @Test
@@ -745,7 +744,7 @@ final class TreeNodeFactoryTest {
         if (ft != null) {
             sigFormField.put(PdfName.FT, ft);
         }
-        sigFormField.put(SV, svDict.getIndirectReference());
+        sigFormField.put(PdfName.SV, svDict.getIndirectReference());
         final PdfDictionary acroFormDict = createAcroFormDict(doc, sigFormField);
         doc.getCatalog().getPdfObject().put(PdfName.AcroForm, acroFormDict);
 
@@ -755,7 +754,7 @@ final class TreeNodeFactoryTest {
         expandAll(factory, node);
 
         // Getting /SV dictionary reference
-        node = node.getDictionaryChildNode(SV);
+        node = node.getDictionaryChildNode(PdfName.SV);
         Assertions.assertNotNull(node);
         Assertions.assertTrue(node.isIndirectReference());
         Assertions.assertEquals(1, node.getChildCount());
