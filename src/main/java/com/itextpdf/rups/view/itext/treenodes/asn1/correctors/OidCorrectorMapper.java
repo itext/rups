@@ -44,13 +44,13 @@ package com.itextpdf.rups.view.itext.treenodes.asn1.correctors;
 
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.algorithms.Mgf1Corrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.algorithms.RsassaPssCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.pdf.RevocationInfoArchivalCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.BasicOcspResponseCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.TimeStampTokenInfoCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.CmsAlgorithmProtectionCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.ContentTypeCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.MessageDigestCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.RandomNonceCorrector;
-import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.RevocationInfoArchivalCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.SequenceNumberCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.SigningCertificateCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes.SigningCertificateV2Corrector;
@@ -106,6 +106,11 @@ public final class OidCorrectorMapper {
             Map.entry(
                     RsassaPssCorrector.OID,
                     RsassaPssCorrector.INSTANCE
+            ),
+            // PDF
+            Map.entry(
+                    RevocationInfoArchivalCorrector.OID,
+                    RevocationInfoArchivalCorrector.INSTANCE
             ),
             // X.509 General
             Map.entry(
@@ -164,10 +169,6 @@ public final class OidCorrectorMapper {
             Map.entry(
                     RandomNonceCorrector.OID,
                     RandomNonceCorrector.INSTANCE
-            ),
-            Map.entry(
-                    RevocationInfoArchivalCorrector.OID,
-                    RevocationInfoArchivalCorrector.INSTANCE
             ),
             Map.entry(
                     SequenceNumberCorrector.OID,

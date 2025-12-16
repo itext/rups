@@ -40,7 +40,7 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes;
+package com.itextpdf.rups.view.itext.treenodes.asn1.correctors.pdf;
 
 import com.itextpdf.rups.view.itext.treenodes.asn1.AbstractAsn1TreeNode;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.AbstractCorrector;
@@ -67,7 +67,8 @@ public final class RevocationInfoArchivalCorrector extends AbstractCorrector {
     /**
      * Singleton instance of the corrector.
      */
-    public static final RevocationInfoArchivalCorrector INSTANCE = new RevocationInfoArchivalCorrector();
+    public static final RevocationInfoArchivalCorrector INSTANCE
+            = new RevocationInfoArchivalCorrector();
 
     private RevocationInfoArchivalCorrector() {
         // singleton class
