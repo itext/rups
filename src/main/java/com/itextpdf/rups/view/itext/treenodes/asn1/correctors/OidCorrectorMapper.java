@@ -92,6 +92,10 @@ public final class OidCorrectorMapper {
     private static final Map<String, AbstractCorrector> CORRECTOR_MAP = Map.ofEntries(
             // Well this is ugly... Need code generation...
             Map.entry(
+                    AuthenticatedDataCorrector.OID,
+                    AuthenticatedDataCorrector.INSTANCE
+            ),
+            Map.entry(
                     ContentInfoCorrector.OID,
                     ContentInfoCorrector.INSTANCE
             ),
