@@ -60,17 +60,44 @@ public final class OidMainTreeBuilder {
      * Tree: *
      */
     public static OidTreeNode build() {
+        // @formatter:off
         return new OidTreeNode(null, Map.ofEntries(
-                entry("0", "itu-t"),
-                entry("1", "iso", Map.ofEntries(
-                        entry("0", "standard"),
-                        entry("1", "registration-authority", Map.ofEntries(
-                                entry("2", "document-type")
-                        )),
-                        entry("2", OidIsoMemberBodyTreeBuilder.build()),
-                        entry("3", OidIsoIdentifiedOrganizationTreeBuilder.build())
-                )),
-                entry("2", OidJointIsoItuTTreeBuilder.build())
+          entry("0", "itu-t"),
+          entry("1", "iso", Map.ofEntries(
+            entry("0", "standard", Map.ofEntries(
+              entry("32004", createIso32004Tree())
+            )),
+            entry("1", "registration-authority", Map.ofEntries(
+              entry("2", "document-type")
+            )),
+            entry("2", OidIsoMemberBodyTreeBuilder.build()),
+            entry("3", OidIsoIdentifiedOrganizationTreeBuilder.build())
+          )),
+          entry("2", OidJointIsoItuTTreeBuilder.build())
         ));
+        // @formatter:on
+    }
+
+
+    /**
+     * Tree: 1.0.32004.*
+     *
+     * @see <a href="https://pdfa.org/resource/iso-ts-32004-integrity-protection/">
+     * Integrity protection in encrypted documents in PDF 2.0
+     * </a>
+     */
+    private static OidTreeNode createIso32004Tree() {
+        // @formatter:off
+        return new OidTreeNode("iso32004", Map.ofEntries(
+          entry("0", "modules", Map.ofEntries(
+            entry("1", "pdfmac")
+          )),
+          entry("1", "pdfmac", Map.ofEntries(
+            entry("0", "id-ct-pdfMacIntegrityInfo"),
+            entry("1", "id-kdf-pdfMacWrapKdf"),
+            entry("2", "id-attr-pdfMacData")
+          ))
+        ));
+        // @formatter:on
     }
 }

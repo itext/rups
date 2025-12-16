@@ -438,6 +438,26 @@ final class OidReferenceTest {
     }
 
     @Test
+    void getDisplayString_Iso32004() {
+        Assertions.assertEquals(
+                "/iso/standard/iso32004/modules/pdfmac",
+                OidReference.getDisplayString("1.0.32004.0.1")
+        );
+        Assertions.assertEquals(
+                "/iso/standard/iso32004/pdfmac/id-ct-pdfMacIntegrityInfo",
+                OidReference.getDisplayString("1.0.32004.1.0")
+        );
+        Assertions.assertEquals(
+                "/iso/standard/iso32004/pdfmac/id-kdf-pdfMacWrapKdf",
+                OidReference.getDisplayString("1.0.32004.1.1")
+        );
+        Assertions.assertEquals(
+                "/iso/standard/iso32004/pdfmac/id-attr-pdfMacData",
+                OidReference.getDisplayString("1.0.32004.1.2")
+        );
+    }
+
+    @Test
     void getDisplayString_Misc() {
         Assertions.assertEquals(
                 "/iso/registration-authority/document-type",
