@@ -551,7 +551,7 @@ public abstract class AbstractCorrector {
      * @param getInstanceFunc Bouncy Castle type-specific <tt>getInstance</tt>
      *                        function.
      *
-     * @return The object, that is now stored inside <tt>node</tt>. If fix it
+     * @return The object, that is now stored inside <tt>node</tt>. If fix is
      * not possible, or if it was already correct, the old object will be
      * returned.
      */
