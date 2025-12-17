@@ -239,6 +239,10 @@ final class OidReferenceTest {
                 OidReference.getDisplayString("1.3.6.1.5.5.7.3.8")
         );
         Assertions.assertEquals(
+                "/iso/identified-organization/dod/internet/security/mechanisms/pkix/id-pda/id-pda-dateOfBirth",
+                OidReference.getDisplayString("1.3.6.1.5.5.7.9.1")
+        );
+        Assertions.assertEquals(
                 "/iso/identified-organization/dod/internet/security/mechanisms/pkix/ad/id-ad-ocsp",
                 OidReference.getDisplayString("1.3.6.1.5.5.7.48.1")
         );
@@ -454,6 +458,40 @@ final class OidReferenceTest {
         Assertions.assertEquals(
                 "/iso/standard/iso32004/pdfmac/id-attr-pdfMacData",
                 OidReference.getDisplayString("1.0.32004.1.2")
+        );
+    }
+
+    @Test
+    void getDisplayString_Etsi() {
+        Assertions.assertEquals(
+                "/itu-t/identified-organization/etsi/id-qc-profile/id-etsi-qcs"
+                        + "/id-etsi-qcs-QcCompliance",
+                OidReference.getDisplayString("0.4.0.1862.1.1")
+        );
+        Assertions.assertEquals(
+                "/itu-t/identified-organization/etsi/id-qc-profile/id-etsi-qcs"
+                        + "/id-etsi-qcs-QcSSCD",
+                OidReference.getDisplayString("0.4.0.1862.1.4")
+        );
+        Assertions.assertEquals(
+                "/itu-t/identified-organization/etsi/id-qc-profile/id-etsi-qcs"
+                        + "/id-etsi-qcs-QcPDS",
+                OidReference.getDisplayString("0.4.0.1862.1.5")
+        );
+        Assertions.assertEquals(
+                "/itu-t/identified-organization/etsi/id-qc-profile/id-etsi-qcs"
+                        + "/id-etsi-qcs-QcType/id-etsi-qct-esign",
+                OidReference.getDisplayString("0.4.0.1862.1.6.1")
+        );
+        Assertions.assertEquals(
+                "/itu-t/identified-organization/etsi/other-certificate-policies"
+                        + "/policy-identifiers/ncpplus",
+                OidReference.getDisplayString("0.4.0.2042.1.2")
+        );
+        Assertions.assertEquals(
+                "/itu-t/identified-organization/etsi/qualified-certificate-policies"
+                        + "/policy-identifiers/qcp-natural-qscd",
+                OidReference.getDisplayString("0.4.0.194112.1.2")
         );
     }
 

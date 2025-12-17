@@ -110,7 +110,7 @@ final class OidIsoIdentifiedOrganizationTreeBuilder {
           entry("6", createPkixAlgorithmsTree()),
           entry("7", "cmc"),
           entry("8", "on"),
-          entry("9", "pda"),
+          entry("9", createPkixPdaTree()),
           entry("10", "attributeCertificate"),
           entry("11", "qcs"),
           entry("12", "cct"),
@@ -319,6 +319,23 @@ final class OidIsoIdentifiedOrganizationTreeBuilder {
                 entry("31", "id-RSASSA-PSS-SHAKE256"),
                 entry("32", "id-ecdsa-with-shake128"),
                 entry("33", "id-ecdsa-with-shake256")
+        ));
+        // @formatter:on
+    }
+
+    /**
+     * Tree: 1.3.6.1.5.5.7.9.*
+     *
+     * @see <a href="https://www.ietf.org/rfc/rfc3739.txt">RFC 3739</a>
+     */
+    private static OidTreeNode createPkixPdaTree() {
+        // @formatter:off
+        return new OidTreeNode("id-pda", Map.ofEntries(
+          entry("1", "id-pda-dateOfBirth"),
+          entry("2", "id-pda-placeOfBirth"),
+          entry("3", "id-pda-gender"),
+          entry("4", "id-pda-countryOfCitizenship"),
+          entry("5", "id-pda-countryOfResidence")
         ));
         // @formatter:on
     }

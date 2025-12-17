@@ -70,6 +70,7 @@ public final class OidJointIsoItuTTreeBuilder {
         return new OidTreeNode("joint-iso-itu-t", Map.ofEntries(
           entry("5", createDsTree()),
           entry("16", "country", Map.ofEntries(
+            entry("620", "pt"),
             entry("724", "es", Map.ofEntries(
               entry("1", "adm", Map.ofEntries(
                 entry("3", "mpr", Map.ofEntries(

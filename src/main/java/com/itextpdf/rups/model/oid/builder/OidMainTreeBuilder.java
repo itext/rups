@@ -62,7 +62,7 @@ public final class OidMainTreeBuilder {
     public static OidTreeNode build() {
         // @formatter:off
         return new OidTreeNode(null, Map.ofEntries(
-          entry("0", "itu-t"),
+          entry("0", OidItuTTreeBuilder.build()),
           entry("1", "iso", Map.ofEntries(
             entry("0", "standard", Map.ofEntries(
               entry("32004", createIso32004Tree())
@@ -77,7 +77,6 @@ public final class OidMainTreeBuilder {
         ));
         // @formatter:on
     }
-
 
     /**
      * Tree: 1.0.32004.*
