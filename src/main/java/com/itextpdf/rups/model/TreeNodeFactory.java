@@ -269,6 +269,9 @@ public class TreeNodeFactory {
          * themes, but it seems like a reasonable default to use.
          */
         final PdfString nodeObject = (PdfString) node.getPdfObject();
+        // This is important, otherwise /Contents value in encrypted documents
+        // will be broken...
+        nodeObject.markAsUnencryptedObject();
         final AbstractAsn1TreeNode asn1 = Asn1TreeNodeFactory.fromPrimitive(nodeObject.getValueBytes());
         if (asn1 != null) {
             /*
