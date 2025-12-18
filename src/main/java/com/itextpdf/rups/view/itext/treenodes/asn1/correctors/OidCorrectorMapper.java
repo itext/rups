@@ -44,6 +44,7 @@ package com.itextpdf.rups.view.itext.treenodes.asn1.correctors;
 
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.algorithms.Mgf1Corrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.algorithms.RsassaPssCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.pdf.PdfMacDataCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.pdf.PdfMacIntegrityInfoCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.pdf.RevocationInfoArchivalCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.BasicOcspResponseCorrector;
@@ -113,6 +114,10 @@ public final class OidCorrectorMapper {
                     RsassaPssCorrector.INSTANCE
             ),
             // PDF
+            Map.entry(
+                    PdfMacDataCorrector.OID,
+                    PdfMacDataCorrector.INSTANCE
+            ),
             Map.entry(
                     PdfMacIntegrityInfoCorrector.OID,
                     PdfMacIntegrityInfoCorrector.INSTANCE
