@@ -1,0 +1,16 @@
+name: Test
+
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Get email
+        id: get-email
+        uses: evvanErb/get-github-email-by-username-action@v2.0
+        with:
+          github-username: marcoandries
+          token: ${{ secrets.GH_TOKEN }}
