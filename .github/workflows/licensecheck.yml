@@ -14,6 +14,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    continue-on-error: true
+
     steps:
       - name: Get number commits
         id: get_nr_commits
@@ -154,3 +156,25 @@ jobs:
                 }
               }
             ]
+
+      - name: Fallback Email notification
+        if: failure()
+        id: fallback_mail
+        uses: dawidd6/action-send-mail@v6
+        with:
+            # Required mail server address if not connection_url:
+            server_address: smtp.gmail.com
+            # Optional whether this connection use TLS (default is true if server_port is 465)
+            secure: true
+            # Required mail subject:
+            subject: Github Actions job result
+            # Required recipients' addresses:
+            to: obiwan@example.com,yoda@example.com
+            # Required sender full name (address can be skipped):
+            from: Luke Skywalker # <user@example.com>
+            # Optional plain body:
+            body: Build job of ${{github.repository}} completed successfully!
+            # Optional unsigned/invalid certificates allowance:
+            ignore_cert: true
+            # Optional priority: 'high', 'normal' (default) or 'low'
+            priority: high
