@@ -15,12 +15,20 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Get number commits
+        id: get_nr_commits
+        env:
+            commits: ${{ toJson(github.event.commits) }}
+        run: |
+            NUMBER_COMMITS=$(echo $commits | jq '. | length' )
+            echo "number_commits=$NUMBER_COMMITS" >> $GITHUB_OUTPUT
+
       - name: Get push type
         id: push-type
         run: |
             echo "Getting push type"
             PUSH_TYPE='commit'
-            FETCH_DEPTH=10
+            FETCH_DEPTH=${{ steps.get_nr_commits.outputs.number_commits }}
             if ${{ github.event.forced }} || ${{ github.event.before == '0000000000000000000000000000000000000000' }}; then
                 PUSH_TYPE='branch'
                 FETCH_DEPTH=0
