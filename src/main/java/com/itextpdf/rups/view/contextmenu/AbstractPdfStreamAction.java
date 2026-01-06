@@ -46,6 +46,8 @@ import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.view.itext.PdfTree;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
+import javax.swing.tree.TreePath;
+
 public abstract class AbstractPdfStreamAction extends AbstractRupsAction {
     protected final transient PdfReaderController controller;
 
@@ -72,8 +74,15 @@ public abstract class AbstractPdfStreamAction extends AbstractRupsAction {
         // be regenerated after the update. Presumably there should be a
         // better way to do this, but this works fine for now
         if (controller != null) {
+            final TreePath path = new TreePath(root.getPath());
+            boolean wasExpanded = controller.getPdfTree().isExpanded(path);
             controller.deleteAllTreeChildren(root);
             controller.selectNode(root);
+            if (wasExpanded) {
+                controller.getPdfTree().expandPath(path);
+            } else {
+                controller.getPdfTree().collapsePath(path);
+            }
         }
     }
 }
