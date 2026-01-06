@@ -127,6 +127,35 @@ class StructureTreeTest {
         Assertions.assertEquals(0, secondTextNode.getChildCount());
     }
 
+    @Test
+    void structElemsUnexpectedPageRefTestTest()
+            throws IOException, ExecutionException, InterruptedException {
+        /*
+         * For some reason there are documents in the wild, where there is a
+         * structure elem tree, but the elements there reference a page, which
+         * is absent in the overall page tree. We shouldn't crash in such cases.
+         */
+        final PdfFile pdfFile = PdfFile.open(
+                new File(SOURCE_DIR + "UnexpectedPageRefTest.pdf")
+        );
+
+        final StructureTreeNode rootNode = getStructureTreeRootNode(pdfFile);
+        Assertions.assertEquals(1, rootNode.getChildCount());
+
+        final StructureTreeNode docNode = (StructureTreeNode) rootNode.getChildAt(0);
+        Assertions.assertEquals("/Document", docNode.toString());
+        Assertions.assertEquals(1, docNode.getChildCount());
+        final StructureTreeNode floatNode = (StructureTreeNode) docNode.getChildAt(0);
+        Assertions.assertEquals("/Float", floatNode.toString());
+        Assertions.assertEquals(1, floatNode.getChildCount());
+        final StructureTreeNode figureNode = (StructureTreeNode) floatNode.getChildAt(0);
+        Assertions.assertEquals("/Figure", figureNode.toString());
+        Assertions.assertEquals(1, figureNode.getChildCount());
+        final StructureTreeNode mcidNode = (StructureTreeNode) figureNode.getChildAt(0);
+        Assertions.assertEquals("0", mcidNode.toString());
+        Assertions.assertEquals(0, mcidNode.getChildCount());
+    }
+
     private static StructureTreeNode getStructureTreeRootNode(IPdfFile pdfFile)
             throws ExecutionException, InterruptedException {
 
