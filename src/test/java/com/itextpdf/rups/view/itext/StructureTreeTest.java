@@ -91,6 +91,42 @@ class StructureTreeTest {
         Assertions.assertEquals("0 [Olleh ]", nodeLabel);
     }
 
+    @Test
+    void structElemsGeneratedByAcrobatTest()
+            throws IOException, ExecutionException, InterruptedException {
+        /*
+         * Acrobat doesn't set the /Type key on the structure elements
+         * themselves. This test is here to check, that we process this case
+         * properly.
+         */
+        final PdfFile pdfFile = PdfFile.open(
+                new File(SOURCE_DIR + "AcrobatStructElemTest.pdf")
+        );
+
+        final StructureTreeNode rootNode = getStructureTreeRootNode(pdfFile);
+        Assertions.assertEquals(2, rootNode.getChildCount());
+
+        final StructureTreeNode firstPNode = (StructureTreeNode) rootNode.getChildAt(0);
+        Assertions.assertEquals("/P", firstPNode.toString());
+        Assertions.assertEquals(1, firstPNode.getChildCount());
+        final StructureTreeNode firstTextNode = (StructureTreeNode) firstPNode.getChildAt(0);
+        Assertions.assertEquals(
+                "0 [A paragraph created in Acrobat, tagged. ]",
+                firstTextNode.toString()
+        );
+        Assertions.assertEquals(0, firstTextNode.getChildCount());
+
+        final StructureTreeNode secondPNode = (StructureTreeNode) rootNode.getChildAt(1);
+        Assertions.assertEquals("/P -> #2 [Second Paragraph]", secondPNode.toString());
+        Assertions.assertEquals(1, secondPNode.getChildCount());
+        final StructureTreeNode secondTextNode = (StructureTreeNode) secondPNode.getChildAt(0);
+        Assertions.assertEquals(
+                "1 [A second paragraph. ]",
+                secondTextNode.toString()
+        );
+        Assertions.assertEquals(0, secondTextNode.getChildCount());
+    }
+
     private static StructureTreeNode getStructureTreeRootNode(IPdfFile pdfFile)
             throws ExecutionException, InterruptedException {
 
