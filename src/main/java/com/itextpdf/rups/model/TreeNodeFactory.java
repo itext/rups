@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -73,7 +73,6 @@ import javax.swing.tree.TreeNode;
 public class TreeNodeFactory {
     // These should be available in later versions of iText, remove later
     private static final PdfName PdfNameIssuer = new PdfName("Issuer");
-    private static final PdfName PdfNameSV = new PdfName("SV");
     private static final PdfName PdfNameSVCert = new PdfName("SVCert");
     private static final PdfName PdfNameTS = new PdfName("TS");
 
@@ -130,7 +129,7 @@ public class TreeNodeFactory {
     }
 
     /**
-     * Creates the Child TreeNode objects for a PDF object TreeNode.
+     * Creates the child TreeNode objects for a PDF object TreeNode.
      *
      * @param node the parent node
      */
@@ -224,7 +223,7 @@ public class TreeNodeFactory {
     }
 
     /**
-     * Creates the Child TreeNode objects for a PDF object TreeNode, which
+     * Creates the child TreeNode objects for a PDF object TreeNode, which
      * contains DER-encoded ASN.1 bytes.
      *
      * @param node the parent node.
@@ -235,11 +234,12 @@ public class TreeNodeFactory {
     private static boolean expandAsn1Nodes(PdfObjectTreeNode node) {
         return expandSigContentsNode(node)
                 || expandSvCertArrayValueNode(node)
-                || expandDssDataNode(node);
+                || expandDssDataNode(node)
+                || expandStandaloneMacNode(node);
     }
 
     /**
-     * Creates the Child TreeNode objects for a PDF object TreeNode, which
+     * Creates the child TreeNode objects for a PDF object TreeNode, which
      * is a /Contents entry in a /Sig or /DocTimeStamp dictionary.
      *
      * @param node the parent node.
@@ -249,7 +249,7 @@ public class TreeNodeFactory {
      */
     private static boolean expandSigContentsNode(PdfObjectTreeNode node) {
         // This should be a string under the /Contents key
-        if (!node.isDictionaryNode(PdfName.Contents) || !node.getPdfObject().isString()) {
+        if (!node.isDictionaryNode(PdfName.Contents) || !node.isString()) {
             return false;
         }
 
@@ -269,6 +269,9 @@ public class TreeNodeFactory {
          * themes, but it seems like a reasonable default to use.
          */
         final PdfString nodeObject = (PdfString) node.getPdfObject();
+        // This is important, otherwise /Contents value in encrypted documents
+        // will be broken...
+        nodeObject.markAsUnencryptedObject();
         final AbstractAsn1TreeNode asn1 = Asn1TreeNodeFactory.fromPrimitive(nodeObject.getValueBytes());
         if (asn1 != null) {
             /*
@@ -326,7 +329,7 @@ public class TreeNodeFactory {
     }
 
     /**
-     * Creates the Child TreeNode objects for a PDF object TreeNode, which
+     * Creates the child TreeNode objects for a PDF object TreeNode, which
      * is inside /Subject or /Issuer arrays in a /SVCert dictionary.
      *
      * @param node the parent node.
@@ -336,7 +339,7 @@ public class TreeNodeFactory {
      */
     private static boolean expandSvCertArrayValueNode(PdfObjectTreeNode node) {
         // This should be a string
-        if (!node.getPdfObject().isString()) {
+        if (!node.isString()) {
             return false;
         }
 
@@ -410,7 +413,7 @@ public class TreeNodeFactory {
             return false;
         }
         dictType = parent.getPdfDictionaryType();
-        if (PdfNameSV.equals(dictType)) {
+        if (PdfName.SV.equals(dictType)) {
             return true;
         }
         if (dictType != null) {
@@ -422,7 +425,7 @@ public class TreeNodeFactory {
          * It should be a form field dictionary with the form field type of
          * /Sig and the parent object should be under /SV there.
          */
-        return isUnderSigFormFieldDict(parent, PdfNameSV);
+        return isUnderSigFormFieldDict(parent, PdfName.SV);
     }
 
     /**
@@ -442,7 +445,7 @@ public class TreeNodeFactory {
     }
 
     /**
-     * Creates the Child TreeNode objects for a PDF object TreeNode, which
+     * Creates the child TreeNode objects for a PDF object TreeNode, which
      * is a DER-encoded object under the DSS dictionary nodes.
      *
      * @param node the parent node.
@@ -458,7 +461,7 @@ public class TreeNodeFactory {
     }
 
     /**
-     * Creates the Child TreeNode objects for a PDF object TreeNode, which
+     * Creates the child TreeNode objects for a PDF object TreeNode, which
      * is in an array under DSS.
      *
      * @param node the parent node.
@@ -510,7 +513,7 @@ public class TreeNodeFactory {
     }
 
     /**
-     * Creates the Child TreeNode objects for a PDF object TreeNode, which
+     * Creates the child TreeNode objects for a PDF object TreeNode, which
      * is a stream under /TS in DSS.
      *
      * @param node the parent node.
@@ -545,6 +548,48 @@ public class TreeNodeFactory {
                     TreeNodeFactory.class,
                     PdfName.DSS,
                     PdfNameTS
+            );
+        }
+        return true;
+    }
+
+    /**
+     * Creates the child TreeNode objects for a PDF object TreeNode, which
+     * is a /MAC entry in an /AuthCode dictionary.
+     *
+     * @param node the parent node.
+     *
+     * @return true if this is the correct node, regardless of whether a child
+     * was added.
+     */
+    private static boolean expandStandaloneMacNode(PdfObjectTreeNode node) {
+        // This should be a string under the /MAC key
+        if (!node.isDictionaryNode(PdfName.MAC) || !node.isString()) {
+            return false;
+        }
+
+        // Parent should be an /AuthCode dictionary
+        final PdfObjectTreeNode parent = getDirectParentNode(node);
+        if (parent == null || !parent.isDictionaryNode(PdfName.AuthCode)) {
+            return false;
+        }
+
+        // At this point we assume, that the PDF string contains an encoded
+        // ASN.1 object inside.
+        final PdfString nodeObject = (PdfString) node.getPdfObject();
+        final AbstractAsn1TreeNode asn1 = Asn1TreeNodeFactory.fromPrimitive(
+                nodeObject.getValueBytes()
+        );
+        if (asn1 != null) {
+            // PDF MAC is stored in a ContentInfo structure
+            ContentInfoCorrector.INSTANCE.correct(asn1);
+            node.add(asn1);
+        } else {
+            LoggerHelper.warnf(
+                    Language.WARNING_FAILED_TO_PARSE_AS_ASN1_OBJECT,
+                    TreeNodeFactory.class,
+                    PdfName.MAC,
+                    PdfName.AuthCode
             );
         }
         return true;

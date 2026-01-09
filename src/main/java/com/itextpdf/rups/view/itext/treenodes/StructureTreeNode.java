@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -101,9 +101,13 @@ public class StructureTreeNode extends IconTreeNode {
     }
 
     private static Object ingestDictionaryNode(PdfDictionary dict, PdfObjectTreeNode node) {
-        final Object userObj;
         final PdfObject dictType = dict.get(PdfName.Type, false);
-        if (PdfName.StructElem.equals(dictType)) {
+        if (PdfName.OBJR.equals(dictType)) {
+            return "OBJR => " + node.getPdfObject().getIndirectReference();
+        }
+        // Assuming StructElem from here, since the /Type key for structure
+        // elements is optional
+        if (PdfName.StructElem.equals(dictType) || dictType == null) {
             final StringBuilder buf = new StringBuilder();
             if (dict.get(PdfName.S, false) != null) {
                 buf.append(PdfObjectTreeNode.getCaption(dict.get(PdfName.S, false)));
@@ -113,15 +117,14 @@ public class StructureTreeNode extends IconTreeNode {
             }
             final PdfString actualText = dict.getAsString(PdfName.ActualText);
             if (actualText != null) {
-                formatExtractedText(buf, actualText.toUnicodeString());
+                formatExtractedText(buf, PdfObjectTreeNode.getCaption(actualText));
             }
-            userObj = buf.toString();
-        } else if (PdfName.OBJR.equals(dictType)){
-            userObj = "OBJR => " + node.getPdfObject().getIndirectReference();
-        } else {
-            userObj = node;
+            if (buf.length() > 0) {
+                return buf.toString();
+            }
         }
-        return userObj;
+        // Using just the node itself as fallback
+        return node;
     }
 
     protected static void formatExtractedText(StringBuilder base, String extractedText) {

@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -42,8 +42,10 @@
  */
 package com.itextpdf.rups.view;
 
+import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.conf.LookAndFeelId;
+import com.itextpdf.rups.conf.StreamFilterId;
 import com.itextpdf.rups.view.icons.FrameIconUtil;
 
 import java.awt.BorderLayout;
@@ -85,6 +87,7 @@ public final class PreferencesWindow {
 
     // Fields to reset
     private JCheckBox openDuplicateFiles;
+    private JComboBox<StreamFilterId> defaultFilter;
     private JTextField pathField;
     private JLabel restartLabel;
     private JComboBox<String> localeBox;
@@ -167,6 +170,21 @@ public final class PreferencesWindow {
         JLabel openDuplicateFilesLabel = new JLabel(Language.PREFERENCES_ALLOW_DUPLICATE_FILES.getString());
         openDuplicateFilesLabel.setLabelFor(this.openDuplicateFiles);
 
+        this.defaultFilter = new JComboBox<>();
+        this.defaultFilter.addItem(new StreamFilterId(null));
+        this.defaultFilter.addItem(new StreamFilterId(PdfName.BrotliDecode));
+        this.defaultFilter.addItem(new StreamFilterId(PdfName.FlateDecode));
+        this.defaultFilter.setSelectedItem(new StreamFilterId(RupsConfiguration.INSTANCE.getDefaultFilter()));
+        this.defaultFilter.addItemListener((ItemEvent e) -> {
+            if (e.getStateChange() == ItemEvent.SELECTED) {
+                RupsConfiguration.INSTANCE.setDefaultFilter(((StreamFilterId) e.getItem()).getValue());
+            }
+        });
+        final JLabel defaultFilterLabel = new JLabel(
+                Language.PREFERENCES_DEFAULT_STREAM_FILTER.getString()
+        );
+        defaultFilterLabel.setLabelFor(this.defaultFilter);
+
         JPanel generalSettingsPanel = new JPanel();
         generalSettingsPanel.setLayout(this.gridBagLayout);
 
@@ -175,6 +193,9 @@ public final class PreferencesWindow {
 
         generalSettingsPanel.add(openDuplicateFilesLabel, this.left);
         generalSettingsPanel.add(this.openDuplicateFiles, this.right);
+
+        generalSettingsPanel.add(defaultFilterLabel, this.left);
+        generalSettingsPanel.add(this.defaultFilter, this.right);
 
         this.generalSettingsScrollPane = new JScrollPane(generalSettingsPanel);
     }
@@ -270,6 +291,7 @@ public final class PreferencesWindow {
     private void resetView() {
         this.pathField.setText(RupsConfiguration.INSTANCE.getHomeFolder().getPath());
         this.openDuplicateFiles.setSelected(RupsConfiguration.INSTANCE.canOpenDuplicateFiles());
+        this.defaultFilter.setSelectedItem(new StreamFilterId(RupsConfiguration.INSTANCE.getDefaultFilter()));
         this.lookAndFeelBox.setSelectedItem(RupsConfiguration.INSTANCE.getLookAndFeel());
         this.localeBox.setSelectedItem(RupsConfiguration.INSTANCE.getUserLocale().toLanguageTag());
         this.restartLabel.setText(" ");

@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -164,7 +164,7 @@ public class PdfReaderController implements IPdfObjectPanelEventListener, IRupsE
         pdfTree = new PdfTree();
 
         pdfTree.addTreeSelectionListener(treeSelectionListener);
-        final PdfTreeContextMenu menu = new PdfTreeContextMenu(pdfTree);
+        final PdfTreeContextMenu menu = new PdfTreeContextMenu(pdfTree, this);
         pdfTree.setComponentPopupMenu(menu);
         pdfTree.addMouseListener(new PdfTreeContextMenuMouseListener(menu, pdfTree));
 
@@ -386,15 +386,20 @@ public class PdfReaderController implements IPdfObjectPanelEventListener, IRupsE
 
     public int deleteTreeChild(PdfObjectTreeNode parent, int index) {
         parent.remove(index);
-        ((DefaultTreeModel) pdfTree.getModel()).reload(parent);
+        getTreeModel().reload(parent);
         return index;
+    }
+
+    public void deleteAllTreeChildren(PdfObjectTreeNode parent) {
+        parent.removeAllChildren();
+        getTreeModel().reload(parent);
     }
 
     //Returns index of the added child
     public int addTreeNodeChild(PdfObjectTreeNode parent, PdfObjectTreeNode child, int index) {
         parent.insert(child, index);
         nodes.expandNode(child);
-        ((DefaultTreeModel) pdfTree.getModel()).reload(parent);
+        getTreeModel().reload(parent);
         return index;
     }
 
@@ -476,5 +481,9 @@ public class PdfReaderController implements IPdfObjectPanelEventListener, IRupsE
         func.accept(text);
         func.accept(objectPanel);
         func.accept(streamPane);
+    }
+
+    private DefaultTreeModel getTreeModel() {
+        return (DefaultTreeModel) pdfTree.getModel();
     }
 }

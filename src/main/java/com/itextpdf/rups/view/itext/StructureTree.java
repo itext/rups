@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -47,6 +47,7 @@ import com.itextpdf.kernel.pdf.PdfIndirectReference;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfNumber;
 import com.itextpdf.kernel.pdf.PdfObject;
+import com.itextpdf.kernel.pdf.PdfPage;
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.TreeNodeFactory;
@@ -134,15 +135,26 @@ public final class StructureTree extends JTree implements TreeSelectionListener,
         return new DefaultTreeModel(root);
     }
 
-    private Map<Integer, MarkedContentInfo> indexMarkedContentOnPage(PdfDictionary page) {
-        final PdfIndirectReference ref = page.getIndirectReference();
+    private Map<Integer, MarkedContentInfo> indexMarkedContentOnPage(PdfDictionary pageDict) {
+        final PdfIndirectReference ref = pageDict.getIndirectReference();
         Map<Integer, MarkedContentInfo> result = this.mciByPage.get(ref);
         if (result != null) {
             return result;
         }
-        final MarkedContentInfoGatherer gatherer = new MarkedContentInfoGatherer();
-        gatherer.processPageContent(this.loader.getFile().getPdfDocument().getPage(page));
-        result = gatherer.getMarkedContentIndex();
+        final PdfPage page = this.loader.getFile().getPdfDocument().getPage(pageDict);
+        if (page != null) {
+            final MarkedContentInfoGatherer gatherer = new MarkedContentInfoGatherer();
+            gatherer.processPageContent(page);
+            result = gatherer.getMarkedContentIndex();
+        } else {
+            /*
+             * This can happen in weird cases, when there is a page in the
+             * document, that is referenced within a structure element, but it
+             * is absent in the page tree for some reason... So we will just
+             * assume, that we could not find anything there.
+             */
+            result = Map.of();
+        }
         this.mciByPage.put(ref, result);
         return result;
     }

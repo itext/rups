@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -56,7 +56,6 @@ import com.itextpdf.kernel.pdf.canvas.PdfCanvas;
 import com.itextpdf.kernel.pdf.tagging.StandardRoles;
 import com.itextpdf.kernel.pdf.tagutils.TagTreePointer;
 import com.itextpdf.kernel.pdf.xobject.PdfFormXObject;
-import com.itextpdf.test.ExtendedITextTest;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
@@ -68,7 +67,7 @@ import java.io.IOException;
 import java.util.Map;
 
 @Tag("IntegrationTest")
-public class MarkedContentInfoGathererTest extends ExtendedITextTest {
+public class MarkedContentInfoGathererTest {
     @Test
     public void indexOnePageOneContentStreamMcidCountTest() throws IOException {
         byte[] pdf = onePageOneContentStream();

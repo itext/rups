@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -54,6 +54,7 @@ import com.itextpdf.rups.view.icons.IconFetcher;
 import com.itextpdf.rups.view.icons.IconTreeNode;
 
 import java.util.Enumeration;
+import java.util.regex.Pattern;
 import javax.swing.tree.TreeNode;
 
 /**
@@ -72,6 +73,8 @@ public class PdfObjectTreeNode extends IconTreeNode implements IPdfContextMenuTa
     private static final String REF_RECURSIVE_ICON = "ref_recursive.png";
     private static final String STREAM_ICON = "stream.png";
     private static final String STRING_ICON = "string.png";
+
+    private static final Pattern CAPTION_STRIP_REGEX = Pattern.compile("[\\x00-\\x08\\x0B-\\x1F]");
 
     /**
      * If the object is indirect, the number of the PDF object.
@@ -317,6 +320,15 @@ public class PdfObjectTreeNode extends IconTreeNode implements IPdfContextMenuTa
     }
 
     /**
+     * Tells you if the node contains a string.
+     *
+     * @return true if the object is a PdfString
+     */
+    public boolean isString() {
+        return object.isString();
+    }
+
+    /**
      * Set this to true if the object is a reference to a node higher up in the tree.
      *
      * @param recursive true if the object is indirect and recursive
@@ -360,7 +372,7 @@ public class PdfObjectTreeNode extends IconTreeNode implements IPdfContextMenuTa
                 }
                 return String.format(Language.STREAM_OF_TYPE.getString(), type);
             case PdfObject.STRING:
-                return ((PdfString) object).toUnicodeString();
+                return toStrippedUnicodeString((PdfString) object);
             case PdfObject.DICTIONARY:
                 type = ((PdfDictionary) object).getAsName(PdfName.Type);
                 if (type == null) {
@@ -437,6 +449,14 @@ public class PdfObjectTreeNode extends IconTreeNode implements IPdfContextMenuTa
      * {@inheritDoc}
      */
     @Override
+    public boolean isPdfStreamNode() {
+        return object.isStream();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public boolean supportsInspectObject() {
         /*
          * "Inspect Object" is useful only for streams at the moment.
@@ -453,5 +473,17 @@ public class PdfObjectTreeNode extends IconTreeNode implements IPdfContextMenuTa
          * Currently saving is supported only for strings and streams.
          */
         return object.isStream() || object.isString();
+    }
+
+    /**
+     * Returns the result of a {@link PdfString#toUnicodeString()} call, but
+     * removes some of the non-printable ASCII control characters.
+     *
+     * @param pdfString PDF string to convert to Java string
+     *
+     * @return the converted string
+     */
+    private static String toStrippedUnicodeString(PdfString pdfString) {
+        return CAPTION_STRIP_REGEX.matcher(pdfString.toUnicodeString()).replaceAll("");
     }
 }

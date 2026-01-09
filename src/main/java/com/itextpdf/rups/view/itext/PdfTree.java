@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -66,6 +66,11 @@ public final class PdfTree extends JTree implements IRupsEventListener {
     private PdfTrailerTreeNode root;
 
     /**
+     * Whether the backing PDF file is mutable or not.
+     */
+    private boolean isMutable = false;
+
+    /**
      * Constructs a PDF tree.
      */
     public PdfTree() {
@@ -88,6 +93,15 @@ public final class PdfTree extends JTree implements IRupsEventListener {
     }
 
     /**
+     * Returns whether the backing PDF file is mutable or not.
+     *
+     * @return whether the backing PDF file is mutable or not.
+     */
+    public boolean isMutable() {
+        return isMutable;
+    }
+
+    /**
      * Select a specific node in the tree.
      * Typically this method will be called from a different tree,
      * such as the pages, outlines or form tree.
@@ -105,6 +119,7 @@ public final class PdfTree extends JTree implements IRupsEventListener {
     @Override
     public void handleCloseDocument() {
         reset();
+        isMutable = false;
     }
 
     @Override
@@ -113,6 +128,7 @@ public final class PdfTree extends JTree implements IRupsEventListener {
         root.setUserObject(String.format(Language.PDF_OBJECT_TREE.getString(), loader.getLoaderName()));
         loader.getNodes().expandNode(root);
         setModel(new DefaultTreeModel(root));
+        isMutable = loader.getFile().isOpenedAsOwner();
     }
 
     private void reset() {

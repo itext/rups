@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -42,51 +42,123 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
+import com.itextpdf.brotlicompressor.BrotliStreamCompressionStrategy;
+import com.itextpdf.kernel.pdf.FlateCompressionStrategy;
+import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.rups.controller.PdfReaderController;
+import com.itextpdf.rups.io.encoders.ASCII85CompressionStrategy;
+import com.itextpdf.rups.io.encoders.ASCIIHexCompressionStrategy;
+import com.itextpdf.rups.io.encoders.RunLengthCompressionStrategy;
+import com.itextpdf.rups.util.ExcludeFromGeneratedJacocoReport;
 import com.itextpdf.rups.view.Language;
+import com.itextpdf.rups.view.itext.PdfTree;
 
 import javax.swing.Action;
+import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
-import java.awt.Component;
+import javax.swing.JSeparator;
 
 /**
  * Convenience class for the popup menu for the PdfTree panel.
  *
  * @author Michael Demey
  */
+// Excluding from coverage, as this is just logic for creating a UI pop-up menu
+@ExcludeFromGeneratedJacocoReport
 public final class PdfTreeContextMenu extends JPopupMenu {
-    private final InspectObjectAction inspectObjectAction;
-    private final SaveToFilePdfTreeAction saveRawBytesToFileAction;
-    private final SaveToFilePdfTreeAction saveToFileAction;
+    private final PdfTree parentTree;
 
-    public PdfTreeContextMenu(Component component) {
-        inspectObjectAction = new InspectObjectAction(
+    private final JMenuItem inspectObjectMenu;
+    private final JMenuItem saveRawBytesToFileMenu;
+    private final JMenuItem saveToFileMenu;
+    private final JSeparator filterSectionSeparator;
+    private final JMenu applyFilterSubMenu;
+    private final JMenuItem removeAllFiltersMenu;
+
+    public PdfTreeContextMenu(PdfTree parentTree, PdfReaderController controller) {
+        this.parentTree = parentTree;
+
+        inspectObjectMenu = createJMenuItem(new InspectObjectAction(
                 Language.INSPECT_OBJECT.getString(),
-                component
-        );
-        saveRawBytesToFileAction = new SaveToFilePdfTreeAction(
+                parentTree
+        ));
+        saveRawBytesToFileMenu = createJMenuItem(new SaveToFilePdfTreeAction(
                 Language.SAVE_RAW_BYTES_TO_FILE.getString(),
-                component,
+                parentTree,
                 true
-        );
-        saveToFileAction = new SaveToFilePdfTreeAction(
+        ));
+        saveToFileMenu = createJMenuItem(new SaveToFilePdfTreeAction(
                 Language.SAVE_TO_FILE.getString(),
-                component,
+                parentTree,
                 false
-        );
+        ));
+        removeAllFiltersMenu = createJMenuItem(new RemoveAllFiltersAction(
+                Language.REMOVE_ALL_FILTERS.getString(),
+                parentTree,
+                controller
+        ));
+        final JMenuItem applyAscii85DecodeMenu = createJMenuItem(new ApplyFilterAction(
+                PdfName.ASCII85Decode.getValue(),
+                parentTree,
+                controller,
+                ASCII85CompressionStrategy::new
+        ));
+        final JMenuItem applyAsciiHexDecodeMenu = createJMenuItem(new ApplyFilterAction(
+                PdfName.ASCIIHexDecode.getValue(),
+                parentTree,
+                controller,
+                ASCIIHexCompressionStrategy::new
+        ));
+        final JMenuItem applyBrotliDecodeMenu = createJMenuItem(new ApplyFilterAction(
+                PdfName.BrotliDecode.getValue(),
+                parentTree,
+                controller,
+                BrotliStreamCompressionStrategy::new
+        ));
+        final JMenuItem applyFlateDecodeMenu = createJMenuItem(new ApplyFilterAction(
+                PdfName.FlateDecode.getValue(),
+                parentTree,
+                controller,
+                FlateCompressionStrategy::new
+        ));
+        final JMenuItem applyRunLengthDecodeMenu = createJMenuItem(new ApplyFilterAction(
+                PdfName.RunLengthDecode.getValue(),
+                parentTree,
+                controller,
+                RunLengthCompressionStrategy::new
+        ));
 
-        add(getJMenuItem(inspectObjectAction));
-        add(getJMenuItem(saveRawBytesToFileAction));
-        add(getJMenuItem(saveToFileAction));
+        filterSectionSeparator = new JPopupMenu.Separator();
+
+        applyFilterSubMenu = new JMenu(Language.APPLY_FILTER.getString());
+        applyFilterSubMenu.add(applyAscii85DecodeMenu);
+        applyFilterSubMenu.add(applyAsciiHexDecodeMenu);
+        applyFilterSubMenu.add(applyBrotliDecodeMenu);
+        applyFilterSubMenu.add(applyFlateDecodeMenu);
+        applyFilterSubMenu.add(applyRunLengthDecodeMenu);
+
+        add(inspectObjectMenu);
+        add(saveRawBytesToFileMenu);
+        add(saveToFileMenu);
+        add(filterSectionSeparator);
+        add(applyFilterSubMenu);
+        add(removeAllFiltersMenu);
     }
 
-    public void setEnabledForNode(IPdfContextMenuTarget node) {
-        inspectObjectAction.setEnabled(node.supportsInspectObject());
-        saveRawBytesToFileAction.setEnabled(node.supportsSave());
-        saveToFileAction.setEnabled(node.supportsSave());
+    public void prepareForNode(IPdfContextMenuTarget node) {
+        inspectObjectMenu.setEnabled(node.supportsInspectObject());
+        saveRawBytesToFileMenu.setEnabled(node.supportsSave());
+        saveToFileMenu.setEnabled(node.supportsSave());
+        filterSectionSeparator.setVisible(node.isPdfStreamNode());
+        filterSectionSeparator.setEnabled(parentTree.isMutable());
+        applyFilterSubMenu.setVisible(node.isPdfStreamNode());
+        applyFilterSubMenu.setEnabled(parentTree.isMutable());
+        removeAllFiltersMenu.setVisible(node.isPdfStreamNode());
+        removeAllFiltersMenu.setEnabled(parentTree.isMutable());
     }
 
-    private static JMenuItem getJMenuItem(AbstractRupsAction rupsAction) {
+    private static JMenuItem createJMenuItem(AbstractRupsAction rupsAction) {
         final JMenuItem jMenuItem = new JMenuItem();
         jMenuItem.setText((String) rupsAction.getValue(Action.NAME));
         jMenuItem.setAction(rupsAction);

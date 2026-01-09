@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -45,6 +45,7 @@ package com.itextpdf.rups;
 import com.itextpdf.rups.controller.IRupsController;
 import com.itextpdf.rups.controller.RupsController;
 import com.itextpdf.rups.model.LoggerHelper;
+import com.itextpdf.rups.util.ExcludeFromGeneratedJacocoReport;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.RupsDropTarget;
 import com.itextpdf.rups.view.RupsMenuBar;
@@ -125,6 +126,8 @@ public final class Rups {
         }
     }
 
+    // Excluding from coverage as this is UI init code
+    @ExcludeFromGeneratedJacocoReport
     static IRupsController initApplication(JFrame frame) {
         mainFrame = frame;
 
@@ -140,7 +143,7 @@ public final class Rups {
 
         final RupsTabbedPane rupsTabbedPane = new RupsTabbedPane();
         final RupsController rupsController = new RupsController(screen, rupsTabbedPane);
-        final RupsMenuBar rupsMenuBar = new RupsMenuBar(rupsController);
+        final RupsMenuBar rupsMenuBar = new RupsMenuBar(rupsController, frame);
 
         frame.setDropTarget(new RupsDropTarget(rupsController));
         frame.setJMenuBar(rupsMenuBar);

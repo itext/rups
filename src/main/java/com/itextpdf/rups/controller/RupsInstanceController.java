@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -339,7 +339,7 @@ public class RupsInstanceController implements TreeSelectionListener, PageSelect
          */
         final JPopupMenu menu = tree.getComponentPopupMenu();
         if ((menu instanceof PdfTreeContextMenu) && (selectedNode instanceof IPdfContextMenuTarget)) {
-            ((PdfTreeContextMenu) menu).setEnabledForNode((IPdfContextMenuTarget) selectedNode);
+            ((PdfTreeContextMenu) menu).prepareForNode((IPdfContextMenuTarget) selectedNode);
         }
 
         if (selectedNode instanceof PdfTrailerTreeNode) {

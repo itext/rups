@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -43,10 +43,15 @@
 package com.itextpdf.rups.model;
 
 import com.itextpdf.kernel.exceptions.BadPasswordException;
+import com.itextpdf.kernel.pdf.CompressionConstants;
+import com.itextpdf.kernel.pdf.IStreamCompressionStrategy;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfReader;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.kernel.pdf.ReaderProperties;
+import com.itextpdf.kernel.pdf.StampingProperties;
+import com.itextpdf.kernel.pdf.WriterProperties;
+import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.view.Language;
 
 import java.io.ByteArrayInputStream;
@@ -251,8 +256,8 @@ public final class PdfFile implements IPdfFile {
                     readerProperties
             );
             final ByteArrayOutputStream tempWriterOutputStream = new ByteArrayOutputStream();
-            final PdfWriter writer = new PdfWriter(tempWriterOutputStream);
-            document = new PdfDocument(reader, writer);
+            final PdfWriter writer = new PdfWriter(tempWriterOutputStream, createWriterProperties());
+            document = new PdfDocument(reader, writer, createStampingProps());
             writerOutputStream = tempWriterOutputStream;
             return true;
         } catch (BadPasswordException e) {
@@ -292,5 +297,23 @@ public final class PdfFile implements IPdfFile {
         } catch (BadPasswordException e) {
             return false;
         }
+    }
+
+    private static WriterProperties createWriterProperties() {
+        final WriterProperties props = new WriterProperties();
+        if (RupsConfiguration.INSTANCE.getDefaultFilter() == null) {
+            props.setCompressionLevel(CompressionConstants.NO_COMPRESSION);
+        }
+        return props;
+    }
+
+    private static StampingProperties createStampingProps() {
+        final StampingProperties props = new StampingProperties();
+        final IStreamCompressionStrategy filterStrategy =
+                RupsConfiguration.INSTANCE.getDefaultFilterStrategy();
+        if (filterStrategy != null) {
+            props.registerDependency(IStreamCompressionStrategy.class, filterStrategy);
+        }
+        return props;
     }
 }

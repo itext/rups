@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -43,14 +43,16 @@
 package com.itextpdf.rups.view.itext;
 
 import com.itextpdf.kernel.exceptions.PdfException;
-import com.itextpdf.kernel.pdf.PdfDictionary;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.kernel.pdf.xobject.PdfImageXObject;
+import com.itextpdf.rups.Rups;
+import com.itextpdf.rups.RupsConfiguration;
 import com.itextpdf.rups.controller.PdfReaderController;
 import com.itextpdf.rups.model.LoggerHelper;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.IRupsEventListener;
+import com.itextpdf.rups.util.PdfStreamUtil;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.contextmenu.ContextMenuMouseListener;
 import com.itextpdf.rups.view.contextmenu.SaveImageAction;
@@ -61,7 +63,6 @@ import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -81,7 +82,6 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.Style;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
-import javax.swing.tree.TreeNode;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
@@ -136,10 +136,11 @@ public final class SyntaxHighlightedStreamPane extends JScrollPane implements IR
         manager = new UndoManager();
         manager.setLimit(MAX_NUMBER_OF_EDITS);
         text.getDocument().addUndoableEditListener(manager);
+        final int shortcutKeyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
         text.registerKeyboardAction(new UndoAction(manager),
-                KeyStroke.getKeyStroke(KeyEvent.VK_Z, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
+                KeyStroke.getKeyStroke(KeyEvent.VK_Z, shortcutKeyMask), JComponent.WHEN_FOCUSED);
         text.registerKeyboardAction(new RedoAction(manager),
-                KeyStroke.getKeyStroke(KeyEvent.VK_Y, InputEvent.CTRL_DOWN_MASK), JComponent.WHEN_FOCUSED);
+                KeyStroke.getKeyStroke(KeyEvent.VK_Y, shortcutKeyMask), JComponent.WHEN_FOCUSED);
     }
 
     /**
@@ -209,30 +210,10 @@ public final class SyntaxHighlightedStreamPane extends JScrollPane implements IR
         /*
          * FIXME: With indirect objects with multiple references, this will
          *        change the tree only in one of them.
-         * FIXME: This doesn't change Length...
          */
+        final PdfStream targetStream = (PdfStream) target.getPdfObject();
         manager.discardAllEdits();
         manager.setLimit(0);
-        if (controller != null && ((PdfDictionary) target.getPdfObject()).containsKey(PdfName.Filter)) {
-            controller.deleteTreeNodeDictChild(target, PdfName.Filter);
-        }
-        /*
-         * In the current state, stream node could contain ASN1. data, which
-         * is parsed and added as tree nodes. After editing, it won't be valid,
-         * so we must remove them.
-         */
-        if (controller != null) {
-            int i = 0;
-            while (i < target.getChildCount()) {
-                final TreeNode child = target.getChildAt(i);
-                if (child instanceof PdfObjectTreeNode) {
-                    ++i;
-                } else {
-                    controller.deleteTreeChild(target, i);
-                    // Will assume it being just a shift...
-                }
-            }
-        }
         final int sizeEst = text.getText().length();
         final ByteArrayOutputStream baos = new ByteArrayOutputStream(sizeEst);
         try {
@@ -240,8 +221,22 @@ public final class SyntaxHighlightedStreamPane extends JScrollPane implements IR
         } catch (IOException e) {
             LoggerHelper.error(Language.ERROR_UNEXPECTED_EXCEPTION.getString(), e, getClass());
         }
-        ((PdfStream) target.getPdfObject()).setData(baos.toByteArray());
+        try {
+            PdfStreamUtil.setDataWithFilter(
+                    targetStream,
+                    baos.toByteArray(),
+                    RupsConfiguration.INSTANCE.getDefaultFilterStrategy()
+            );
+        } catch (IOException e) {
+            final String errorMessage = Language.ERROR_APPLYING_FILTER.getString();
+            LoggerHelper.error(errorMessage, e, getClass());
+            Rups.showBriefMessage(errorMessage);
+        }
         if (controller != null) {
+            // We need to delete all children from the tree node to force them to
+            // be regenerated after the update. Presumably there should be a
+            // better way to do this, but this works fine for now
+            controller.deleteAllTreeChildren(target);
             controller.selectNode(target);
         }
         manager.setLimit(MAX_NUMBER_OF_EDITS);

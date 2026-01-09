@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -53,11 +53,16 @@ import com.itextpdf.rups.model.IPdfFile;
 import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.model.MruListHandler;
 import com.itextpdf.rups.model.ObjectLoader;
+import com.itextpdf.rups.util.ExcludeFromGeneratedJacocoReport;
 
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import javax.swing.Box;
+import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -78,9 +83,12 @@ public final class RupsMenuBar extends JMenuBar implements IRupsEventListener {
     /**
      * Creates a JMenuBar.
      */
-    public RupsMenuBar(RupsController controller) {
+    // Excluding from coverage as this is UI init code
+    @ExcludeFromGeneratedJacocoReport
+    public RupsMenuBar(RupsController controller, JFrame mainFrame) {
         this.controller = controller;
 
+        final int shortcutKeyMask = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
         preferencesWindow = new PreferencesWindow();
 
         final JMenu file = new JMenu(Language.MENU_BAR_FILE.getString());
@@ -88,7 +96,7 @@ public final class RupsMenuBar extends JMenuBar implements IRupsEventListener {
                 file,
                 Language.MENU_BAR_OPEN,
                 new PdfFileOpenAction(controller::openNewFile, controller.getMasterComponent()),
-                KeyStroke.getKeyStroke('O', InputEvent.CTRL_DOWN_MASK)
+                KeyStroke.getKeyStroke(KeyEvent.VK_O, shortcutKeyMask)
         );
         file.add(createOpenRecentSubMenu());
         reopenAsOwnerMenuItem = addItem(
@@ -100,22 +108,33 @@ public final class RupsMenuBar extends JMenuBar implements IRupsEventListener {
                 file,
                 Language.MENU_BAR_CLOSE,
                 e -> controller.closeCurrentFile(),
-                KeyStroke.getKeyStroke('W', InputEvent.CTRL_DOWN_MASK)
+                KeyStroke.getKeyStroke(KeyEvent.VK_W, shortcutKeyMask)
         );
         saveAsMenuItem = addItem(
                 file,
                 Language.MENU_BAR_SAVE_AS,
                 new PdfFileSaveAction(controller, controller.getMasterComponent()),
-                KeyStroke.getKeyStroke('S', InputEvent.CTRL_DOWN_MASK)
+                KeyStroke.getKeyStroke(KeyEvent.VK_S, shortcutKeyMask)
         );
         file.addSeparator();
         openInPdfViewerMenuItem = addItem(
                 file,
                 Language.MENU_BAR_OPEN_IN_PDF_VIEWER,
                 new OpenInViewerAction(controller),
-                KeyStroke.getKeyStroke('E', InputEvent.CTRL_DOWN_MASK)
+                KeyStroke.getKeyStroke(KeyEvent.VK_E, shortcutKeyMask)
         );
         add(file);
+        if (mainFrame != null) {
+            file.addSeparator();
+            addItem(
+                    file,
+                    Language.MENU_BAR_EXIT,
+                    (ActionEvent e) -> mainFrame.dispatchEvent(
+                            new WindowEvent(mainFrame, WindowEvent.WINDOW_CLOSING)
+                    ),
+                    KeyStroke.getKeyStroke(KeyEvent.VK_Q, shortcutKeyMask)
+            );
+        }
 
         final JMenu edit = new JMenu(Language.MENU_BAR_EDIT.getString());
         addItem(

@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -46,6 +46,13 @@ package com.itextpdf.rups.view.contextmenu;
  * Interface for tree nodes, which can spawn {@link com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu}.
  */
 public interface IPdfContextMenuTarget {
+    /**
+     * Returns true, if the tree node is a PDF stream node.
+     *
+     * @return true, if the tree node is a PDF stream node.
+     */
+    boolean isPdfStreamNode();
+
     /**
      * Returns true, if the tree node supports the "Inspect Object" operation.
      *

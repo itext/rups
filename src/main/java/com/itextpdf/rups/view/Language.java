@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -55,6 +55,7 @@ import java.util.ResourceBundle;
  * in the resource bundles.
  */
 public enum Language {
+    APPLY_FILTER,
     ARRAY,
     ARRAY_CHOOSE_INDEX,
 
@@ -92,6 +93,7 @@ public enum Language {
     ENTER_OWNER_PASSWORD,
 
     ERROR,
+    ERROR_APPLYING_FILTER,
     ERROR_BUILDING_CONTENT_STREAM,
     ERROR_CANNOT_CHECK_NULL_FOR_INPUT_STREAM,
     ERROR_CANNOT_FIND_FILE,
@@ -172,6 +174,7 @@ public enum Language {
     MENU_BAR_CLOSE,
     MENU_BAR_COMPARE_WITH,
     MENU_BAR_EDIT,
+    MENU_BAR_EXIT,
     MENU_BAR_FILE,
     MENU_BAR_HELP,
     MENU_BAR_NEW_INDIRECT,
@@ -183,6 +186,7 @@ public enum Language {
     MENU_BAR_VERSION,
     MESSAGE_ABOUT,
 
+    NONE,
     NO_SELECTED_FILE,
     NULL_AS_TEXT,
 
@@ -202,6 +206,7 @@ public enum Language {
     PLAINTEXT_DESCRIPTION,
     PREFERENCES,
     PREFERENCES_ALLOW_DUPLICATE_FILES,
+    PREFERENCES_DEFAULT_STREAM_FILTER,
     PREFERENCES_NEED_RESTART,
     PREFERENCES_OPEN_FOLDER,
     PREFERENCES_RESET_TO_DEFAULTS,
@@ -211,6 +216,7 @@ public enum Language {
     PREFERENCES_VISUAL_SETTINGS,
 
     RAW_BYTES,
+    REMOVE_ALL_FILTERS,
 
     SAVE,
     SAVE_IMAGE,

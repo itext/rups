@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -64,7 +64,7 @@ public final class NoopProgressDialog implements IProgressDialog {
     }
 
     @Override
-    public void showErrorDialog(Exception ex) {
+    public void showErrorDialog(Throwable th) {
         // noop
     }
 

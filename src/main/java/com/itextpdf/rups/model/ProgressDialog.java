@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -42,6 +42,7 @@
  */
 package com.itextpdf.rups.model;
 
+import com.itextpdf.rups.util.ExcludeFromGeneratedJacocoReport;
 import com.itextpdf.rups.view.Language;
 
 import java.awt.Dimension;
@@ -61,6 +62,8 @@ import javax.swing.WindowConstants;
 /**
  * An informational dialog window showing the progress of a certain action.
  */
+// Excluding from coverage as this is a UI dialog
+@ExcludeFromGeneratedJacocoReport
 public final class ProgressDialog extends JDialog implements IProgressDialog {
     private static final Dimension DIALOG_SIZE = new Dimension(300, 100);
     private static final Insets LAYOUT_INSETS = new Insets(5, 5, 5, 5);
@@ -158,12 +161,12 @@ public final class ProgressDialog extends JDialog implements IProgressDialog {
     }
 
     /**
-     * Displays an error dialog for the given exception.
+     * Displays an error dialog for the given throwable.
      *
-     * @param ex exception to display information about
+     * @param th throwable to display information about
      */
     @Override
-    public void showErrorDialog(Exception ex) {
-        ErrorDialogPane.showErrorDialog(this, ex);
+    public void showErrorDialog(Throwable th) {
+        ErrorDialogPane.showErrorDialog(this, th);
     }
 }

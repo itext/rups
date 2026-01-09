@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -66,7 +66,6 @@ import org.junit.jupiter.api.Test;
 
 @Tag("UnitTest")
 final class TreeNodeFactoryTest {
-    private static final PdfName SV = new PdfName("SV");
     private static final PdfName SVCert = new PdfName("SVCert");
 
     @Test
@@ -418,7 +417,7 @@ final class TreeNodeFactoryTest {
          *
          * Checking both keys at the same time.
          */
-        doSVCertTest(PdfName.Sig, SV, SVCert, new PdfString(new byte[] {0x30, 0x00}), "certificate");
+        doSVCertTest(PdfName.Sig, PdfName.SV, SVCert, new PdfString(new byte[] {0x30, 0x00}), "certificate");
     }
 
     @Test
@@ -440,7 +439,7 @@ final class TreeNodeFactoryTest {
          *
          * Checking both keys at the same time.
          */
-        doSVCertTest(PdfName.Sig, SV, SVCert, new PdfString(new byte[] {0x01, 0x00}), null);
+        doSVCertTest(PdfName.Sig, PdfName.SV, SVCert, new PdfString(new byte[] {0x01, 0x00}), null);
     }
 
     @Test
@@ -460,7 +459,7 @@ final class TreeNodeFactoryTest {
          *
          * Checking both keys at the same time.
          */
-        doSVCertTest(PdfName.Sig, SV, PdfName.Tx, new PdfString(new byte[] {0x30, 0x00}), null);
+        doSVCertTest(PdfName.Sig, PdfName.SV, PdfName.Tx, new PdfString(new byte[] {0x30, 0x00}), null);
     }
 
     @Test
@@ -480,7 +479,7 @@ final class TreeNodeFactoryTest {
          *
          * Checking both keys at the same time.
          */
-        doSVCertTest(PdfName.Sig, SV, SVCert, new PdfNumber(1), null);
+        doSVCertTest(PdfName.Sig, PdfName.SV, SVCert, new PdfNumber(1), null);
     }
 
     @Test
@@ -499,7 +498,7 @@ final class TreeNodeFactoryTest {
          *
          * Checking both keys at the same time.
          */
-        doSVCertTest(PdfName.Sig, SV, null, new PdfString(new byte[] {0x30, 0x00}), "certificate");
+        doSVCertTest(PdfName.Sig, PdfName.SV, null, new PdfString(new byte[] {0x30, 0x00}), "certificate");
     }
 
     @Test
@@ -557,6 +556,67 @@ final class TreeNodeFactoryTest {
          * Checking both keys at the same time.
          */
         doSVCertTest(PdfName.Tx, null, null, new PdfString(new byte[] {0x30, 0x00}), null);
+    }
+
+    @Test
+    void expandNode_Asn1MacWithValidContents() {
+        /*
+         * Checking on a test document, where the following markers are
+         * present:
+         *
+         * 1. There is an "/AuthCode" dictionary with a "/MAC" key, which
+         *    contains a string.
+         * 2. String data is "0x3000" (empty ASN.1 SEQUENCE).
+         *
+         * As a result there SHOULD be an ASN.1 subtree.
+         */
+        doMacTest(PdfName.AuthCode, new PdfString(new byte[] {0x30, 0x00}), "contentInfo");
+    }
+
+    @Test
+    void expandNode_Asn1MacWithInvalidContents() {
+        /*
+         * Checking on a test document, where the following markers are
+         * present:
+         *
+         * 1. There is an "/AuthCode" dictionary with a "/MAC" key, which
+         *    contains a string.
+         * 2. String data is "0x1000" (ASN.1 BOOLEAN without data, which is
+         *    invalid).
+         *
+         * As a result there SHOULD NOT be an ASN.1 subtree.
+         */
+        doMacTest(PdfName.AuthCode, new PdfString(new byte[] {0x01, 0x00}), null);
+    }
+
+    @Test
+    void expandNode_Asn1MacWithNonStringContents() {
+        /*
+         * Checking on a test document, where the following markers are
+         * present:
+         *
+         * 1. There is an "/AuthCode" dictionary with a "/MAC" key, which
+         *    contains a number.
+         * 2. Data is a number (1), which is incorrect.
+         *
+         * As a result there SHOULD NOT be an ASN.1 subtree.
+         */
+        doMacTest(PdfName.AuthCode, new PdfNumber(1), null);
+    }
+
+    @Test
+    void expandNode_Asn1MacWithInvalidParentKey() {
+        /*
+         * Checking on a test document, where the following markers are
+         * present:
+         *
+         * 1. There is a "/SV" dictionary with a "/MAC" key, which contains a
+         *    string. This is an unexpected dictionary
+         * 2. String data is "0x3000" (empty ASN.1 SEQUENCE).
+         *
+         * As a result there SHOULD NOT be an ASN.1 subtree.
+         */
+        doMacTest(PdfName.SV, new PdfString(new byte[] {0x30, 0x00}), null);
     }
 
     @Test
@@ -745,7 +805,7 @@ final class TreeNodeFactoryTest {
         if (ft != null) {
             sigFormField.put(PdfName.FT, ft);
         }
-        sigFormField.put(SV, svDict.getIndirectReference());
+        sigFormField.put(PdfName.SV, svDict.getIndirectReference());
         final PdfDictionary acroFormDict = createAcroFormDict(doc, sigFormField);
         doc.getCatalog().getPdfObject().put(PdfName.AcroForm, acroFormDict);
 
@@ -755,7 +815,7 @@ final class TreeNodeFactoryTest {
         expandAll(factory, node);
 
         // Getting /SV dictionary reference
-        node = node.getDictionaryChildNode(SV);
+        node = node.getDictionaryChildNode(PdfName.SV);
         Assertions.assertNotNull(node);
         Assertions.assertTrue(node.isIndirectReference());
         Assertions.assertEquals(1, node.getChildCount());
@@ -795,6 +855,33 @@ final class TreeNodeFactoryTest {
                 Assertions.assertInstanceOf(Asn1SequenceTreeNode.class, issuer.getChildAt(0));
                 Asn1TestUtil.assertNodeMatches(0, expectedLeafNodeName, (AbstractAsn1TreeNode) issuer.getChildAt(0));
             }
+        }
+    }
+
+    private void doMacTest(PdfName key, PdfObject mac, String expectedLeafNodeName) {
+        final PdfDocument doc = new PdfDocument(new PdfWriter(new ByteArrayOutputStream()));
+        final PdfDictionary authCodeDict = new PdfDictionary(Map.of(
+                PdfName.MACLocation, PdfName.Standalone,
+                PdfName.MAC, mac
+        ));
+        doc.getTrailer().put(key, authCodeDict);
+
+        final TreeNodeFactory factory = new TreeNodeFactory(createIndirectObjectFactory(doc));
+        PdfObjectTreeNode node = PdfObjectTreeNode.getInstance(doc.getTrailer());
+        Assertions.assertNotNull(node);
+        expandAll(factory, node);
+
+        node = node.getDictionaryChildNode(key);
+        Assertions.assertNotNull(node);
+        Assertions.assertTrue(node.isDictionary());
+        node = node.getDictionaryChildNode(PdfName.MAC);
+        Assertions.assertNotNull(node);
+        if (expectedLeafNodeName == null) {
+            Assertions.assertEquals(0, node.getChildCount());
+        } else {
+            Assertions.assertEquals(1, node.getChildCount());
+            Assertions.assertInstanceOf(Asn1SequenceTreeNode.class, node.getChildAt(0));
+            Asn1TestUtil.assertNodeMatches(0, expectedLeafNodeName, (AbstractAsn1TreeNode) node.getChildAt(0));
         }
     }
 

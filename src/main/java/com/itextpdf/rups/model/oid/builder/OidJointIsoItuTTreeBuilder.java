@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -70,6 +70,7 @@ public final class OidJointIsoItuTTreeBuilder {
         return new OidTreeNode("joint-iso-itu-t", Map.ofEntries(
           entry("5", createDsTree()),
           entry("16", "country", Map.ofEntries(
+            entry("620", "pt"),
             entry("724", "es", Map.ofEntries(
               entry("1", "adm", Map.ofEntries(
                 entry("3", "mpr", Map.ofEntries(

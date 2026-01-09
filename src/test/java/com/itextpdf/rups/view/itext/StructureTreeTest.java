@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -49,7 +49,6 @@ import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfFile;
 import com.itextpdf.rups.view.itext.treenodes.StructureTreeNode;
-import com.itextpdf.test.ExtendedITextTest;
 
 import java.io.File;
 import java.io.IOException;
@@ -61,7 +60,7 @@ import org.junit.jupiter.api.Test;
 
 
 @Tag("IntegrationTest")
-class StructureTreeTest extends ExtendedITextTest {
+class StructureTreeTest {
     private static final String SOURCE_DIR = "./src/test/resources/com/itextpdf/rups/controller/";
 
     @Test
@@ -90,6 +89,71 @@ class StructureTreeTest extends ExtendedITextTest {
                 .getChildAt(0).getChildAt(0);
         String nodeLabel = (String) mciChild.getUserObject();
         Assertions.assertEquals("0 [Olleh ]", nodeLabel);
+    }
+
+    @Test
+    void structElemsGeneratedByAcrobatTest()
+            throws IOException, ExecutionException, InterruptedException {
+        /*
+         * Acrobat doesn't set the /Type key on the structure elements
+         * themselves. This test is here to check, that we process this case
+         * properly.
+         */
+        final PdfFile pdfFile = PdfFile.open(
+                new File(SOURCE_DIR + "AcrobatStructElemTest.pdf")
+        );
+
+        final StructureTreeNode rootNode = getStructureTreeRootNode(pdfFile);
+        Assertions.assertEquals(2, rootNode.getChildCount());
+
+        final StructureTreeNode firstPNode = (StructureTreeNode) rootNode.getChildAt(0);
+        Assertions.assertEquals("/P", firstPNode.toString());
+        Assertions.assertEquals(1, firstPNode.getChildCount());
+        final StructureTreeNode firstTextNode = (StructureTreeNode) firstPNode.getChildAt(0);
+        Assertions.assertEquals(
+                "0 [A paragraph created in Acrobat, tagged. ]",
+                firstTextNode.toString()
+        );
+        Assertions.assertEquals(0, firstTextNode.getChildCount());
+
+        final StructureTreeNode secondPNode = (StructureTreeNode) rootNode.getChildAt(1);
+        Assertions.assertEquals("/P -> #2 [Second Paragraph]", secondPNode.toString());
+        Assertions.assertEquals(1, secondPNode.getChildCount());
+        final StructureTreeNode secondTextNode = (StructureTreeNode) secondPNode.getChildAt(0);
+        Assertions.assertEquals(
+                "1 [A second paragraph. ]",
+                secondTextNode.toString()
+        );
+        Assertions.assertEquals(0, secondTextNode.getChildCount());
+    }
+
+    @Test
+    void structElemsUnexpectedPageRefTestTest()
+            throws IOException, ExecutionException, InterruptedException {
+        /*
+         * For some reason there are documents in the wild, where there is a
+         * structure elem tree, but the elements there reference a page, which
+         * is absent in the overall page tree. We shouldn't crash in such cases.
+         */
+        final PdfFile pdfFile = PdfFile.open(
+                new File(SOURCE_DIR + "UnexpectedPageRefTest.pdf")
+        );
+
+        final StructureTreeNode rootNode = getStructureTreeRootNode(pdfFile);
+        Assertions.assertEquals(1, rootNode.getChildCount());
+
+        final StructureTreeNode docNode = (StructureTreeNode) rootNode.getChildAt(0);
+        Assertions.assertEquals("/Document", docNode.toString());
+        Assertions.assertEquals(1, docNode.getChildCount());
+        final StructureTreeNode floatNode = (StructureTreeNode) docNode.getChildAt(0);
+        Assertions.assertEquals("/Float", floatNode.toString());
+        Assertions.assertEquals(1, floatNode.getChildCount());
+        final StructureTreeNode figureNode = (StructureTreeNode) floatNode.getChildAt(0);
+        Assertions.assertEquals("/Figure", figureNode.toString());
+        Assertions.assertEquals(1, figureNode.getChildCount());
+        final StructureTreeNode mcidNode = (StructureTreeNode) figureNode.getChildAt(0);
+        Assertions.assertEquals("0", mcidNode.toString());
+        Assertions.assertEquals(0, mcidNode.getChildCount());
     }
 
     private static StructureTreeNode getStructureTreeRootNode(IPdfFile pdfFile)

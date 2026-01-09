@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -551,7 +551,7 @@ public abstract class AbstractCorrector {
      * @param getInstanceFunc Bouncy Castle type-specific <tt>getInstance</tt>
      *                        function.
      *
-     * @return The object, that is now stored inside <tt>node</tt>. If fix it
+     * @return The object, that is now stored inside <tt>node</tt>. If fix is
      * not possible, or if it was already correct, the old object will be
      * returned.
      */

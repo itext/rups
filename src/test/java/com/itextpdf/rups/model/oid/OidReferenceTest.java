@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -239,6 +239,10 @@ final class OidReferenceTest {
                 OidReference.getDisplayString("1.3.6.1.5.5.7.3.8")
         );
         Assertions.assertEquals(
+                "/iso/identified-organization/dod/internet/security/mechanisms/pkix/id-pda/id-pda-dateOfBirth",
+                OidReference.getDisplayString("1.3.6.1.5.5.7.9.1")
+        );
+        Assertions.assertEquals(
                 "/iso/identified-organization/dod/internet/security/mechanisms/pkix/ad/id-ad-ocsp",
                 OidReference.getDisplayString("1.3.6.1.5.5.7.48.1")
         );
@@ -434,6 +438,60 @@ final class OidReferenceTest {
         Assertions.assertEquals(
                 "/iso/member-body/us/adbe/acrobat/security/x509Ext/archiverevinfo",
                 OidReference.getDisplayString("1.2.840.113583.1.1.9.2")
+        );
+    }
+
+    @Test
+    void getDisplayString_Iso32004() {
+        Assertions.assertEquals(
+                "/iso/standard/iso32004/modules/pdfmac",
+                OidReference.getDisplayString("1.0.32004.0.1")
+        );
+        Assertions.assertEquals(
+                "/iso/standard/iso32004/pdfmac/id-ct-pdfMacIntegrityInfo",
+                OidReference.getDisplayString("1.0.32004.1.0")
+        );
+        Assertions.assertEquals(
+                "/iso/standard/iso32004/pdfmac/id-kdf-pdfMacWrapKdf",
+                OidReference.getDisplayString("1.0.32004.1.1")
+        );
+        Assertions.assertEquals(
+                "/iso/standard/iso32004/pdfmac/id-attr-pdfMacData",
+                OidReference.getDisplayString("1.0.32004.1.2")
+        );
+    }
+
+    @Test
+    void getDisplayString_Etsi() {
+        Assertions.assertEquals(
+                "/itu-t/identified-organization/etsi/id-qc-profile/id-etsi-qcs"
+                        + "/id-etsi-qcs-QcCompliance",
+                OidReference.getDisplayString("0.4.0.1862.1.1")
+        );
+        Assertions.assertEquals(
+                "/itu-t/identified-organization/etsi/id-qc-profile/id-etsi-qcs"
+                        + "/id-etsi-qcs-QcSSCD",
+                OidReference.getDisplayString("0.4.0.1862.1.4")
+        );
+        Assertions.assertEquals(
+                "/itu-t/identified-organization/etsi/id-qc-profile/id-etsi-qcs"
+                        + "/id-etsi-qcs-QcPDS",
+                OidReference.getDisplayString("0.4.0.1862.1.5")
+        );
+        Assertions.assertEquals(
+                "/itu-t/identified-organization/etsi/id-qc-profile/id-etsi-qcs"
+                        + "/id-etsi-qcs-QcType/id-etsi-qct-esign",
+                OidReference.getDisplayString("0.4.0.1862.1.6.1")
+        );
+        Assertions.assertEquals(
+                "/itu-t/identified-organization/etsi/other-certificate-policies"
+                        + "/policy-identifiers/ncpplus",
+                OidReference.getDisplayString("0.4.0.2042.1.2")
+        );
+        Assertions.assertEquals(
+                "/itu-t/identified-organization/etsi/qualified-certificate-policies"
+                        + "/policy-identifiers/qcp-natural-qscd",
+                OidReference.getDisplayString("0.4.0.194112.1.2")
         );
     }
 

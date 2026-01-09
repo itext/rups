@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -40,50 +40,53 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.attributes;
+package com.itextpdf.rups.view.itext.treenodes.asn1.correctors.types;
 
 import com.itextpdf.rups.view.itext.treenodes.asn1.AbstractAsn1TreeNode;
+import com.itextpdf.rups.view.itext.treenodes.asn1.Asn1TaggedObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.AbstractCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.OidCorrectorMapper;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.CrlCorrector;
-import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.OcspResponseCorrector;
 
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.ASN1TaggedObject;
 
 /**
- * Corrector for the revocationInfoArchival attribute, as it is defined in PDF.
+ * Corrector for the RevocationInfoChoices type, as it is defined in RFC 5652.
  *
  * <pre>
- * RevocationInfoArchival::= SEQUENCE {
- *   crls           [0] EXPLICIT SEQUENCE OF CRLs OPTIONAL,
- *   ocsps          [1] EXPLICIT SEQUENCE OF OCSPResponse OPTIONAL,
- *   otherRevInfos  [2] EXPLICIT SEQUENCE OF OtherRevInfo OPTIONAL
+ * RevocationInfoChoices ::= SET OF RevocationInfoChoice
+ *
+ * RevocationInfoChoice ::= CHOICE {
+ *   crl    CertificateList,
+ *   other  [1] IMPLICIT OtherRevocationInfoFormat
+ * }
+ *
+ * OtherRevocationInfoFormat ::= SEQUENCE {
+ *   otherRevInfoFormat OBJECT IDENTIFIER,
+ *   otherRevInfo       ANY DEFINED BY otherRevInfoFormat
  * }
  * </pre>
  */
-public final class RevocationInfoArchivalCorrector extends AbstractCorrector {
+public final class RevocationInfoChoicesCorrector extends AbstractCorrector {
     /**
      * Singleton instance of the corrector.
      */
-    public static final RevocationInfoArchivalCorrector INSTANCE = new RevocationInfoArchivalCorrector();
+    public static final RevocationInfoChoicesCorrector INSTANCE =
+            new RevocationInfoChoicesCorrector();
 
-    private RevocationInfoArchivalCorrector() {
+    private RevocationInfoChoicesCorrector() {
         // singleton class
     }
-
-    /**
-     * OBJECT IDENTIFIER for the type, which is handled by the corrector.
-     */
-    public static final String OID = "1.2.840.113583.1.1.8";
 
     /**
      * {@inheritDoc}
      */
     @Override
     public String getDefaultVariableName() {
-        return "revocationInfoArchival";
+        return "crls";
     }
 
     /**
@@ -91,72 +94,53 @@ public final class RevocationInfoArchivalCorrector extends AbstractCorrector {
      */
     @Override
     public void correct(AbstractAsn1TreeNode node, ASN1Primitive obj, String variableName) {
-        if (!isUniversalType(obj, ASN1Sequence.class)) {
+        if (!isUniversalType(obj, ASN1Set.class)) {
             return;
         }
         node.setRfcFieldName(variableName);
-        int i = 0;
-        if (node.getChildCount() > i) {
-            final AbstractAsn1TreeNode crls = node.getChildAt(i);
-            if (isExplicitContextSpecificType(crls, 0, ASN1Sequence.class)) {
-                correctCrls(crls);
-                ++i;
-            }
-        }
-        if (node.getChildCount() > i) {
-            final AbstractAsn1TreeNode ocsps = node.getChildAt(i);
-            if (isExplicitContextSpecificType(ocsps, 1, ASN1Sequence.class)) {
-                correctOcsps(ocsps);
-                ++i;
-            }
-        }
-        if (node.getChildCount() > i) {
-            final AbstractAsn1TreeNode otherRevInfos = node.getChildAt(i);
-            if (isExplicitContextSpecificType(otherRevInfos, 2, ASN1Sequence.class)) {
-                correctOtherRevInfos(otherRevInfos);
-            }
-        }
-    }
-
-    private static void correctCrls(AbstractAsn1TreeNode node) {
-        node.setRfcFieldName("crls");
-        for (final AbstractAsn1TreeNode entry : node) {
-            CrlCorrector.INSTANCE.correct(entry);
-        }
-    }
-
-    private static void correctOcsps(AbstractAsn1TreeNode node) {
-        node.setRfcFieldName("ocsps");
-        for (final AbstractAsn1TreeNode entry : node) {
-            OcspResponseCorrector.INSTANCE.correct(entry);
-        }
-    }
-
-    private static void correctOtherRevInfos(AbstractAsn1TreeNode node) {
-        node.setRfcFieldName("otherRevInfos");
-        for (final AbstractAsn1TreeNode entry : node) {
-            correctOtherRevInfo(entry);
+        for (final AbstractAsn1TreeNode revocationInfoChoice : node) {
+            correctRevocationInfoChoice(revocationInfoChoice);
         }
     }
 
     /**
      * <pre>
-     * OtherRevInfo ::= SEQUENCE {
-     *   type   OBJECT IDENTIFIER
-     *   value  OCTET STRING
+     * RevocationInfoChoice ::= CHOICE {
+     *   crl    CertificateList,
+     *   other  [1] IMPLICIT OtherRevocationInfoFormat
      * }
      * </pre>
      */
-    private static void correctOtherRevInfo(AbstractAsn1TreeNode node) {
-        if (!isUniversalType(node, ASN1Sequence.class)) {
+    private static void correctRevocationInfoChoice(AbstractAsn1TreeNode node) {
+        if (isUniversalType(node)) {
+            CrlCorrector.INSTANCE.correct(node);
+        } else if (isImplicitContextSpecificType(node, 1)) {
+            correctOtherRevocationInfoFormat((Asn1TaggedObjectTreeNode) node);
+        }
+    }
+
+    /**
+     * <pre>
+     * OtherRevocationInfoFormat ::= SEQUENCE {
+     *   otherRevInfoFormat OBJECT IDENTIFIER,
+     *   otherRevInfo       ANY DEFINED BY otherRevInfoFormat
+     * }
+     * </pre>
+     */
+    private static void correctOtherRevocationInfoFormat(Asn1TaggedObjectTreeNode node) {
+        final ASN1TaggedObject obj = fixImplicitContextSpecificObject(
+                node, ASN1Sequence::getInstance
+        );
+        if (!isUniversalType(getBaseObject(obj), ASN1Sequence.class)) {
             return;
         }
-        node.setRfcFieldName("otherRevInfo");
+        node.setRfcFieldName("other");
+        String oid = null;
         if (node.getChildCount() > 0) {
-            correctPrimitiveUniversalType(node.getChildAt(0), ASN1ObjectIdentifier.class, "type");
+            oid = correctUniversalObjectIdentifier(node.getChildAt(0), "otherRevInfoFormat");
         }
         if (node.getChildCount() > 1) {
-            correctPrimitiveUniversalType(node.getChildAt(1), ASN1OctetString.class, "value");
+            OidCorrectorMapper.get(oid).correct(node.getChildAt(1), "otherRevInfo");
         }
     }
 }

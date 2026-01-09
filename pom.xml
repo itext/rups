@@ -4,7 +4,7 @@
 
   <groupId>com.itextpdf</groupId>
   <artifactId>itext-rups</artifactId>
-  <version>25.03</version>
+  <version>26.01</version>
 
 
   <name>itext-rups</name>
@@ -75,12 +75,12 @@
     <macosappbundler-maven-plugin.version>1.21.1</macosappbundler-maven-plugin.version>
 
     <!-- Application dependencies -->
-    <dom4j.version>2.1.4</dom4j.version>
-    <flatlaf.version>3.5.4</flatlaf.version>
+    <dom4j.version>2.2.0</dom4j.version>
+    <flatlaf.version>3.7</flatlaf.version>
     <icu4j.version>76.1</icu4j.version>
-    <itext.version>9.1.0</itext.version>
-    <jackson.version>2.18.3</jackson.version>
-    <logback.version>1.5.17</logback.version>
+    <itext.version>9.5.0</itext.version>
+    <jackson.version>2.20.1</jackson.version>
+    <logback.version>1.5.22</logback.version>
 
     <!-- Test dependencies -->
     <junit-jupiter-api.version>5.12.0</junit-jupiter-api.version>
@@ -118,6 +118,11 @@
       <version>${itext.version}</version>
     </dependency>
     <dependency>
+      <groupId>com.itextpdf</groupId>
+      <artifactId>brotli-compressor</artifactId>
+      <version>${itext.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.dom4j</groupId>
       <artifactId>dom4j</artifactId>
       <version>${dom4j.version}</version>
@@ -133,12 +138,6 @@
       <groupId>com.formdev</groupId>
       <artifactId>flatlaf</artifactId>
       <version>${flatlaf.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.itextpdf</groupId>
-      <artifactId>pdftest</artifactId>
-      <version>${itext.version}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>

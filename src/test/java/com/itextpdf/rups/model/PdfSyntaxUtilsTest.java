@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -51,7 +51,6 @@ import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfNumber;
 import com.itextpdf.kernel.pdf.PdfString;
 import com.itextpdf.kernel.pdf.PdfWriter;
-import com.itextpdf.test.ExtendedITextTest;
 
 import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
@@ -61,7 +60,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @Tag("UnitTest")
-class PdfSyntaxUtilsTest extends ExtendedITextTest {
+class PdfSyntaxUtilsTest {
 
     @Test
     void testSimpleString() {

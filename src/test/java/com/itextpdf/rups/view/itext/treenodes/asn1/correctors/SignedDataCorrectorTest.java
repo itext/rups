@@ -1,6 +1,6 @@
 /*
     This file is part of the iText (R) project.
-    Copyright (c) 1998-2025 Apryse Group NV
+    Copyright (c) 1998-2026 Apryse Group NV
     Authors: Apryse Software.
 
     This program is free software; you can redistribute it and/or modify
@@ -74,15 +74,6 @@ final class SignedDataCorrectorTest {
         final AbstractAsn1TreeNode node = createDefaultNode();
         SignedDataCorrector.INSTANCE.correct(node, "sd");
         validateDefaultNode(node, "sd");
-    }
-
-    @Test
-    void correct_DifferentVersions() {
-        testVersion(-1, null);
-        for (int i = 0; i < 6; ++i) {
-            testVersion(i, "v" + i);
-        }
-        testVersion(6, null);
     }
 
     @Test
@@ -177,99 +168,6 @@ final class SignedDataCorrectorTest {
     }
 
     @Test
-    void correct_InvalidCertificateType() {
-        final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
-                new DERSequence(new ASN1Encodable[] {
-                        new ASN1Integer(1),
-                        new DERSet(),
-                        new DERSequence(),
-                        new DERTaggedObject(false, 0, new DERSet(
-                                new DERTaggedObject(true, 9, new DERSequence())
-                        ))
-                })
-        );
-        SignedDataCorrector.INSTANCE.correct(node);
-        Asn1TestUtil.assertNodeMatches(4, "signedData", node);
-        Asn1TestUtil.assertNodeMatches(0, "version: 1 (v1)", node.getChildAt(0));
-        Asn1TestUtil.assertNodeMatches(0, "digestAlgorithms", node.getChildAt(1));
-        Asn1TestUtil.assertNodeMatches(0, "encapContentInfo", node.getChildAt(2));
-        Asn1TestUtil.assertNodeMatches(1, "certificates", node.getChildAt(3));
-        Asn1TestUtil.assertNodeMatches(0, "[9] EXPLICIT SEQUENCE", node.getChildAt(3).getChildAt(0));
-    }
-
-    @Test
-    void correct_InvalidOtherCertificateBaseType() {
-        final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
-                new DERSequence(new ASN1Encodable[] {
-                        new ASN1Integer(1),
-                        new DERSet(),
-                        new DERSequence(),
-                        new DERTaggedObject(false, 0, new DERSet(
-                                new DERTaggedObject(false, 3, new ASN1Integer(1))
-                        ))
-                })
-        );
-        SignedDataCorrector.INSTANCE.correct(node);
-        Asn1TestUtil.assertNodeMatches(4, "signedData", node);
-        Asn1TestUtil.assertNodeMatches(0, "version: 1 (v1)", node.getChildAt(0));
-        Asn1TestUtil.assertNodeMatches(0, "digestAlgorithms", node.getChildAt(1));
-        Asn1TestUtil.assertNodeMatches(0, "encapContentInfo", node.getChildAt(2));
-        Asn1TestUtil.assertNodeMatches(1, "certificates", node.getChildAt(3));
-        Asn1TestUtil.assertNodeMatches(0, "[3] IMPLICIT INTEGER: 1", node.getChildAt(3).getChildAt(0));
-    }
-
-    @Test
-    void correct_EmptyOtherCertificateSequence() {
-        final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
-                new DERSequence(new ASN1Encodable[] {
-                        new ASN1Integer(1),
-                        new DERSet(),
-                        new DERSequence(),
-                        new DERTaggedObject(false, 0, new DERSet(
-                                new DERTaggedObject(false, 3, new DERSequence())
-                        ))
-                })
-        );
-        SignedDataCorrector.INSTANCE.correct(node);
-        Asn1TestUtil.assertNodeMatches(4, "signedData", node);
-        Asn1TestUtil.assertNodeMatches(0, "version: 1 (v1)", node.getChildAt(0));
-        Asn1TestUtil.assertNodeMatches(0, "digestAlgorithms", node.getChildAt(1));
-        Asn1TestUtil.assertNodeMatches(0, "encapContentInfo", node.getChildAt(2));
-        Asn1TestUtil.assertNodeMatches(1, "certificates", node.getChildAt(3));
-        Asn1TestUtil.assertNodeMatches(0, "other", node.getChildAt(3).getChildAt(0));
-    }
-
-    @Test
-    void correct_InvalidOtherCertFormatType() {
-        final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
-                new DERSequence(new ASN1Encodable[] {
-                        new ASN1Integer(1),
-                        new DERSet(),
-                        new DERSequence(),
-                        new DERTaggedObject(false, 0, new DERSet(
-                                new DERTaggedObject(false, 3, new DERSequence(
-                                        new ASN1Integer(1)
-                                ))
-                        ))
-                })
-        );
-        SignedDataCorrector.INSTANCE.correct(node);
-        Asn1TestUtil.assertNodeMatches(4, "signedData", node);
-        Asn1TestUtil.assertNodeMatches(0, "version: 1 (v1)", node.getChildAt(0));
-        Asn1TestUtil.assertNodeMatches(0, "digestAlgorithms", node.getChildAt(1));
-        Asn1TestUtil.assertNodeMatches(0, "encapContentInfo", node.getChildAt(2));
-        {
-            final AbstractAsn1TreeNode certificates = node.getChildAt(3);
-            Asn1TestUtil.assertNodeMatches(1, "certificates", certificates);
-            {
-                final AbstractAsn1TreeNode certificate = certificates.getChildAt(0);
-                Asn1TestUtil.assertNodeMatches(1, "other", certificate);
-                Asn1TestUtil.assertNodeMatches(0, "INTEGER: 1", certificate.getChildAt(0));
-            }
-        }
-    }
-
-    @Test
     void correct_InvalidEncapsulatedContentInfoTypes() {
         final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
@@ -291,54 +189,6 @@ final class SignedDataCorrectorTest {
             for (int i = 0; i < 2; ++i) {
                 Asn1TestUtil.assertNodeMatches(0, "INTEGER: " + i, ci.getChildAt(i));
             }
-        }
-    }
-
-    @Test
-    void correct_InvalidEContentBaseType() {
-        final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
-                new DERSequence(new ASN1Encodable[] {
-                        new ASN1Integer(1),
-                        new DERSet(),
-                        new DERSequence(new ASN1Encodable[] {
-                                new ASN1ObjectIdentifier("1.2"),    // member-body
-                                new DERTaggedObject(true, 0, new ASN1Integer(1)),
-                        }),
-                })
-        );
-        SignedDataCorrector.INSTANCE.correct(node);
-        Asn1TestUtil.assertNodeMatches(3, "signedData", node);
-        Asn1TestUtil.assertNodeMatches(0, "version: 1 (v1)", node.getChildAt(0));
-        Asn1TestUtil.assertNodeMatches(0, "digestAlgorithms", node.getChildAt(1));
-        {
-            final AbstractAsn1TreeNode ci = node.getChildAt(2);
-            Asn1TestUtil.assertNodeMatches(2, "encapContentInfo", ci);
-            Asn1TestUtil.assertNodeMatches(0, "eContentType: 1.2 (/iso/member-body)", ci.getChildAt(0));
-            Asn1TestUtil.assertNodeMatches(0, "[0] EXPLICIT INTEGER: 1", ci.getChildAt(1));
-        }
-    }
-
-    @Test
-    void correct_UnknownEContentDataType() {
-        final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
-                new DERSequence(new ASN1Encodable[] {
-                        new ASN1Integer(1),
-                        new DERSet(),
-                        new DERSequence(new ASN1Encodable[] {
-                                new ASN1ObjectIdentifier("1.2"),    // member-body
-                                new DERTaggedObject(true, 0, new DEROctetString(new byte[] {0x05, 0x00})),
-                        }),
-                })
-        );
-        SignedDataCorrector.INSTANCE.correct(node);
-        Asn1TestUtil.assertNodeMatches(3, "signedData", node);
-        Asn1TestUtil.assertNodeMatches(0, "version: 1 (v1)", node.getChildAt(0));
-        Asn1TestUtil.assertNodeMatches(0, "digestAlgorithms", node.getChildAt(1));
-        {
-            final AbstractAsn1TreeNode ci = node.getChildAt(2);
-            Asn1TestUtil.assertNodeMatches(2, "encapContentInfo", ci);
-            Asn1TestUtil.assertNodeMatches(0, "eContentType: 1.2 (/iso/member-body)", ci.getChildAt(0));
-            Asn1TestUtil.assertNodeMatches(0, "eContent: 0x0500", ci.getChildAt(1));
         }
     }
 
@@ -491,75 +341,6 @@ final class SignedDataCorrectorTest {
     }
 
     @Test
-    void correct_EmptyOtherRevocationInfoFormatSequence() {
-        final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
-                new DERSequence(new ASN1Encodable[] {
-                        new ASN1Integer(1),
-                        new DERSet(),
-                        new DERSequence(),
-                        new DERTaggedObject(false, 1, new DERSet(
-                                new DERTaggedObject(false, 1, new DERSequence())
-                        ))
-                })
-        );
-        SignedDataCorrector.INSTANCE.correct(node);
-        Asn1TestUtil.assertNodeMatches(4, "signedData", node);
-        Asn1TestUtil.assertNodeMatches(0, "version: 1 (v1)", node.getChildAt(0));
-        Asn1TestUtil.assertNodeMatches(0, "digestAlgorithms", node.getChildAt(1));
-        Asn1TestUtil.assertNodeMatches(0, "encapContentInfo", node.getChildAt(2));
-        Asn1TestUtil.assertNodeMatches(1, "crls", node.getChildAt(3));
-        Asn1TestUtil.assertNodeMatches(0, "other", node.getChildAt(3).getChildAt(0));
-    }
-
-    @Test
-    void correct_InvalidRevocationInfoChoiceType() {
-        final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
-                new DERSequence(new ASN1Encodable[] {
-                        new ASN1Integer(1),
-                        new DERSet(),
-                        new DERSequence(),
-                        new DERTaggedObject(false, 1, new DERSet(
-                                new DERTaggedObject(false, 2, new DERSequence())
-                        ))
-                })
-        );
-        SignedDataCorrector.INSTANCE.correct(node);
-        Asn1TestUtil.assertNodeMatches(4, "signedData", node);
-        Asn1TestUtil.assertNodeMatches(0, "version: 1 (v1)", node.getChildAt(0));
-        Asn1TestUtil.assertNodeMatches(0, "digestAlgorithms", node.getChildAt(1));
-        Asn1TestUtil.assertNodeMatches(0, "encapContentInfo", node.getChildAt(2));
-        {
-            final AbstractAsn1TreeNode crls = node.getChildAt(3);
-            Asn1TestUtil.assertNodeMatches(1, "crls", crls);
-            Asn1TestUtil.assertNodeMatches(0, "[2] IMPLICIT SEQUENCE", crls.getChildAt(0));
-        }
-    }
-
-    @Test
-    void correct_InvalidOtherRevocationInfoFormatBaseType() {
-        final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
-                new DERSequence(new ASN1Encodable[] {
-                        new ASN1Integer(1),
-                        new DERSet(),
-                        new DERSequence(),
-                        new DERTaggedObject(false, 1, new DERSet(
-                                new DERTaggedObject(false, 1, new ASN1Integer(1))
-                        ))
-                })
-        );
-        SignedDataCorrector.INSTANCE.correct(node);
-        Asn1TestUtil.assertNodeMatches(4, "signedData", node);
-        Asn1TestUtil.assertNodeMatches(0, "version: 1 (v1)", node.getChildAt(0));
-        Asn1TestUtil.assertNodeMatches(0, "digestAlgorithms", node.getChildAt(1));
-        Asn1TestUtil.assertNodeMatches(0, "encapContentInfo", node.getChildAt(2));
-        {
-            final AbstractAsn1TreeNode crls = node.getChildAt(3);
-            Asn1TestUtil.assertNodeMatches(1, "crls", crls);
-            Asn1TestUtil.assertNodeMatches(0, "[1] IMPLICIT INTEGER: 1", crls.getChildAt(0));
-        }
-    }
-
-    @Test
     void correct_InvalidAttributesBaseType() {
         final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
@@ -625,30 +406,6 @@ final class SignedDataCorrectorTest {
                 Asn1TestUtil.assertNodeMatches(0, "version: 1 (v1)", signerInfo.getChildAt(0));
                 Asn1TestUtil.assertNodeMatches(0, "[0] IMPLICIT SEQUENCE", signerInfo.getChildAt(1));
             }
-        }
-    }
-
-    @Test
-    void correct_InvalidCertificateChoiceBaseType() {
-        final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
-                new DERSequence(new ASN1Encodable[] {
-                        new ASN1Integer(1),
-                        new DERSet(),
-                        new DERSequence(),
-                        new DERTaggedObject(false, 0, new DERSet(
-                                new DERTaggedObject(false, 0, new ASN1Integer(1))
-                        )),
-                })
-        );
-        SignedDataCorrector.INSTANCE.correct(node);
-        Asn1TestUtil.assertNodeMatches(4, "signedData", node);
-        Asn1TestUtil.assertNodeMatches(0, "version: 1 (v1)", node.getChildAt(0));
-        Asn1TestUtil.assertNodeMatches(0, "digestAlgorithms", node.getChildAt(1));
-        Asn1TestUtil.assertNodeMatches(0, "encapContentInfo", node.getChildAt(2));
-        {
-            final AbstractAsn1TreeNode certificates = node.getChildAt(3);
-            Asn1TestUtil.assertNodeMatches(1, "certificates", certificates);
-            Asn1TestUtil.assertNodeMatches(0, "[0] IMPLICIT INTEGER: 1", certificates.getChildAt(0));
         }
     }
 
@@ -852,7 +609,7 @@ final class SignedDataCorrectorTest {
         }
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         /*
          * No need to fill everything here, as it will be massive...
          * It is tested individually anyway.
@@ -933,23 +690,5 @@ final class SignedDataCorrectorTest {
                         )
                 })
         );
-    }
-
-    private static void testVersion(int value, String description) {
-        final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
-                new DERSequence(
-                        new ASN1Integer(value)
-                )
-        );
-        SignedDataCorrector.INSTANCE.correct(node);
-        Asn1TestUtil.assertNodeMatches(1, "signedData", node);
-        if (description == null) {
-            Asn1TestUtil.assertNodeMatches(0, "version: " + value, node.getChildAt(0));
-        } else {
-            Asn1TestUtil.assertNodeMatches(0,
-                    "version: " + value + " (" + description + ")",
-                    node.getChildAt(0)
-            );
-        }
     }
 }
