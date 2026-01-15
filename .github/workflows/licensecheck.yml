@@ -107,7 +107,7 @@ jobs:
       - name: Filter results
         id: filter_results
         run: |
-          jq -n --argjson data '${{ steps.read_results.outputs.results }}' '$data[] | select(.licenselines != "")' >> filtered_results
+          jq -n --argjson data '${{ steps.read_results.outputs.results }}' '$data[] | select(.licenselines == "")' >> filtered_results
           filtered_results="$(cat filtered_results)"
           echo filtered_results=$filtered_results >> $GITHUB_OUTPUT
 
@@ -117,8 +117,6 @@ jobs:
         run: |
             echo "Removing commits as they contains licenses"
             echo ${{ toJson(steps.filter_results.outputs.filtered_results) }}
-            git reset --hard ${{ github.event.before }}
-            git push origin ${{ github.ref }} --force-with-lease
             echo "link=https://github.com/${{ github.repository }}/commits/${{ github.ref }}" >> $GITHUB_OUTPUT
             echo "short_msg=push denied, reset to '${{ toJSON(github.event.before) }}'!" >> $GITHUB_OUTPUT
             echo "action_type=reverted to" >> $GITHUB_OUTPUT
