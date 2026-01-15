@@ -121,6 +121,22 @@ jobs:
             NUMBER_COMMITS=$(echo $commits | jq '. | length' )
             echo "number_commits=$NUMBER_COMMITS" >> $GITHUB_OUTPUT
 
+      - name: Get push type
+        id: push-type
+        if: ${{ steps.filter_results.outputs.filtered_results != '' }}        
+        run: |
+            echo "Getting push type"
+            PUSH_TYPE='commit'
+            FETCH_DEPTH=${{ steps.get_nr_commits.outputs.number_commits }}
+            if ${{ github.event.before == '0000000000000000000000000000000000000000' }}; then
+                PUSH_TYPE='branch'
+                FETCH_DEPTH=0
+            fi
+            echo "Push type: $PUSH_TYPE"
+            echo "Fetch depth: $FETCH_DEPTH"
+            echo "push_type=$PUSH_TYPE" >> $GITHUB_OUTPUT
+            echo "fetch_depth=$FETCH_DEPTH" >> $GITHUB_OUTPUT
+
       - name: Checkout
         if: ${{ steps.filter_results.outputs.filtered_results != '' }}
         uses: actions/checkout@v4
@@ -131,14 +147,22 @@ jobs:
         if: ${{ steps.filter_results.outputs.filtered_results != '' }}
         id: remove-license
         run: |
-            echo "Removing commits as they contains licenses"
-            echo ${{ toJson(steps.filter_results.outputs.filtered_results) }}
-            git reset --hard ${{ github.event.before }}
-            git push origin ${{ github.ref }} --force-with-lease
-            echo "link=https://github.com/${{ github.repository }}/commits/${{ github.ref }}" >> $GITHUB_OUTPUT
-            echo "short_msg=push denied, reset to '${{ toJSON(github.event.before) }}'!" >> $GITHUB_OUTPUT
-            echo "action_type=reverted to" >> $GITHUB_OUTPUT
-            echo "msg_code=${{ github.event.before }}" >> $GITHUB_OUTPUT
+            if ${{ steps.push-type.outputs.push_type == 'commit'}}; then
+                echo "Removing commits as they contains licenses"
+                git reset --hard ${{ github.event.before }}
+                git push origin ${{ github.ref }} --force-with-lease
+                echo "link=https://github.com/${{ github.repository }}/commits/${{ github.ref }}" >> $GITHUB_OUTPUT
+                echo "short_msg=push denied, reset to '${{ toJSON(github.event.before) }}'!" >> $GITHUB_OUTPUT
+                echo "action_type=reverted to" >> $GITHUB_OUTPUT
+                echo "msg_code=${{ github.event.before }}" >> $GITHUB_OUTPUT
+            else
+                echo "Removing branch ${{ github.ref }} as it contains licenses"
+                git push origin --delete ${{ github.ref }}
+                echo "link=https://github.com/${{ github.repository }}/branches" >> $GITHUB_OUTPUT
+                echo "short_msg='${{ github.ref }}' was removed!" >> $GITHUB_OUTPUT
+                echo "action_type=removed" >> $GITHUB_OUTPUT
+                echo "msg_code=${{ github.ref }}" >> $GITHUB_OUTPUT
+            fi            
 
       - name: Find correspondences
         id: email
@@ -178,7 +202,7 @@ jobs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "${{ steps.remove-license.outputs.action_type}} `${{ steps.remove-license.outputs.msg_code }}`"
+                  "text": "${{ steps.remove-license.outputs.action_type}} ${{ steps.push-type.outputs.push_type}} `${{ steps.remove-license.outputs.msg_code }}`"
                 }
               },
               {
