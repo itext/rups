@@ -42,60 +42,35 @@
  */
 package com.itextpdf.rups.controller;
 
-import com.itextpdf.kernel.pdf.PdfArray;
-import com.itextpdf.kernel.pdf.PdfDictionary;
-import com.itextpdf.kernel.pdf.PdfIndirectReference;
-import com.itextpdf.kernel.pdf.PdfName;
-import com.itextpdf.kernel.pdf.PdfObject;
-import com.itextpdf.kernel.pdf.PdfStream;
+import com.itextpdf.kernel.pdf.*;
 import com.itextpdf.kernel.utils.CompareTool;
 import com.itextpdf.kernel.utils.CompareTool.CompareResult;
-import com.itextpdf.kernel.utils.objectpathitems.ArrayPathItem;
-import com.itextpdf.kernel.utils.objectpathitems.DictPathItem;
-import com.itextpdf.kernel.utils.objectpathitems.IndirectPathItem;
-import com.itextpdf.kernel.utils.objectpathitems.LocalPathItem;
-import com.itextpdf.kernel.utils.objectpathitems.ObjectPath;
+import com.itextpdf.kernel.utils.objectpathitems.*;
 import com.itextpdf.rups.io.listeners.PdfTreeNavigationListener;
-import com.itextpdf.rups.model.IndirectObjectFactory;
+import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.model.ObjectLoader;
 import com.itextpdf.rups.model.PdfSyntaxParser;
 import com.itextpdf.rups.model.TreeNodeFactory;
 import com.itextpdf.rups.view.DebugView;
-import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.PageSelectionListener;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenu;
 import com.itextpdf.rups.view.contextmenu.PdfTreeContextMenuMouseListener;
 import com.itextpdf.rups.view.icons.IconTreeNode;
-import com.itextpdf.rups.view.itext.FormTree;
-import com.itextpdf.rups.view.itext.IPdfObjectPanelEventListener;
-import com.itextpdf.rups.view.itext.OutlineTree;
-import com.itextpdf.rups.view.itext.PagesTable;
-import com.itextpdf.rups.view.itext.PdfObjectPanel;
-import com.itextpdf.rups.view.itext.PdfTree;
-import com.itextpdf.rups.view.itext.PlainText;
-import com.itextpdf.rups.view.itext.StructureTree;
-import com.itextpdf.rups.view.itext.SyntaxHighlightedStreamPane;
-import com.itextpdf.rups.view.itext.XRefTable;
-import com.itextpdf.rups.view.itext.treenodes.ObjectStreamTreeNode;
+import com.itextpdf.rups.view.itext.*;
 import com.itextpdf.rups.view.itext.treenodes.PdfObjectTreeNode;
 
-import java.awt.Color;
-import java.awt.event.KeyListener;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Stack;
-import java.util.function.Consumer;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
+import java.awt.*;
+import java.awt.event.KeyListener;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.Stack;
+import java.util.function.Consumer;
 
 /**
  * Controls the components that get their content from iText's PdfReader.
