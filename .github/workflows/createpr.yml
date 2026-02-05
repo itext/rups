@@ -11,6 +11,7 @@ jobs:
 
     outputs:
       email: ${{ steps.get-email.outputs.email }}
+      prurl: ${{ steps.open-pull-request.outputs.prurl }}
       failure: ${{ steps.failure_handling.outputs.failure }}
 
     steps:
@@ -38,12 +39,13 @@ jobs:
         id: open-pull-request
         if: ${{ ! startsWith(github.ref, 'refs/heads/rebased') }}
         run: |
-          gh pr create \
+          PRURL=$(gh pr create \
             --title "Pull Request to create/update rebased branch for '${{ github.ref }}'" \
             --body "Programmatically created Pull Request to automatically keep merge branch to develop up-to-date" \
             --base develop \
             --head ${{ github.ref }} \
-            --assignee ${{ github.event.sender.login }}
+            --assignee ${{ github.event.sender.login }})
+          echo "prurl=$PRURL" >> $GITHUB_OUTPUT
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
@@ -65,7 +67,7 @@ jobs:
     with:
       emailslackuser: ${{ needs.create_pr.outputs.email }}
       shortmsg: "Pull request created for '${{ github.ref }}'!"
-      blocks: "[{\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"Pull request created for '${{ github.ref }}' in '${{ github.server_url }}/${{ github.repository }}'\"}}]"
+      blocks: "[{\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"Pull request created for '${{ github.ref }}': ${{ needs.create_pr.outputs.prurl }}\"}}]"
 
 
   notification_failure:
