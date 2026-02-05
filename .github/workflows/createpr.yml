@@ -16,14 +16,12 @@ jobs:
     steps:
       - name: Get email
         id: get-email
-        if: ${{ ! startsWith(github.ref, 'refs/heads/rebased') }}
         uses: evvanErb/get-github-email-by-username-action@v2.0
         with:
           github-username: ${{ github.event.sender.login }}
           token: ${{ secrets.GH_TOKEN }}
 
       - name: Checkout
-        if: ${{ ! startsWith(github.ref, 'refs/heads/rebased') }}
         uses: actions/checkout@v4
         with:
           persist-credentials: false
@@ -52,7 +50,7 @@ jobs:
   notification_success:
 
     needs: [create_pr]    
-    if: ${{ needs.create_pr.outputs.failure != true }}
+    if: ${{ ! needs.create_pr.outputs.failure }}
     
     uses: itext/rups/.github/workflows/sendslackmsgtopusher.yml@createRebased
     secrets: inherit
@@ -61,10 +59,11 @@ jobs:
       shortmsg: "Pull request created for '${{ github.ref }}'!"
       blocks: "[{\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"Pull request created for '${{ github.ref }}' in '${{ github.server_url }}/${{ github.repository }}'\"}}]"
 
+
   notification_failure:
 
     needs: [create_pr]    
-    if: ${{ needs.create_pr.outputs.failure == true }}
+    if: ${{ needs.create_pr.outputs.failure }}
     
     uses: itext/rups/.github/workflows/sendslackmsgtopusher.yml@createRebased
     secrets: inherit
