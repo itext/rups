@@ -1,0 +1,66 @@
+name: CreatePR
+
+on:
+  create:
+
+jobs:
+  create_pr:
+    runs-on: ubuntu-latest
+    
+    continue-on-error: true
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+
+      - name: Open pull request
+        id: open-pull-request
+        if: ${{ ! startsWith(github.ref, 'refs/heads/rebased') }}
+        run: |
+          gh pr create \
+            --title "Pull Request to create/update rebased branch for '${{ github.ref }}'" \
+            --body "Programmatically created Pull Request to automatically keep merge branch to develop up-to-date" \
+            --base develop \
+            --head ${{ github.ref }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+
+      - name: Success handling
+        if: success()
+        id: success_handling
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+            FAILURE=${{ false }}
+            echo "failure=$FAILURE" >> $GITHUB_OUTPUT
+            SHORT_MSG="Pull request created for '${{ github.ref }}'!"
+            echo "short_msg=$SHORT_MSG" >> $GITHUB_OUTPUT
+            BLOCKS="[{\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"Pull request created for '${{ github.ref }}' in '${{ github.server_url }}/${{ github.repository }}'\"}}]"
+            echo "blocks=$BLOCKS" >> $GITHUB_OUTPUT
+        
+      - name: Failure handling
+        if: failure()
+        id: failure_handling
+        run: |
+            FAILURE=${{ true }}
+            echo "failure=$FAILURE" >> $GITHUB_OUTPUT
+            SHORT_MSG="No pull request created for '${{ github.ref }}'!"
+            echo "short_msg=$SHORT_MSG" >> $GITHUB_OUTPUT
+            FIRSTBLOCK="{\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \":alert-beam: No pull request created in '${{ github.server_url }}/${{ github.repository }}'\"}}"
+            BLOCKS="[$FIRSTBLOCK, {\"type\": \"section\", \"text\": {\"type\": \"mrkdwn\", \"text\": \"Check if '${{ github.ref }}' has changes compared to 'develop' & push again\"}}]"
+            echo "blocks=$BLOCKS" >> $GITHUB_OUTPUT
+
+
+  notification:
+
+    needs: [create_pr]
+    
+    uses: itext/rups/.github/workflows/sendslackmsgtopusher.yml@createRebased
+    secrets: inherit
+    with:
+      emailslackuser: ${{ github.event.sender.login }}
+      shortmsg: ${{ needs.check_conditions.outputs.slack_short_msg }}
+      blocks: ${{ needs.check_conditions.outputs.slack_blocks }}
