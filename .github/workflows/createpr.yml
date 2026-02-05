@@ -41,7 +41,8 @@ jobs:
             --title "Pull Request to create/update rebased branch for '${{ github.ref }}'" \
             --body "Programmatically created Pull Request to automatically keep merge branch to develop up-to-date" \
             --base develop \
-            --head ${{ github.ref }}
+            --head ${{ github.ref }} \
+            --assignee ${{ github.event.sender.login }}
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
