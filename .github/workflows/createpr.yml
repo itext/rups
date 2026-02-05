@@ -14,6 +14,10 @@ jobs:
       failure: ${{ steps.failure_handling.outputs.failure }}
 
     steps:
+      - name: Logging
+        run: |
+            echo "github.ref: ${{ github.ref }}"
+
       - name: Get email
         id: get-email
         if: ${{ ! startsWith(github.ref, 'refs/heads/rebased') }}
