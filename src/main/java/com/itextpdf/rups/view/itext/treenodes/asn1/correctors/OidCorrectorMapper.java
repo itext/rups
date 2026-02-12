@@ -73,6 +73,7 @@ import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.Ba
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.CertificateIssuerCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.CertificatePoliciesCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.CrlDistributionPointsCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.CrlNumberCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.CrlReasonCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.ExtKeyUsageCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.InvalidityDateCorrector;
@@ -236,6 +237,10 @@ public final class OidCorrectorMapper {
             Map.entry(
                     CrlDistributionPointsCorrector.OID,
                     CrlDistributionPointsCorrector.INSTANCE
+            ),
+            Map.entry(
+                    CrlNumberCorrector.OID,
+                    CrlNumberCorrector.INSTANCE
             ),
             Map.entry(
                     CrlReasonCorrector.OID,
