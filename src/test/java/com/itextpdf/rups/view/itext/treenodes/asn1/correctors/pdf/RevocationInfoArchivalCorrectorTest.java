@@ -228,7 +228,7 @@ final class RevocationInfoArchivalCorrectorTest {
         }
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         /*
          * No need to fill the whole crls/ocsps here, as they are massive...
          * They will be tested separately anyway.

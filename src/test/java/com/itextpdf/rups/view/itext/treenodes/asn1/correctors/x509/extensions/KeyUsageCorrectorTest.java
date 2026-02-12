@@ -108,7 +108,7 @@ final class KeyUsageCorrectorTest {
         Asn1TestUtil.assertNodeMatches(0, "decipherOnly: TRUE", node.getChildAt(8));
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new DERBitString(new byte[] {(byte) 0b10101010, (byte) 0b10000000}, 7)
         );

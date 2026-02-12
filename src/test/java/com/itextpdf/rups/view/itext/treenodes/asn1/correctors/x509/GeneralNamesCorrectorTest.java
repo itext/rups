@@ -107,7 +107,7 @@ final class GeneralNamesCorrectorTest {
         Asn1TestUtil.assertNodeMatches(0, "ipAddress: 0x7F000001", node.getChildAt(1));
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
                         new DERTaggedObject(false, 2, new DERIA5String("example.com")),

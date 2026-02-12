@@ -131,7 +131,7 @@ final class ContentInfoCorrectorTest {
         }
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         /*
          * No need to fill the whole signedData here, as it is massive...
          * It will be tested separately anyway.

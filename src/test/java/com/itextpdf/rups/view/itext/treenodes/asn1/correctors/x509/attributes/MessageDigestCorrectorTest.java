@@ -81,7 +81,7 @@ final class MessageDigestCorrectorTest {
         Asn1TestUtil.assertNodeMatches(0, expectedVariableName + ": 0x0102FF", node);
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new DEROctetString(new byte[] {0x01, 0x02, (byte) 0xFF})
         );

@@ -204,7 +204,7 @@ final class OcspResponseCorrectorTest {
         }
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         /*
          * No need to fill the whole response bytes here, as it can massive...
          * It will be tested separately anyway.

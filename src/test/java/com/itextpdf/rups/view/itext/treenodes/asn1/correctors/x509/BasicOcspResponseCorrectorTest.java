@@ -937,7 +937,7 @@ final class BasicOcspResponseCorrectorTest {
         }
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         /*
          * No need to fill extensions/certificates here, as they can be massive...
          * It will be tested separately anyway.

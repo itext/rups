@@ -109,7 +109,7 @@ final class BasicConstraintsCorrectorTest {
         Asn1TestUtil.assertNodeMatches(0, "pathLenConstraint: 256", node.getChildAt(1));
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
                         ASN1Boolean.getInstance(true),

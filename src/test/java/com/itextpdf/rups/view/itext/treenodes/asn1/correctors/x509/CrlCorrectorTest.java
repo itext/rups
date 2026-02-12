@@ -324,7 +324,7 @@ final class CrlCorrectorTest {
         Asn1TestUtil.assertNodeMatches(0, "signatureValue: 0x1122334455", node.getChildAt(2));
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         /*
          * No need to fill everything here, as it will be massive...
          * It is tested individually anyway.

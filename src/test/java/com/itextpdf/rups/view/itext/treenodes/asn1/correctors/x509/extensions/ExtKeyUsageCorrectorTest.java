@@ -123,7 +123,7 @@ final class ExtKeyUsageCorrectorTest {
         }
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
                         new ASN1ObjectIdentifier("1.3.6.1.5.5.7.3.8"),  // id-kp-timeStamping

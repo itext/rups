@@ -220,7 +220,7 @@ final class UserNoticeCorrectorTest {
         Asn1TestUtil.assertNodeMatches(0, "explicitText: Shut it down!", node.getChildAt(1));
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
                         new DERSequence(new ASN1Encodable[] {

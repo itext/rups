@@ -129,7 +129,7 @@ final class AuthorityKeyIdentifierCorrectorTest {
         Asn1TestUtil.assertNodeMatches(0, "authorityCertSerialNumber: 777", node.getChildAt(2));
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
                         new DERTaggedObject(false, 0,

@@ -86,7 +86,7 @@ final class ContentTypeCorrectorTest {
         );
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new ASN1ObjectIdentifier("1.2.840.113549.1.7.2")    // signedData
         );

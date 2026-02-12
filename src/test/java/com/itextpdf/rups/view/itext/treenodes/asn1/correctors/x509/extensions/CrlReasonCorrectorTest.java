@@ -96,7 +96,7 @@ final class CrlReasonCorrectorTest {
         Asn1TestUtil.assertNodeMatches(0, expectedVariableName + ": 0 (unspecified)", node);
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new ASN1Enumerated(0)
         );

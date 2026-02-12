@@ -91,7 +91,7 @@ final class SigningTimeCorrectorTest {
         Asn1TestUtil.assertNodeMatches(0, expectedVariableName + ": 202405011337 (2024-05-01T13:37:00Z)", node);
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new DERGeneralizedTime("202405011337")
         );

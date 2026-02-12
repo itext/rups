@@ -80,7 +80,7 @@ final class CertificateSerialNumberCorrectorTest {
         Asn1TestUtil.assertNodeMatches(0, expectedVariableName + ": 1337", node);
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new ASN1Integer(1337)
         );

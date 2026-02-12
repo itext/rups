@@ -112,7 +112,7 @@ final class AlgorithmIdentifierCorrectorTest {
         }
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
                         new ASN1ObjectIdentifier("1.2.840.113549.1.1.8"),           // mgf1

@@ -140,7 +140,7 @@ final class RelativeDistinguishedNameCorrectorTest {
         }
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new DERSet(
                         new DERSequence(new ASN1Encodable[] {

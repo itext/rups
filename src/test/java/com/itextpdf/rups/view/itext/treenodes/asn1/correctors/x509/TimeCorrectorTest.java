@@ -94,7 +94,7 @@ final class TimeCorrectorTest {
         );
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new DERGeneralizedTime("202405011337")
         );

@@ -107,7 +107,7 @@ final class PdfMacIntegrityInfoCorrectorTest {
         Asn1TestUtil.assertNodeMatches(0, "signatureDigest: 0x10203040", node.getChildAt(2));
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
                         new ASN1Integer(0),

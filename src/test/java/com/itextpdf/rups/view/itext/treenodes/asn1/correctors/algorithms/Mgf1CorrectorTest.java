@@ -131,7 +131,7 @@ final class Mgf1CorrectorTest {
         Asn1TestUtil.assertNodeMatches(0, "parameters: NULL", node.getChildAt(1));
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(new ASN1Encodable[] {
                         new ASN1ObjectIdentifier("2.16.840.1.101.3.4.2.3"), // id-sha512

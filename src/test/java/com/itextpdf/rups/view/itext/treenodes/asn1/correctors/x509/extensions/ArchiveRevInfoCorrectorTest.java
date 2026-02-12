@@ -116,7 +116,7 @@ final class ArchiveRevInfoCorrectorTest {
         Asn1TestUtil.assertNodeMatches(0, "version: 1 (v1)", node.getChildAt(0));
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence(
                         new ASN1Integer(1)

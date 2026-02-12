@@ -444,7 +444,7 @@ final class TimeStampTokenInfoCorrectorTest {
         }
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         /*
          * No need to fill extensions here, as they can be massive...
          * It will be tested separately anyway.

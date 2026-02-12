@@ -81,7 +81,7 @@ final class SequenceNumberCorrectorTest {
         Asn1TestUtil.assertNodeMatches(0, expectedVariableName + ": 777", node);
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 new ASN1Integer(777)
         );

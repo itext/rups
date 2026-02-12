@@ -81,7 +81,7 @@ final class OcspNocheckCorrectorTest {
         Asn1TestUtil.assertNodeMatches(0, expectedVariableName + ": NULL", node);
     }
 
-    private AbstractAsn1TreeNode createDefaultNode() {
+    private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
                 DERNull.INSTANCE
         );
