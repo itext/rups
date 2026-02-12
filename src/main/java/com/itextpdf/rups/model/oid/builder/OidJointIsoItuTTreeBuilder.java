@@ -299,6 +299,7 @@ public final class OidJointIsoItuTTreeBuilder {
           entry("22", "expirationDate"),
           entry("23", "instructionCode"),
           entry("24", "invalidityDate"),
+          entry("27", "deltaCRLIndicator"),
           entry("28", "issuingDistributionPoint"),
           entry("29", "certificateIssuer"),
           entry("30", "nameConstraints"),
