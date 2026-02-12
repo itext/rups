@@ -40,7 +40,7 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509;
+package com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions;
 
 import com.itextpdf.rups.view.itext.treenodes.asn1.AbstractAsn1TreeNode;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.AbstractCorrector;
@@ -77,6 +77,11 @@ public final class CrlReasonCorrector extends AbstractCorrector {
     private CrlReasonCorrector() {
         // singleton class
     }
+
+    /**
+     * OBJECT IDENTIFIER for the type, which is handled by the corrector.
+     */
+    public static final String OID = "2.5.29.21";
 
     /**
      * {@inheritDoc}

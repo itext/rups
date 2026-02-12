@@ -40,7 +40,7 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509;
+package com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions;
 
 import com.itextpdf.rups.view.itext.treenodes.asn1.AbstractAsn1TreeNode;
 import com.itextpdf.rups.view.itext.treenodes.asn1.Asn1TestUtil;

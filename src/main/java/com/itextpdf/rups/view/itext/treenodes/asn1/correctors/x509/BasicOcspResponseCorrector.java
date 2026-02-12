@@ -45,6 +45,7 @@ package com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509;
 import com.itextpdf.rups.view.itext.treenodes.asn1.AbstractAsn1TreeNode;
 import com.itextpdf.rups.view.itext.treenodes.asn1.Asn1TaggedObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.AbstractCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.CrlReasonCorrector;
 
 import org.bouncycastle.asn1.ASN1BitString;
 import org.bouncycastle.asn1.ASN1GeneralizedTime;
