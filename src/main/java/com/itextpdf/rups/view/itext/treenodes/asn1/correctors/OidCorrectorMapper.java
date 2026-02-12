@@ -74,6 +74,7 @@ import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.Ce
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.CrlDistributionPointsCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.CrlReasonCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.ExtKeyUsageCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.InvalidityDateCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.KeyUsageCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.SubjectKeyIdentifierCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.TimeStampCorrector;
@@ -237,6 +238,10 @@ public final class OidCorrectorMapper {
             Map.entry(
                     ExtKeyUsageCorrector.OID,
                     ExtKeyUsageCorrector.INSTANCE
+            ),
+            Map.entry(
+                    InvalidityDateCorrector.OID,
+                    InvalidityDateCorrector.INSTANCE
             ),
             Map.entry(
                     KeyUsageCorrector.OID,
