@@ -14,4 +14,3 @@ jobs:
     call-licensecheck:
       uses: itext/github-workflows/.github/workflows/onpush.yml@licensecheckPrms
       secrets: inherit
-
