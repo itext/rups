@@ -40,35 +40,36 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509;
+package com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.types;
 
 import com.itextpdf.rups.view.itext.treenodes.asn1.AbstractAsn1TreeNode;
+import com.itextpdf.rups.view.itext.treenodes.asn1.Asn1TaggedObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.AbstractCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.GeneralNamesCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.types.RelativeDistinguishedNameCorrector;
 
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
+import org.bouncycastle.asn1.ASN1Set;
+import org.bouncycastle.asn1.ASN1TaggedObject;
 
 /**
- * Corrector for the Name type, as it is defined in RFC 5280.
+ * Corrector for the DistributionPointName type, as it is defined in RFC 5280.
  *
  * <pre>
- * Name ::= CHOICE {
- *   -- only one possibility for now --
- *   rdnSequence    RDNSequence
+ * DistributionPointName ::= CHOICE {
+ *   fullName                   [0] IMPLICIT GeneralNames,
+ *   nameRelativeToCRLIssuer    [1] IMPLICIT RelativeDistinguishedName
  * }
- *
- * RDNSequence ::= SEQUENCE OF RelativeDistinguishedName
- *
  * </pre>
  */
-public final class NameCorrector extends AbstractCorrector {
+public final class DistributionPointNameCorrector extends AbstractCorrector {
     /**
      * Singleton instance of the corrector.
      */
-    public static final NameCorrector INSTANCE = new NameCorrector();
+    public static final DistributionPointNameCorrector INSTANCE = new DistributionPointNameCorrector();
 
-    private NameCorrector() {
+    private DistributionPointNameCorrector() {
         // singleton class
     }
 
@@ -77,7 +78,25 @@ public final class NameCorrector extends AbstractCorrector {
      */
     @Override
     public String getDefaultVariableName() {
-        return "name";
+        return "distributionPointName";
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void correct(AbstractAsn1TreeNode node) {
+        // Because this is a CHOICE, we have special handling for default name
+        correct(node, (String) null);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void correct(AbstractAsn1TreeNode node, ASN1Primitive obj) {
+        // Because this is a CHOICE, we have special handling for default name
+        correct(node, obj, null);
     }
 
     /**
@@ -85,12 +104,41 @@ public final class NameCorrector extends AbstractCorrector {
      */
     @Override
     public void correct(AbstractAsn1TreeNode node, ASN1Primitive obj, String variableName) {
-        if (!isUniversalType(obj, ASN1Sequence.class)) {
-            return;
+        if (isImplicitContextSpecificType(obj, 0)) {
+            final ASN1TaggedObject newObj = fixImplicitContextSpecificObject(
+                    (Asn1TaggedObjectTreeNode) node,
+                    (ASN1TaggedObject) obj,
+                    ASN1Sequence::getInstance
+            );
+            GeneralNamesCorrector.INSTANCE.correct(
+                    node,
+                    getBaseObject(newObj),
+                    getName(0, variableName)
+            );
+        } else if (isImplicitContextSpecificType(obj, 1)) {
+            final ASN1TaggedObject newObj = fixImplicitContextSpecificObject(
+                    (Asn1TaggedObjectTreeNode) node,
+                    (ASN1TaggedObject) obj,
+                    ASN1Set::getInstance
+            );
+            RelativeDistinguishedNameCorrector.INSTANCE.correct(
+                    node,
+                    getBaseObject(newObj),
+                    getName(1, variableName)
+            );
         }
-        node.setRfcFieldName(variableName);
-        for (final AbstractAsn1TreeNode child : node) {
-            RelativeDistinguishedNameCorrector.INSTANCE.correct(child);
+    }
+
+    private static final String[] DEFAULT_VARIABLE_NAMES = {
+            "fullName",
+            "nameRelativeToCRLIssuer",
+    };
+
+    private static String getName(int tagNo, String variableName) {
+        assert (0 <= tagNo) && (tagNo < DEFAULT_VARIABLE_NAMES.length);
+        if (variableName != null) {
+            return variableName;
         }
+        return DEFAULT_VARIABLE_NAMES[tagNo];
     }
 }

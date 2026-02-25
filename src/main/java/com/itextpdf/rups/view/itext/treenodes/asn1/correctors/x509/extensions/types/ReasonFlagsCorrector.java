@@ -40,35 +40,39 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509;
+package com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.types;
 
 import com.itextpdf.rups.view.itext.treenodes.asn1.AbstractAsn1TreeNode;
+import com.itextpdf.rups.view.itext.treenodes.asn1.Asn1BooleanTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.AbstractCorrector;
-import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.types.RelativeDistinguishedNameCorrector;
 
+import org.bouncycastle.asn1.ASN1BitString;
 import org.bouncycastle.asn1.ASN1Primitive;
-import org.bouncycastle.asn1.ASN1Sequence;
 
 /**
- * Corrector for the Name type, as it is defined in RFC 5280.
+ * Corrector for the ReasonFlags type, as it is defined in RFC 5280.
  *
  * <pre>
- * Name ::= CHOICE {
- *   -- only one possibility for now --
- *   rdnSequence    RDNSequence
+ * ReasonFlags ::= BIT STRING {
+ *   unused                 (0),
+ *   keyCompromise          (1),
+ *   cACompromise           (2),
+ *   affiliationChanged     (3),
+ *   superseded             (4),
+ *   cessationOfOperation   (5),
+ *   certificateHold        (6),
+ *   privilegeWithdrawn     (7),
+ *   aACompromise           (8)
  * }
- *
- * RDNSequence ::= SEQUENCE OF RelativeDistinguishedName
- *
  * </pre>
  */
-public final class NameCorrector extends AbstractCorrector {
+public final class ReasonFlagsCorrector extends AbstractCorrector {
     /**
      * Singleton instance of the corrector.
      */
-    public static final NameCorrector INSTANCE = new NameCorrector();
+    public static final ReasonFlagsCorrector INSTANCE = new ReasonFlagsCorrector();
 
-    private NameCorrector() {
+    private ReasonFlagsCorrector() {
         // singleton class
     }
 
@@ -77,20 +81,34 @@ public final class NameCorrector extends AbstractCorrector {
      */
     @Override
     public String getDefaultVariableName() {
-        return "name";
+        return "reasons";
     }
+
+    private static final String[] FLAG_NAMES = {
+            "unused",
+            "keyCompromise",
+            "caCompromise",
+            "affiliationChanged",
+            "superseded",
+            "cessationOfOperation",
+            "certificateHold",
+            "privilegeWithdrawn",
+            "aaCompromise",
+    };
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void correct(AbstractAsn1TreeNode node, ASN1Primitive obj, String variableName) {
-        if (!isUniversalType(obj, ASN1Sequence.class)) {
+        if (!isUniversalType(obj, ASN1BitString.class)) {
             return;
         }
         node.setRfcFieldName(variableName);
-        for (final AbstractAsn1TreeNode child : node) {
-            RelativeDistinguishedNameCorrector.INSTANCE.correct(child);
+        // Will add nodes to "decipher" the bit string
+        final byte[] flags = ((ASN1BitString) obj).getBytes();
+        for (int i = 0; i < FLAG_NAMES.length; ++i) {
+            node.add(new Asn1BooleanTreeNode(FLAG_NAMES[i], hasFlag(flags, i)));
         }
     }
 }

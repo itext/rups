@@ -40,35 +40,32 @@
     For more information, please contact iText Software Corp. at this
     address: sales@itextpdf.com
  */
-package com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509;
+package com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.types;
 
 import com.itextpdf.rups.view.itext.treenodes.asn1.AbstractAsn1TreeNode;
 import com.itextpdf.rups.view.itext.treenodes.asn1.Asn1TestUtil;
 import com.itextpdf.rups.view.itext.treenodes.asn1.Asn1TreeNodeFactory;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1Integer;
-import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.DERPrintableString;
+import org.bouncycastle.asn1.DERBitString;
 import org.bouncycastle.asn1.DERSequence;
-import org.bouncycastle.asn1.DERSet;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 @Tag("UnitTest")
-final class RelativeDistinguishedNameCorrectorTest {
+final class ReasonFlagsCorrectorTest {
     @Test
     void correct_WithDefaultName() {
         final AbstractAsn1TreeNode node = createDefaultNode();
-        RelativeDistinguishedNameCorrector.INSTANCE.correct(node);
-        validateDefaultNode(node, "relativeDistinguishedName");
+        ReasonFlagsCorrector.INSTANCE.correct(node);
+        validateDefaultNode(node, "reasons");
     }
 
     @Test
     void correct_WithoutDefaultName() {
         final AbstractAsn1TreeNode node = createDefaultNode();
-        RelativeDistinguishedNameCorrector.INSTANCE.correct(node, "rdn");
-        validateDefaultNode(node, "rdn");
+        ReasonFlagsCorrector.INSTANCE.correct(node, "rf");
+        validateDefaultNode(node, "rf");
     }
 
     @Test
@@ -76,78 +73,44 @@ final class RelativeDistinguishedNameCorrectorTest {
         final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
                 new DERSequence()
         );
-        RelativeDistinguishedNameCorrector.INSTANCE.correct(node);
-        Asn1TestUtil.assertNodeMatches(0, "SEQUENCE", node);
+        ReasonFlagsCorrector.INSTANCE.correct(node);
+        Assertions.assertNull(node.getRfcFieldName());
     }
 
     @Test
-    void correct_InvalidAttributeTypeAndValueType() {
+    void correct_FullBitString() {
         final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
-                new DERSet(
-                        new DERSet()
-                )
+                new DERBitString(new byte[] {(byte) 0xAA, (byte) 0x80}, 7)
         );
-        RelativeDistinguishedNameCorrector.INSTANCE.correct(node);
-        Asn1TestUtil.assertNodeMatches(1, "relativeDistinguishedName", node);
-        Asn1TestUtil.assertNodeMatches(0, "SET", node.getChildAt(0));
-    }
-
-    @Test
-    void correct_EmptyAttributeTypeAndValueSequence() {
-        final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
-                new DERSet(
-                        new DERSequence()
-                )
-        );
-        RelativeDistinguishedNameCorrector.INSTANCE.correct(node);
-        Asn1TestUtil.assertNodeMatches(1, "relativeDistinguishedName", node);
-        Asn1TestUtil.assertNodeMatches(0, "attributeTypeAndValue", node.getChildAt(0));
-    }
-
-    @Test
-    void correct_InvalidAttributeType() {
-        final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(
-                new DERSet(
-                        new DERSequence(
-                                new ASN1Integer(1)
-                        )
-                )
-        );
-        RelativeDistinguishedNameCorrector.INSTANCE.correct(node);
-        Asn1TestUtil.assertNodeMatches(1, "relativeDistinguishedName", node);
-        {
-            final AbstractAsn1TreeNode pair = node.getChildAt(0);
-            Asn1TestUtil.assertNodeMatches(1, "attributeTypeAndValue", pair);
-            Asn1TestUtil.assertNodeMatches(0, "INTEGER: 1", pair.getChildAt(0));
-        }
+        ReasonFlagsCorrector.INSTANCE.correct(node);
+        Asn1TestUtil.assertNodeMatches(9, "reasons: 0b101010101", node);
+        Asn1TestUtil.assertNodeMatches(0, "unused: TRUE", node.getChildAt(0));
+        Asn1TestUtil.assertNodeMatches(0, "keyCompromise: FALSE", node.getChildAt(1));
+        Asn1TestUtil.assertNodeMatches(0, "caCompromise: TRUE", node.getChildAt(2));
+        Asn1TestUtil.assertNodeMatches(0, "affiliationChanged: FALSE", node.getChildAt(3));
+        Asn1TestUtil.assertNodeMatches(0, "superseded: TRUE", node.getChildAt(4));
+        Asn1TestUtil.assertNodeMatches(0, "cessationOfOperation: FALSE", node.getChildAt(5));
+        Asn1TestUtil.assertNodeMatches(0, "certificateHold: TRUE", node.getChildAt(6));
+        Asn1TestUtil.assertNodeMatches(0, "privilegeWithdrawn: FALSE", node.getChildAt(7));
+        Asn1TestUtil.assertNodeMatches(0, "aaCompromise: TRUE", node.getChildAt(8));
     }
 
     private static void validateDefaultNode(AbstractAsn1TreeNode node, String expectedVariableName) {
-        Asn1TestUtil.assertNodeMatches(1, expectedVariableName, node);
-        {
-            final AbstractAsn1TreeNode typeAndValue = node.getChildAt(0);
-            Asn1TestUtil.assertNodeMatches(2, "attributeTypeAndValue", typeAndValue);
-            Asn1TestUtil.assertNodeMatches(
-                    0,
-                    "type: 2.5.4.10 (/joint-iso-itu-t/ds/attributeType/organizationName)",
-                    typeAndValue.getChildAt(0)
-            );
-            Asn1TestUtil.assertNodeMatches(
-                    0,
-                    "value: PDF Association",
-                    typeAndValue.getChildAt(1)
-            );
-        }
+        Asn1TestUtil.assertNodeMatches(9, expectedVariableName + ": 0b1", node);
+        Asn1TestUtil.assertNodeMatches(0, "unused: TRUE", node.getChildAt(0));
+        Asn1TestUtil.assertNodeMatches(0, "keyCompromise: FALSE", node.getChildAt(1));
+        Asn1TestUtil.assertNodeMatches(0, "caCompromise: FALSE", node.getChildAt(2));
+        Asn1TestUtil.assertNodeMatches(0, "affiliationChanged: FALSE", node.getChildAt(3));
+        Asn1TestUtil.assertNodeMatches(0, "superseded: FALSE", node.getChildAt(4));
+        Asn1TestUtil.assertNodeMatches(0, "cessationOfOperation: FALSE", node.getChildAt(5));
+        Asn1TestUtil.assertNodeMatches(0, "certificateHold: FALSE", node.getChildAt(6));
+        Asn1TestUtil.assertNodeMatches(0, "privilegeWithdrawn: FALSE", node.getChildAt(7));
+        Asn1TestUtil.assertNodeMatches(0, "aaCompromise: FALSE", node.getChildAt(8));
     }
 
     private static AbstractAsn1TreeNode createDefaultNode() {
         return Asn1TreeNodeFactory.fromPrimitive(
-                new DERSet(
-                        new DERSequence(new ASN1Encodable[] {
-                                new ASN1ObjectIdentifier("2.5.4.10"),   // organizationName
-                                new DERPrintableString("PDF Association")
-                        })
-                )
+                new DERBitString((byte) 0x80, 7)
         );
     }
 }

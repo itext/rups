@@ -43,16 +43,15 @@
 package com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions;
 
 import com.itextpdf.rups.view.itext.treenodes.asn1.AbstractAsn1TreeNode;
-import com.itextpdf.rups.view.itext.treenodes.asn1.Asn1BooleanTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.asn1.Asn1TaggedObjectTreeNode;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.AbstractCorrector;
 import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.GeneralNamesCorrector;
-import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.RelativeDistinguishedNameCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.types.DistributionPointNameCorrector;
+import com.itextpdf.rups.view.itext.treenodes.asn1.correctors.x509.extensions.types.ReasonFlagsCorrector;
 
 import org.bouncycastle.asn1.ASN1BitString;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
-import org.bouncycastle.asn1.ASN1Set;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 
 /**
@@ -66,23 +65,6 @@ import org.bouncycastle.asn1.ASN1TaggedObject;
  *   distributionPointName  [0] EXPLICIT DistributionPointName OPTIONAL,
  *   reasons                [1] IMPLICIT ReasonFlags OPTIONAL,
  *   cRLIssuer              [2] IMPLICIT GeneralNames OPTIONAL
- * }
- *
- * DistributionPointName ::= CHOICE {
- *   fullName                   [0] IMPLICIT GeneralNames,
- *   nameRelativeToCRLIssuer    [1] IMPLICIT RelativeDistinguishedName
- * }
- *
- * ReasonFlags ::= BIT STRING {
- *   unused                 (0),
- *   keyCompromise          (1),
- *   cACompromise           (2),
- *   affiliationChanged     (3),
- *   superseded             (4),
- *   cessationOfOperation   (5),
- *   certificateHold        (6),
- *   privilegeWithdrawn     (7),
- *   aACompromise           (8)
  * }
  * </pre>
  */
@@ -139,16 +121,24 @@ public final class CrlDistributionPointsCorrector extends AbstractCorrector {
         node.setRfcFieldName("distributionPoint");
         int i = 0;
         if (node.getChildCount() > i) {
-            final AbstractAsn1TreeNode distributionPoint = node.getChildAt(i);
-            if (isExplicitContextSpecificType(distributionPoint, 0)) {
-                correctDistributionPointName((Asn1TaggedObjectTreeNode) distributionPoint);
+            final AbstractAsn1TreeNode distributionPointName = node.getChildAt(i);
+            if (isExplicitContextSpecificType(distributionPointName, 0)) {
+                DistributionPointNameCorrector.INSTANCE.correct(
+                        distributionPointName,
+                        getBaseObjectUnchecked(distributionPointName),
+                        "distributionPointName"
+                );
                 ++i;
             }
         }
         if (node.getChildCount() > i) {
             final AbstractAsn1TreeNode reasons = node.getChildAt(i);
             if (isImplicitContextSpecificType(reasons, 1)) {
-                correctReasonFlags((Asn1TaggedObjectTreeNode) reasons);
+                final ASN1TaggedObject reasonsObj = fixImplicitContextSpecificObject(
+                        (Asn1TaggedObjectTreeNode) reasons,
+                        ASN1BitString::getInstance
+                );
+                ReasonFlagsCorrector.INSTANCE.correct(reasons, getBaseObject(reasonsObj), "reasons");
                 ++i;
             }
         }
@@ -161,83 +151,6 @@ public final class CrlDistributionPointsCorrector extends AbstractCorrector {
                 );
                 GeneralNamesCorrector.INSTANCE.correct(issuer, getBaseObject(issuerObj), "crlIssuer");
             }
-        }
-    }
-
-    /**
-     * <pre>
-     * DistributionPointName ::= CHOICE {
-     *   fullName                   [0] IMPLICIT GeneralNames,
-     *   nameRelativeToCRLIssuer    [1] IMPLICIT RelativeDistinguishedName
-     * }
-     * </pre>
-     */
-    private static void correctDistributionPointName(Asn1TaggedObjectTreeNode node) {
-        final ASN1Primitive obj = getBaseObject(node);
-        if (isImplicitContextSpecificType(obj, 0)) {
-            final ASN1TaggedObject newObj = fixImplicitContextSpecificObject(
-                    node,
-                    (ASN1TaggedObject) obj,
-                    ASN1Sequence::getInstance
-            );
-            GeneralNamesCorrector.INSTANCE.correct(
-                    node,
-                    getBaseObject(newObj),
-                    "distributionPointName"
-            );
-        } else if (isImplicitContextSpecificType(obj, 1)) {
-            final ASN1TaggedObject newObj = fixImplicitContextSpecificObject(
-                    node,
-                    (ASN1TaggedObject) obj,
-                    ASN1Set::getInstance
-            );
-            RelativeDistinguishedNameCorrector.INSTANCE.correct(
-                    node,
-                    getBaseObject(newObj),
-                    "distributionPointName"
-            );
-        }
-    }
-
-    private static final String[] FLAG_NAMES = {
-            "unused",
-            "keyCompromise",
-            "caCompromise",
-            "affiliationChanged",
-            "superseded",
-            "cessationOfOperation",
-            "certificateHold",
-            "privilegeWithdrawn",
-            "aaCompromise",
-    };
-
-    /**
-     * <pre>
-     * ReasonFlags ::= BIT STRING {
-     *   unused                 (0),
-     *   keyCompromise          (1),
-     *   cACompromise           (2),
-     *   affiliationChanged     (3),
-     *   superseded             (4),
-     *   cessationOfOperation   (5),
-     *   certificateHold        (6),
-     *   privilegeWithdrawn     (7),
-     *   aACompromise           (8)
-     * }
-     * </pre>
-     */
-    private static void correctReasonFlags(Asn1TaggedObjectTreeNode node) {
-        final ASN1TaggedObject obj =
-                fixImplicitContextSpecificObject(node, ASN1BitString::getInstance);
-        final ASN1Primitive baseObj = getBaseObject(obj);
-        if (!isUniversalType(baseObj, ASN1BitString.class)) {
-            return;
-        }
-        node.setRfcFieldName("reasons");
-        // Will add nodes to "decipher" the bit string
-        final byte[] flags = ((ASN1BitString) baseObj).getBytes();
-        for (int i = 0; i < FLAG_NAMES.length; ++i) {
-            node.add(new Asn1BooleanTreeNode(FLAG_NAMES[i], hasFlag(flags, i)));
         }
     }
 }
