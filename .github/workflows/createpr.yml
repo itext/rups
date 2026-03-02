@@ -5,5 +5,5 @@ on:
 
 jobs:
     call-createpr:
-      uses: itext/github-workflows/.github/workflows/createpr.yml@master
+      uses: itext/github-workflows/.github/workflows/createpr.yml@addCondition
       secrets: inherit
