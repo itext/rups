@@ -43,12 +43,12 @@
 package com.itextpdf.rups.view.contextmenu;
 
 import com.itextpdf.brotlicompressor.BrotliStreamCompressionStrategy;
+import com.itextpdf.kernel.pdf.ASCII85CompressionStrategy;
+import com.itextpdf.kernel.pdf.ASCIIHexCompressionStrategy;
 import com.itextpdf.kernel.pdf.FlateCompressionStrategy;
 import com.itextpdf.kernel.pdf.PdfName;
+import com.itextpdf.kernel.pdf.RunLengthCompressionStrategy;
 import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.io.encoders.ASCII85CompressionStrategy;
-import com.itextpdf.rups.io.encoders.ASCIIHexCompressionStrategy;
-import com.itextpdf.rups.io.encoders.RunLengthCompressionStrategy;
 import com.itextpdf.rups.util.ExcludeFromGeneratedJacocoReport;
 import com.itextpdf.rups.view.Language;
 import com.itextpdf.rups.view.itext.PdfTree;

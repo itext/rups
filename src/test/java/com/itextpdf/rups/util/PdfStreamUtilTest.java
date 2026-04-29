@@ -42,6 +42,8 @@
  */
 package com.itextpdf.rups.util;
 
+import com.itextpdf.kernel.pdf.ASCII85CompressionStrategy;
+import com.itextpdf.kernel.pdf.ASCIIHexCompressionStrategy;
 import com.itextpdf.kernel.pdf.CompressionConstants;
 import com.itextpdf.kernel.pdf.PdfArray;
 import com.itextpdf.kernel.pdf.PdfDictionary;
@@ -50,8 +52,6 @@ import com.itextpdf.kernel.pdf.PdfNull;
 import com.itextpdf.kernel.pdf.PdfNumber;
 import com.itextpdf.kernel.pdf.PdfObject;
 import com.itextpdf.kernel.pdf.PdfStream;
-import com.itextpdf.rups.io.encoders.ASCII85CompressionStrategy;
-import com.itextpdf.rups.io.encoders.ASCIIHexCompressionStrategy;
 
 import java.io.IOException;
 import java.util.List;

@@ -42,12 +42,12 @@
  */
 package com.itextpdf.rups.view.contextmenu;
 
+import com.itextpdf.kernel.pdf.ASCII85CompressionStrategy;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfName;
 import com.itextpdf.kernel.pdf.PdfNumber;
 import com.itextpdf.kernel.pdf.PdfStream;
 import com.itextpdf.rups.controller.PdfReaderController;
-import com.itextpdf.rups.io.encoders.ASCII85CompressionStrategy;
 import com.itextpdf.rups.mock.NoopProgressDialog;
 import com.itextpdf.rups.model.IRupsEventListener;
 import com.itextpdf.rups.model.ObjectLoader;

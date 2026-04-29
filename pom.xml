@@ -78,7 +78,7 @@
     <dom4j.version>2.2.0</dom4j.version>
     <flatlaf.version>3.7</flatlaf.version>
     <icu4j.version>78.2</icu4j.version>
-    <itext.version>9.5.0</itext.version>
+    <itext.version>9.6.0</itext.version>
     <jackson.version>2.21.1</jackson.version>
     <logback.version>1.5.25</logback.version>
 
