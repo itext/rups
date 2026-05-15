@@ -120,6 +120,7 @@ public final class ObjectLoader extends SwingWorker<Void, Void> {
         return nodes;
     }
 
+
     /**
      * getter for a human readable name representing this loader
      *
