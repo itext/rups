@@ -79,7 +79,7 @@
     <flatlaf.version>3.7</flatlaf.version>
     <icu4j.version>78.2</icu4j.version>
     <itext.version>9.6.0</itext.version>
-    <jackson.version>2.21.1</jackson.version>
+    <jackson.version>2.21.4</jackson.version>
     <logback.version>1.5.25</logback.version>
 
     <!-- Test dependencies -->
