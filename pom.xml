@@ -59,31 +59,31 @@
 
     <!-- Build dependencies (common) -->
     <assembly-plugin.version>3.8.0</assembly-plugin.version>
-    <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
-    <maven-bundle-plugin.version>6.0.0</maven-bundle-plugin.version>
-    <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
-    <maven-surefire-plugin.version>3.5.4</maven-surefire-plugin.version>
+    <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
+    <maven-bundle-plugin.version>6.1.2</maven-bundle-plugin.version>
+    <maven-jar-plugin.version>3.5.1</maven-jar-plugin.version>
+    <maven-surefire-plugin.version>3.6.0</maven-surefire-plugin.version>
 
     <!-- Build dependencies (qa) -->
-    <japicmp-maven-plugin.version>0.25.4</japicmp-maven-plugin.version>
+    <japicmp-maven-plugin.version>0.26.2</japicmp-maven-plugin.version>
 
     <!-- Build dependencies (exe) -->
     <build-helper-maven-plugin.version>3.6.1</build-helper-maven-plugin.version>
     <launch4j-maven-plugin.version>2.6.0</launch4j-maven-plugin.version>
 
     <!-- Build dependencies (mac) -->
-    <macosappbundler-maven-plugin.version>1.21.1</macosappbundler-maven-plugin.version>
+    <macosappbundler-maven-plugin.version>1.21.2</macosappbundler-maven-plugin.version>
 
     <!-- Application dependencies -->
     <dom4j.version>2.2.0</dom4j.version>
-    <flatlaf.version>3.7</flatlaf.version>
-    <icu4j.version>78.2</icu4j.version>
-    <itext.version>9.6.0</itext.version>
-    <jackson.version>2.21.1</jackson.version>
-    <logback.version>1.5.25</logback.version>
+    <flatlaf.version>3.7.2</flatlaf.version>
+    <icu4j.version>78.3</icu4j.version>
+    <itext.version>9.7.1</itext.version>
+    <jackson.version>2.22.2</jackson.version>
+    <logback.version>1.6.3</logback.version>
 
     <!-- Test dependencies -->
-    <junit-jupiter-api.version>5.14.2</junit-jupiter-api.version>
+    <junit-jupiter-api.version>5.14.4</junit-jupiter-api.version>
   </properties>
 
   <dependencies>
