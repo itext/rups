@@ -8,7 +8,7 @@
 
 
   <name>itext-rups</name>
-  <description>RUPS, a tool to view PDF structure in a Swing GUI.</description>
+  <description>This is a test to install branch artifacts through a pom</description>
   <url>https://itextpdf.com/products/rups</url>
   <inceptionYear>2007</inceptionYear>
   <organization>
