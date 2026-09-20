@@ -201,6 +201,7 @@ public enum Language {
     PAGES,
     PAGES_TABLE_OBJECT,
     PDF_READING,
+    PDF_OBJECT_STREAMS_TREE_NODE,
     PDF_OBJECT_TREE,
     PLAINTEXT,
     PLAINTEXT_DESCRIPTION,
@@ -246,10 +247,15 @@ public enum Language {
     WARNING_OID_NAME_NOT_FOUND,
 
     XREF,
+    XREF_BYTE_OFFSET,
+    XREF_BYTE_OFFSET_OBJECT_STREAM,
     XREF_DESCRIPTION,
+    XREF_NA,
+    XREF_NOT_LOADED_YET,
     XREF_NUMBER,
     XREF_OBJECT,
-    XREF_READING;
+    XREF_READING
+    ;
 
     /**
      * The location of the resource bundles.
