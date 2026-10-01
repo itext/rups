@@ -317,4 +317,30 @@ final class Asn1TreeNodeFactoryTest {
         });
         Assertions.assertNull(node);
     }
+
+    @Test
+    void fromPrimitive_InvalidUtcTimeValue() {
+        final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(new byte[] {
+                0x17,               // Tag: UTCTime
+                0x0D,               // Value length: 13
+                // Value: 240501XXXXXXZ (INVALID)
+                0x32, 0x34, 0x30, 0x35, 0x30, 0x31,
+                0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x5A,
+        });
+        Assertions.assertNull(node);
+    }
+
+    @Test
+    void fromPrimitive_ZonelessUtcTimeValue() {
+        final AbstractAsn1TreeNode node = Asn1TreeNodeFactory.fromPrimitive(new byte[] {
+                0x17,               // Tag: UTCTime
+                0x0C,               // Value length: 12
+                // Value: 240501133722
+                0x32, 0x34, 0x30, 0x35, 0x30, 0x31,
+                0x31, 0x33, 0x33, 0x37, 0x32, 0x32,
+        });
+        Assertions.assertNotNull(node);
+        Assertions.assertInstanceOf(Asn1UtcTimeTreeNode.class, node);
+        Asn1TestUtil.assertNodeMatches(0, "UTCTime: 240501133722 (2024-05-01T13:37:22Z)", node);
+    }
 }

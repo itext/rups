@@ -56,16 +56,10 @@ final class Asn1UtcTimeTreeNodeTest {
     }
 
     @Test
-    void toString_Invalid() {
-        final ASN1UTCTime obj = ASN1UTCTime.getInstance(new byte[] {
-                0x17,   // Tag: UTCTime
-                0x0D,   // Value length: 13
-                // Value: 20240501XXXXXXZ
-                0x32, 0x34, 0x30, 0x35, 0x30, 0x31,
-                0x58, 0x58, 0x58, 0x58, 0x58, 0x58, 0x5A,
-        });
+    void toString_Zoneless() {
+        final ASN1UTCTime obj = new ASN1UTCTime("240501133722");
         final Asn1UtcTimeTreeNode node = new Asn1UtcTimeTreeNode(obj);
-        Asn1TestUtil.assertNodeMatches(0, "UTCTime: 240501XXXXXXZ", node);
+        Asn1TestUtil.assertNodeMatches(0, "UTCTime: 240501133722 (2024-05-01T13:37:22Z)", node);
     }
 
     @Test

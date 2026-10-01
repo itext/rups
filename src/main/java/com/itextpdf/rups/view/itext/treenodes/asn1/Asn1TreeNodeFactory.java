@@ -69,6 +69,16 @@ import org.bouncycastle.asn1.ASN1VisibleString;
  * Static factory for building ASN.1 tree nodes.
  */
 public final class Asn1TreeNodeFactory {
+    static {
+        /*
+         * By default, BouncyCastle rejects zone-less UTCTime ("YYMMDDHHMMSS")
+         * on parse. In our use case we want our parser to be as lenient as
+         * possible, so that you would be able to see ASN.1 structures in the
+         * tree, even if something is incorrect.
+         */
+        System.setProperty("org.bouncycastle.asn1.allow_zoneless_utctime", "true");
+    }
+
     private Asn1TreeNodeFactory() {
         // static class
     }

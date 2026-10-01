@@ -437,9 +437,17 @@ class AbstractCorrectorTest {
                     break;
                 case BERTags.INTEGER:
                 case BERTags.ENUMERATED:
-                case BERTags.UTC_TIME:
-                case BERTags.GENERALIZED_TIME:
                     data = new byte[] {i, 4, 0x32, 0x32, 0x32, 0x32};
+                    break;
+                case BERTags.UTC_TIME:
+                    // Value: 240501133722Z
+                    data = new byte[] {i, 13, 0x32, 0x34, 0x30, 0x35, 0x30, 0x31,
+                            0x31, 0x33, 0x33, 0x37, 0x32, 0x32, 0x5A};
+                    break;
+                case BERTags.GENERALIZED_TIME:
+                    // Value: 20240501133722Z
+                    data = new byte[] {i, 15, 0x32, 0x30, 0x32, 0x34, 0x30, 0x35,
+                            0x30, 0x31, 0x31, 0x33, 0x33, 0x37, 0x32, 0x32, 0x5A};
                     break;
                 case BERTags.BIT_STRING:
                     data = new byte[] {i, 2, 0, 0};
